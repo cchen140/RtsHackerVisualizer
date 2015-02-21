@@ -19,3 +19,5 @@ bin/
 # Intellij IDEA Project Files #
 *.eml
 *.iml
+out/
+.idea/
