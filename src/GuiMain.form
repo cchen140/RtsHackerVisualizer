@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="GuiMain">
+  <grid id="27dc6" binding="panel1" default-binding="true" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="500" height="400"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="138ee" class="com.illinois.rts.visualizer.PanelDrawer" binding="zPanel">
+        <constraints border-constraint="Center"/>
+        <properties>
+          <background color="-1558978"/>
+        </properties>
+      </component>
+      <grid id="bf452" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="North"/>
+        <properties>
+          <minimumSize width="0" height="0"/>
+          <preferredSize width="0" height="20"/>
+        </properties>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <grid id="ed10" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="South"/>
+        <properties>
+          <preferredSize width="0" height="50"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <grid id="5cb19" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="West"/>
+            <properties>
+              <preferredSize width="10" height="60"/>
+            </properties>
+            <border type="none"/>
+            <children/>
+          </grid>
+          <grid id="6eec0" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="North"/>
+            <properties>
+              <preferredSize width="0" height="10"/>
+            </properties>
+            <border type="none"/>
+            <children/>
+          </grid>
+          <grid id="da12e" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="South"/>
+            <properties>
+              <preferredSize width="0" height="5"/>
+            </properties>
+            <border type="none"/>
+            <children/>
+          </grid>
+          <grid id="79ba9" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="East"/>
+            <properties>
+              <preferredSize width="20" height="0"/>
+            </properties>
+            <border type="none"/>
+            <children/>
+          </grid>
+          <grid id="35366" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="Center"/>
+            <properties>
+              <autoscrolls value="false"/>
+              <enabled value="false"/>
+              <minimumSize width="158" height="20"/>
+              <preferredSize width="0" height="50"/>
+              <verifyInputWhenFocusTarget value="true"/>
+              <visible value="true"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <grid id="ee7bb" layout-manager="FlowLayout" hgap="5" vgap="2" flow-align="2">
+                <constraints border-constraint="East"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="5b7a7" class="javax.swing.JButton" binding="buttonOpenFile">
+                    <constraints/>
+                    <properties>
+                      <font size="16"/>
+                      <opaque value="true"/>
+                      <preferredSize width="120" height="30"/>
+                      <text value="Load Log"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <grid id="e61c0" layout-manager="FlowLayout" hgap="5" vgap="2" flow-align="0">
+                <constraints border-constraint="West"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="118a7" class="javax.swing.JButton" binding="btnHideTaskList">
+                    <constraints/>
+                    <properties>
+                      <font size="16"/>
+                      <maximumSize width="79" height="38"/>
+                      <minimumSize width="79" height="38"/>
+                      <opaque value="true"/>
+                      <preferredSize width="120" height="30"/>
+                      <text value="Hide List"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+            </children>
+          </grid>
+        </children>
+      </grid>
+      <grid id="adb63" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="East"/>
+        <properties>
+          <preferredSize width="10" height="0"/>
+        </properties>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <grid id="67a06" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="West"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <grid id="8c0c3" binding="taskListPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="Center"/>
+            <properties>
+              <preferredSize width="250" height="0"/>
+              <visible value="true"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <grid id="8b815" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints border-constraint="West"/>
+                <properties>
+                  <preferredSize width="10" height="0"/>
+                  <visible value="false"/>
+                </properties>
+                <border type="none"/>
+                <children/>
+              </grid>
+              <grid id="bcc33" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints border-constraint="East"/>
+                <properties>
+                  <preferredSize width="10" height="0"/>
+                  <visible value="true"/>
+                </properties>
+                <border type="none"/>
+                <children/>
+              </grid>
+              <grid id="fe7ef" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints border-constraint="Center"/>
+                <properties>
+                  <visible value="true"/>
+                </properties>
+                <border type="none"/>
+                <children>
+                  <scrollpane id="e7ec5">
+                    <constraints border-constraint="Center"/>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <grid id="d55cd" layout-manager="BorderLayout" hgap="0" vgap="0">
+                        <constraints/>
+                        <properties/>
+                        <border type="none"/>
+                        <children>
+                          <component id="bf9b2" class="javax.swing.JList" binding="taskList">
+                            <constraints border-constraint="Center"/>
+                            <properties/>
+                          </component>
+                        </children>
+                      </grid>
+                    </children>
+                  </scrollpane>
+                </children>
+              </grid>
+            </children>
+          </grid>
+          <grid id="5c5a1" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="West"/>
+            <properties>
+              <preferredSize width="10" height="0"/>
+            </properties>
+            <border type="none"/>
+            <children/>
+          </grid>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>
