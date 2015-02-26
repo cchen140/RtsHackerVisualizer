@@ -1,9 +1,6 @@
 package com.illinois.rts.visualizer;
 
-import javax.swing.*;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 
@@ -11,8 +8,13 @@ import java.security.InvalidParameterException;
  * Created by CY on 2/16/2015.
  */
 public class LogLoader extends DialogFileLoader {
-    private ScheduleEventContainer eventContainer = new ScheduleEventContainer();
+    private static final int LOG_BLOCK_UNKNOWN = 0;
+    private static final int LOG_BLOCK_TASK_LIST = 1;
+    private static final int LOG_BLOCK_MIXED_LOG = 2;
+
+    private EventContainer eventContainer = new EventContainer();
     private TaskContainer taskContainer = null;
+    private int firstTimeStamp = -1; // The variable to save the earliest timestamp in the log.
 
     public LogLoader()
     {
@@ -20,7 +22,7 @@ public class LogLoader extends DialogFileLoader {
     }
 
 
-    public ScheduleEventContainer loadLogFromDialog() throws IOException
+    public EventContainer loadLogFromDialog() throws IOException
     {
         if (openFileFromDialog() == null)
         {
@@ -33,7 +35,7 @@ public class LogLoader extends DialogFileLoader {
             return eventContainer;
     }
 
-    public ScheduleEventContainer loadDemoLog() throws IOException
+    public EventContainer loadDemoLog() throws IOException
     {
         String demoLogFilePath = "./log/demoLog2.txt";
         if (loadLog(this.openFile(demoLogFilePath)) == false)
@@ -50,56 +52,43 @@ public class LogLoader extends DialogFileLoader {
     private Boolean loadLog(BufferedReader fileReader)
     {
         int lineCounter = 1;
-        int firstTimeStamp = -1;
 
         try {
             String line = null;
             eventContainer.clearAll();
-            int currentLogBlock = 0;
+            int currentLogBlock = LOG_BLOCK_UNKNOWN;
             while ((line = fileReader.readLine()) != null)
             {
-                if (line.trim().length()==0)
+                if (line.trim().length()==0) // Empty line
                     continue;
-//                else if (line.trim().substring(0, 1).equalsIgnoreCase("#"))
+//                else if (line.trim().substring(0, 1).equalsIgnoreCase("#")) // Comment line
 //                    continue;
                 else if (line.trim().toLowerCase().equalsIgnoreCase("@TaskList")) {
-                    currentLogBlock = 1;    // Reading task list block
+                    currentLogBlock = LOG_BLOCK_TASK_LIST;    // Reading task list block
                     continue;
                 }
                 else if (line.trim().toLowerCase().equalsIgnoreCase("@MixedLog")) {
-                    currentLogBlock = 2;    // Reading log block
+                    currentLogBlock = LOG_BLOCK_MIXED_LOG;    // Reading log block
                     continue;
                 }
-                else  if (currentLogBlock == 0) // Unknown lines.
+                else  if (currentLogBlock == LOG_BLOCK_UNKNOWN) // Unknown lines.
                     continue;
 
 
-                String splitStrings[] = line.split(",");
-
-                if (splitStrings.length > 1) {
-                    if (currentLogBlock == 1)
-                    {// Building task list
-                        int taskId = Integer.valueOf(splitStrings[0].trim()).intValue();
-                        String taskTitle = splitStrings[1].trim().substring(1, splitStrings[1].trim().length()-1);
-                        taskContainer.addTask(taskId, taskTitle);
-                    }
-                    else if (currentLogBlock == 2)
-                    {// format: timestamp, event_taskId, event_data, event_string. (62039364, 0, 3, "IN")
-                        int timeStamp = Double.valueOf(splitStrings[0].trim()).intValue();
-                        if (firstTimeStamp == -1)
-                        {
-                            firstTimeStamp = timeStamp;
-                        }
-                        timeStamp = (timeStamp-firstTimeStamp) / 10000;
-
-                        int eventTaskId = Integer.valueOf(splitStrings[1].trim()).intValue();
-                        int eventData = Integer.valueOf(splitStrings[2].trim()).intValue();
-                        String eventString = splitStrings[3].trim().substring(1, splitStrings[3].trim().length()-1);
-
-                        eventContainer.add(timeStamp, eventTaskId, eventData, eventString);
-                    }
+                Boolean parseResult = false;
+                switch (currentLogBlock)
+                {
+                    case LOG_BLOCK_TASK_LIST:
+                        parseResult = parseLogLineTaskList(line);
+                        break;
+                    case LOG_BLOCK_MIXED_LOG:
+                        parseResult = parseLogLineMixedLog(line);
+                        break;
+                    default:
+                        break;
                 }
-                else
+
+                if (parseResult == false)
                 {
                     System.err.format("Incorrect log file format at line %d.\n", lineCounter);
                     return false;
@@ -127,7 +116,7 @@ public class LogLoader extends DialogFileLoader {
      * Get the Events Container from the log loader.
      * @return The initialized Events Container.
      */
-    public ScheduleEventContainer getEventContainer()
+    public EventContainer getEventContainer()
     {
         return eventContainer;
     }
@@ -135,5 +124,58 @@ public class LogLoader extends DialogFileLoader {
 //    public TaskContainer getTaskContainer()
 //    {
 //        return taskContainer;
+//    }
+
+    /**
+     * Parse one log line for task list block.
+     * @param line One log line string to be parsed. Format: [taskId, TaskName]
+     * @return 'true' for successfully parsing the line, whereas 'false' for not.
+     */
+    private Boolean parseLogLineTaskList(String line)
+    {
+        /* Format: [taskId, TaskName] */
+        String splitStrings[] = line.split(",");
+        if (splitStrings.length == 2) {
+            int taskId = Integer.valueOf(splitStrings[0].trim()).intValue();
+            String taskTitle = splitStrings[1].trim().substring(1, splitStrings[1].trim().length() - 1);
+            taskContainer.addTask(taskId, taskTitle);
+            return true;
+        }
+        else {
+            // Incorrect task list log format.
+            return false;
+        }
+    }
+
+    private Boolean parseLogLineMixedLog(String line)
+    {
+        /* format: [timestamp, event_taskId, event_data, event_string]. (62039364, 0, 3, "IN") */
+        String splitStrings[] = line.split(",");
+        if (splitStrings.length == 4) {
+            int timeStamp = Double.valueOf(splitStrings[0].trim()).intValue();
+            if (firstTimeStamp == -1) {
+                // Initialize the earliest timestamp
+                firstTimeStamp = timeStamp;
+            }
+            /* TODO: the scale of the timestamp should be flexible and configurable. */
+            timeStamp = (timeStamp - firstTimeStamp) / 10000;
+
+            int eventTaskId = Integer.valueOf(splitStrings[1].trim()).intValue();
+            int eventData = Integer.valueOf(splitStrings[2].trim()).intValue();
+            String eventString = splitStrings[3].trim().substring(1, splitStrings[3].trim().length() - 1);
+
+            eventContainer.add(timeStamp, eventTaskId, eventData, eventString);
+            return true;
+        }
+        else {
+            // Incorrect task list log format.
+            return false;
+        }
+    }
+
+//    private Boolean parseLogLineHackerList(String line)
+//    {
+//        String splitStrings[] = line.split(",");
+//        if (splitStrings.length == 4) {
 //    }
 }

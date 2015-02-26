@@ -5,14 +5,14 @@ import java.awt.*;
 /**
  * Created by CY on 2/16/2015.
  */
-public class ScheduleEvent extends Event {
+public class SchedulerEvent extends Event {
     public static final int EVENT_SCHEDULER = 0;
     public static final int DRAW_HEIGHT = 150;
 
     private Task task = null;
     private DrawPhase drawObject = new DrawPhase();
 
-    public ScheduleEvent(int inTimeStamp, Task inTask, String inNote)
+    public SchedulerEvent(int inTimeStamp, Task inTask, String inNote)
     {
         timeStamp = inTimeStamp;
         task = inTask;

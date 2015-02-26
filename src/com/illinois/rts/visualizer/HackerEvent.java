@@ -4,14 +4,14 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 
 /**
- * Created by CY on 2/19/2015.
+ * Created by CY on 2/20/2015.
  */
-public class AppEvent extends Event {
+public class HackerEvent extends Event {
     private Task task = null;
     private int recordData = 0;
     private String note = "";
 
-    AppEvent(int inTimeStamp, Task inTask, int inData, String inNote)
+    HackerEvent(int inTimeStamp, Task inTask, int inData, String inNote)
     {
         timeStamp = inTimeStamp;
         task = inTask;
@@ -19,6 +19,7 @@ public class AppEvent extends Event {
         note = inNote;
     }
 
+    @Override
     public void drawEvent(Graphics2D g, int offsetX, int offsetY, double scaleX, double scaleY)
     {
         int scaledOffsetX = offsetX + (int) (timeStamp*scaleX);

@@ -1,21 +1,15 @@
 package com.illinois.rts.visualizer;
 
 import com.illinois.premsim.gui.ZoomablePanel;
-import com.illinois.rts.visualizer.DrawRect;
-import com.illinois.rts.visualizer.ScheduleEvent;
-import com.illinois.rts.visualizer.ScheduleEventContainer;
 
-import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
-import java.util.ArrayList;
 
 /**
  * Created by CY on 2/12/2015.
  */
 public class PanelDrawer extends ZoomablePanel {
     public boolean doNotDraw = false;
-    public ScheduleEventContainer scheduleEventContainer = new ScheduleEventContainer();
+    public EventContainer eventContainer = new EventContainer();
 
     public PanelDrawer()
     {
@@ -28,8 +22,8 @@ public class PanelDrawer extends ZoomablePanel {
         if (doNotDraw == false) {
             //g.scale(1, 1);
             //g.translate(100, -75);
-            scheduleEventContainer.drawVerticalCenter(g, this.getHeight());//draw(g);
-            System.out.println(this.getHeight());
+            eventContainer.drawVerticalCenter(g, this.getHeight());//draw(g);
+            //System.out.println(this.getHeight());
         }
     }
 
@@ -61,10 +55,10 @@ public class PanelDrawer extends ZoomablePanel {
 //
 //    }
 
-    public void setScheduleEventContainer(ScheduleEventContainer inputEventContainer)
+    public void setEventContainer(EventContainer inputEventContainer)
     {
         //scheduleEventContainer.clearAll();
-        scheduleEventContainer = inputEventContainer;
+        eventContainer = inputEventContainer;
         repaint();
     }
 

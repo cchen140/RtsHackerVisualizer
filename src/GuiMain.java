@@ -97,7 +97,7 @@ public class GuiMain implements ActionListener, MouseListener {
 
     private void drawPlotFromLogLoader()
     {
-        zPanel.setScheduleEventContainer(logLoader.getEventContainer());
+        zPanel.setEventContainer(logLoader.getEventContainer());
         taskList.setListData(logLoader.getEventContainer().getTaskContainer().getTasksAsArray());
     }
 
