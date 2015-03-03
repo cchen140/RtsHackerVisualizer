@@ -6,6 +6,10 @@
 1, "APP-1"
 6, "Tmr Svc"
 
+@HackerList
+3, H
+4, L
+
 @MixedLog
 62039364,       0,      3,      "IN"
 63451448,       3,      201,    "H"

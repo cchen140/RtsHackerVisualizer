@@ -16,6 +16,7 @@ public class TaskListColorIcon implements Icon
     private Color fillColor = Color.green;
     private Color borderColor = Color.black;
     private Boolean checked = true;
+    private String symbol = "";
 
     public TaskListColorIcon()
     {
@@ -28,9 +29,10 @@ public class TaskListColorIcon implements Icon
         fillColor = inputFillColor;
     }
 
-    public TaskListColorIcon(Color inputFillColor, Boolean inputChecked) {
+    public TaskListColorIcon(Color inputFillColor, Boolean inputChecked, String inputSymbol) {
         this(inputFillColor);
         checked = inputChecked;
+        symbol = inputSymbol;
     }
 
     public int getIconHeight()
@@ -51,13 +53,22 @@ public class TaskListColorIcon implements Icon
         g.setColor(borderColor);
         g.drawRect(x, y, width, height);
 
-        g.setColor(Color.WHITE);
+
         if (checked == true) {
+            //g.setColor(Color.WHITE);
             //g.drawString("V", x + width / 2, y + height / 2);
         }
         else
         {
+            g.setColor(Color.WHITE);
             g.fillRect(x+width/6, y+height/6, (int) (width*0.7), (int) (height*0.7));
+        }
+
+        if (!symbol.isEmpty())
+        {
+            g.setColor(Color.BLACK);
+            g.setFont(new Font("TimesRoman", Font.BOLD, 18));
+            g.drawString(symbol, x + (int)(width*0.3), y + (int)(height*0.75));
         }
     }
 }

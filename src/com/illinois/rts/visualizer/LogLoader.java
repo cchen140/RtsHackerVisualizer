@@ -11,6 +11,7 @@ public class LogLoader extends DialogFileLoader {
     private static final int LOG_BLOCK_UNKNOWN = 0;
     private static final int LOG_BLOCK_TASK_LIST = 1;
     private static final int LOG_BLOCK_MIXED_LOG = 2;
+    private static final int LOG_BLOCK_HACKER_LIST = 3;
 
     private EventContainer eventContainer = new EventContainer();
     private TaskContainer taskContainer = null;
@@ -61,14 +62,18 @@ public class LogLoader extends DialogFileLoader {
             {
                 if (line.trim().length()==0) // Empty line
                     continue;
-//                else if (line.trim().substring(0, 1).equalsIgnoreCase("#")) // Comment line
-//                    continue;
+                else if (line.trim().substring(0, 1).equalsIgnoreCase("#")) // Comment line
+                    continue;
                 else if (line.trim().toLowerCase().equalsIgnoreCase("@TaskList")) {
                     currentLogBlock = LOG_BLOCK_TASK_LIST;    // Reading task list block
                     continue;
                 }
                 else if (line.trim().toLowerCase().equalsIgnoreCase("@MixedLog")) {
                     currentLogBlock = LOG_BLOCK_MIXED_LOG;    // Reading log block
+                    continue;
+                }
+                else if (line.trim().toLowerCase().equalsIgnoreCase("@HackerList")) {
+                    currentLogBlock = LOG_BLOCK_HACKER_LIST;
                     continue;
                 }
                 else  if (currentLogBlock == LOG_BLOCK_UNKNOWN) // Unknown lines.
@@ -83,6 +88,9 @@ public class LogLoader extends DialogFileLoader {
                         break;
                     case LOG_BLOCK_MIXED_LOG:
                         parseResult = parseLogLineMixedLog(line);
+                        break;
+                    case LOG_BLOCK_HACKER_LIST:
+                        parseResult = parseLogLineHackerList(line);
                         break;
                     default:
                         break;
@@ -173,9 +181,21 @@ public class LogLoader extends DialogFileLoader {
         }
     }
 
-//    private Boolean parseLogLineHackerList(String line)
-//    {
-//        String splitStrings[] = line.split(",");
-//        if (splitStrings.length == 4) {
-//    }
+    private Boolean parseLogLineHackerList(String line)
+    {
+        String splitStrings[] = line.split(",");
+        if (splitStrings.length == 2) {
+            String hacker = splitStrings[1].trim();
+            if (hacker.equalsIgnoreCase("H")) {
+                HackerEvent.setHighHackerId(Integer.valueOf(splitStrings[0].trim()).intValue());
+                return true;
+            } else if (hacker.equalsIgnoreCase("L")) {
+                HackerEvent.setLowHackerId(Integer.valueOf(splitStrings[0].trim()).intValue());
+                return true;
+            }
+        }
+
+        // Incorrect task list log format.
+        return false;
+    }
 }

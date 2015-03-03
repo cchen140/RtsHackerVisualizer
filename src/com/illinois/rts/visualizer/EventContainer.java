@@ -14,6 +14,7 @@ public class EventContainer {
 
     private ArrayList<SchedulerEvent> schedulerEvents = new ArrayList<SchedulerEvent>();
     private ArrayList<AppEvent> appEvents = new ArrayList<AppEvent>();
+    private ArrayList<HackerEvent> hackerEvents = new ArrayList<HackerEvent>();
     private TaskContainer taskContainer = new TaskContainer();
 
     public EventContainer(){}
@@ -25,6 +26,10 @@ public class EventContainer {
                 schedulerEvents.get(schedulerEvents.size() - 1).setEndTimeStamp(inTimeStamp);
             }
             schedulerEvents.add(new SchedulerEvent(inTimeStamp, taskContainer.getTaskById(inData), inEventString));
+        }
+        else if ((inEventTaskId==HackerEvent.highHackerId) || (inEventTaskId==HackerEvent.lowHackerId))
+        {
+            hackerEvents.add(new HackerEvent(inTimeStamp, taskContainer.getTaskById(inEventTaskId), inData, inEventString));
         }
         else
         {
@@ -44,6 +49,11 @@ public class EventContainer {
 //            currentAppEvent.drawEvent(g, PAINT_OFFSET_X, (canvasHeight/2)-PAINT_OFFSET_Y, SCALE_X, SCALE_Y);
              currentAppEvent.drawEvent(g, PAINT_OFFSET_X, PAINT_OFFSET_Y, SCALE_X, SCALE_Y);
         }
+        for (HackerEvent currentHackerEvent : hackerEvents)
+        {
+//            currentAppEvent.drawEvent(g, PAINT_OFFSET_X, (canvasHeight/2)-PAINT_OFFSET_Y, SCALE_X, SCALE_Y);
+            currentHackerEvent.drawEvent(g, PAINT_OFFSET_X, PAINT_OFFSET_Y, SCALE_X, SCALE_Y);
+        }
     }
 
 
@@ -51,6 +61,7 @@ public class EventContainer {
     {
         schedulerEvents.clear();
         appEvents.clear();
+        hackerEvents.clear();
         taskContainer.clear();
     }
 

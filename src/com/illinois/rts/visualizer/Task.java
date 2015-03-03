@@ -7,6 +7,7 @@ import java.awt.*;
  */
 public class Task {
     private String title = "";
+    private String symbol = ""; // Mainly for representing high/low hacker with symbol "H"/"L" in the icon.
     private Color color = Color.black;
     private Boolean boxChecked = true;
     private int id = 0;
@@ -34,6 +35,15 @@ public class Task {
     public int getId()
     {
         return id;
+    }
+
+    public void setSymbol(String inSymbol)
+    {
+        symbol = inSymbol;
+    }
+    public String getSymbol()
+    {
+        return symbol;
     }
 
     public void setColor(Color inputColor)

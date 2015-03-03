@@ -7,8 +7,17 @@ import java.awt.geom.AffineTransform;
  * Created by CY on 2/20/2015.
  */
 public class HackerEvent extends Event {
+    /* */
+    public static int highHackerId = 0;
+    public static int lowHackerId = 0;
+
+    private static final int BAR_WIDTH = 30;
+    private static final int HIGH_HACKER_DATA_SCALE = 50;
+    private static final int LOW_HACKER_DATA_SCALE = 10000;
+
     private Task task = null;
     private int recordData = 0;
+    private int scaledRecordData = 0;
     private String note = "";
 
     HackerEvent(int inTimeStamp, Task inTask, int inData, String inNote)
@@ -16,7 +25,28 @@ public class HackerEvent extends Event {
         timeStamp = inTimeStamp;
         task = inTask;
         recordData = inData;
+
+        if (inTask.getId() == highHackerId) {
+            scaledRecordData = inData / HIGH_HACKER_DATA_SCALE;
+            task.setSymbol("H");
+        }
+        else if (inTask.getId() == lowHackerId)
+        {
+            scaledRecordData = inData / LOW_HACKER_DATA_SCALE;
+            task.setSymbol("L");
+        }
+
         note = inNote;
+    }
+
+    public static void setHighHackerId(int inId)
+    {
+        highHackerId = inId;
+    }
+
+    public static void setLowHackerId(int inId)
+    {
+        lowHackerId = inId;
     }
 
     @Override
@@ -26,15 +56,27 @@ public class HackerEvent extends Event {
         int movedOffsetY = 0;
         if (task.isBoxChecked()) {
             g.setFont(new Font("TimesRoman", Font.BOLD, 18));
-            if (task.getTitle().equalsIgnoreCase("Hacker-H"))
+            if (task.getId() == highHackerId)
             {
-                g.drawString(note, scaledOffsetX-5, offsetY + SchedulerEvent.DRAW_HEIGHT + 80);
-                drawArrow(g, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT + 50, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT);
+                /* Display in North */
+                g.setColor(Color.black);
+                //g.drawLine(scaledOffsetX, offsetY - 50, scaledOffsetX, offsetY);
+                //drawObject.setFillColor(task.getTaskColor());
+                g.fillRect(scaledOffsetX - BAR_WIDTH / 2, offsetY - scaledRecordData, BAR_WIDTH, scaledRecordData);
+                //g.drawString(note, scaledOffsetX, offsetY - 70);
+                //drawArrow(g, scaledOffsetX, offsetY - 50, scaledOffsetX, offsetY);
             }
-            else {
-
-                g.drawString(note, scaledOffsetX, offsetY - 70);
-                drawArrow(g, scaledOffsetX, offsetY - 50, scaledOffsetX, offsetY);
+            else if (task.getId() == lowHackerId)
+            {
+                /* Display in South */
+                g.setColor(task.getTaskColor());
+                g.drawString(note, scaledOffsetX-5, offsetY + SchedulerEvent.DRAW_HEIGHT + 40);
+                drawArrow(g, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT + 20, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT);
+            }
+            else
+            {
+                // Shouldn't reach here.
+                System.err.println("Error occurs in HackerEvent drawEvent function!");
             }
         }
     }

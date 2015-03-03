@@ -25,16 +25,14 @@ public class AppEvent extends Event {
         int movedOffsetY = 0;
         if (task.isBoxChecked()) {
             g.setFont(new Font("TimesRoman", Font.BOLD, 18));
-            if (task.getTitle().equalsIgnoreCase("Hacker-H"))
-            {
-                g.drawString(note, scaledOffsetX-5, offsetY + SchedulerEvent.DRAW_HEIGHT + 80);
-                drawArrow(g, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT + 50, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT);
-            }
-            else {
 
-                g.drawString(note, scaledOffsetX, offsetY - 70);
-                drawArrow(g, scaledOffsetX, offsetY - 50, scaledOffsetX, offsetY);
-            }
+            /* Display in South */
+            g.drawString(note, scaledOffsetX-5, offsetY + SchedulerEvent.DRAW_HEIGHT + 80);
+            drawArrow(g, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT + 50, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT);
+
+            /* Display in North */
+//            g.drawString(note, scaledOffsetX, offsetY - 70);
+//            drawArrow(g, scaledOffsetX, offsetY - 50, scaledOffsetX, offsetY);
         }
     }
 
