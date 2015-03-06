@@ -26,7 +26,7 @@ public abstract class ZoomablePanel extends JPanel implements MouseWheelListener
 MouseListener, MouseMotionListener
 {
     /* 2015 2/18 CY: Add constant for configuring the constraint of moving on y-axis.*/
-    private static final Boolean MOVE_Y_ALLOWED = false;
+    private static final Boolean MOVE_Y_ALLOWED = true;
 
 //	 negative = zoom in, positive = zoom out
 	protected double zoomFactor = 0;
