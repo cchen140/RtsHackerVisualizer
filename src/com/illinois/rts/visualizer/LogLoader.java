@@ -72,6 +72,10 @@ public class LogLoader extends DialogFileLoader {
                     currentLogBlock = LOG_BLOCK_MIXED_LOG;    // Reading log block
                     continue;
                 }
+                else if (line.trim().toLowerCase().equalsIgnoreCase("@SchedulerLog")) {
+                    currentLogBlock = LOG_BLOCK_MIXED_LOG;    // Reading log block
+                    continue;
+                }
                 else if (line.trim().toLowerCase().equalsIgnoreCase("@HackerList")) {
                     currentLogBlock = LOG_BLOCK_HACKER_LIST;
                     continue;
