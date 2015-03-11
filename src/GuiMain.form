@@ -175,6 +175,41 @@
                       </grid>
                     </children>
                   </scrollpane>
+                  <grid id="3dede" layout-manager="BorderLayout" hgap="0" vgap="0">
+                    <constraints border-constraint="South"/>
+                    <properties>
+                      <minimumSize width="17" height="150"/>
+                      <preferredSize width="6" height="150"/>
+                    </properties>
+                    <border type="none"/>
+                    <children>
+                      <scrollpane id="25d79">
+                        <constraints border-constraint="Center"/>
+                        <properties>
+                          <preferredSize width="6" height="100"/>
+                        </properties>
+                        <border type="none"/>
+                        <children>
+                          <component id="a2c20" class="javax.swing.JTextPane" binding="msgTextPanel">
+                            <constraints/>
+                            <properties>
+                              <editable value="false"/>
+                              <preferredSize width="6" height="150"/>
+                              <text value=""/>
+                            </properties>
+                          </component>
+                        </children>
+                      </scrollpane>
+                      <grid id="3cc3c" layout-manager="BorderLayout" hgap="0" vgap="0">
+                        <constraints border-constraint="North"/>
+                        <properties>
+                          <preferredSize width="0" height="5"/>
+                        </properties>
+                        <border type="none"/>
+                        <children/>
+                      </grid>
+                    </children>
+                  </grid>
                 </children>
               </grid>
             </children>

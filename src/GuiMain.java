@@ -14,6 +14,7 @@ public class GuiMain implements ActionListener, MouseListener {
     private PanelDrawer zPanel;
     private JList taskList;
     private JPanel taskListPanel;
+    private JTextPane msgTextPanel;
 
     JFrame frame = new JFrame("RTS Hacker Visualizer");
 
