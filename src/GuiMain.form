@@ -190,13 +190,9 @@
                         </properties>
                         <border type="none"/>
                         <children>
-                          <component id="a2c20" class="javax.swing.JTextPane" binding="msgTextPanel">
+                          <component id="9d952" class="javax.swing.JTextPane" binding="msgTextPane">
                             <constraints/>
-                            <properties>
-                              <editable value="false"/>
-                              <preferredSize width="6" height="150"/>
-                              <text value=""/>
-                            </properties>
+                            <properties/>
                           </component>
                         </children>
                       </scrollpane>

@@ -2,6 +2,7 @@ import javax.swing.*;
 
 import com.illinois.rts.visualizer.*;
 
+import java.awt.*;
 import java.awt.event.*;
 
 /**
@@ -14,12 +15,13 @@ public class GuiMain implements ActionListener, MouseListener {
     private PanelDrawer zPanel;
     private JList taskList;
     private JPanel taskListPanel;
-    private JTextPane msgTextPanel;
+    private JTextPane msgTextPane;
 
     JFrame frame = new JFrame("RTS Hacker Visualizer");
 
     private static GuiMain instance = null;
     private LogLoader logLoader = new LogLoader();
+    public ProgramLogMessenger progMsger = null;
 
     public void initGui() {
 
@@ -31,6 +33,10 @@ public class GuiMain implements ActionListener, MouseListener {
 
         frame.setVisible(true);
 
+        /*
+        *  Don't initialize any variables here! Put them in GuiMain constructor.
+        *  Variables initialized here will remain null for other functions. Why?
+        */
 
     }
 
@@ -53,6 +59,11 @@ public class GuiMain implements ActionListener, MouseListener {
             System.err.println(ex);
             //ex.printStackTrace();
         }
+
+        // Set up program log messenger handler.
+        progMsger = ProgramLogMessenger.getInstance();
+        progMsger.setDocument(msgTextPane.getStyledDocument());
+        msgTextPane.setFont(new Font("TimesRoman", Font.PLAIN, 16));
 
     }
 
