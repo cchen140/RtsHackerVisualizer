@@ -17,6 +17,8 @@ public class EventContainer {
     private ArrayList<HackerEvent> hackerEvents = new ArrayList<HackerEvent>();
     private TaskContainer taskContainer = new TaskContainer();
 
+    private int endTimeStamp = 0;
+
     public EventContainer(){}
 
     public void add(int inTimeStamp, int inEventTaskId, int inData, String inEventString)
@@ -26,6 +28,10 @@ public class EventContainer {
                 schedulerEvents.get(schedulerEvents.size() - 1).setEndTimeStamp(inTimeStamp);
             }
             schedulerEvents.add(new SchedulerEvent(inTimeStamp, taskContainer.getTaskById(inData), inEventString));
+
+            // Assume that the added scheduler event is in order, the latest one should be the latest.
+            // if (endTimeStamp < inTimeStamp)
+            endTimeStamp = inTimeStamp;
         }
         else if ((inEventTaskId==HackerEvent.highHackerId) || (inEventTaskId==HackerEvent.lowHackerId))
         {
@@ -36,26 +42,6 @@ public class EventContainer {
             appEvents.add(new AppEvent(inTimeStamp, taskContainer.getTaskById(inEventTaskId), inData, inEventString));
         }
     }
-
-    public void drawVerticalCenter(Graphics2D g, int canvasHeight)
-    {
-        for (SchedulerEvent currentSchEvent : schedulerEvents)
-        {
-//            currentSchEvent.drawEvent(g, PAINT_OFFSET_X, (canvasHeight/2)-PAINT_OFFSET_Y, SCALE_X, SCALE_Y);
-            currentSchEvent.drawEvent(g, PAINT_OFFSET_X, PAINT_OFFSET_Y, SCALE_X, SCALE_Y);
-        }
-        for (AppEvent currentAppEvent : appEvents)
-        {
-//            currentAppEvent.drawEvent(g, PAINT_OFFSET_X, (canvasHeight/2)-PAINT_OFFSET_Y, SCALE_X, SCALE_Y);
-             currentAppEvent.drawEvent(g, PAINT_OFFSET_X, PAINT_OFFSET_Y, SCALE_X, SCALE_Y);
-        }
-        for (HackerEvent currentHackerEvent : hackerEvents)
-        {
-//            currentAppEvent.drawEvent(g, PAINT_OFFSET_X, (canvasHeight/2)-PAINT_OFFSET_Y, SCALE_X, SCALE_Y);
-            currentHackerEvent.drawEvent(g, PAINT_OFFSET_X, PAINT_OFFSET_Y, SCALE_X, SCALE_Y);
-        }
-    }
-
 
     public void clearAll()
     {
@@ -73,6 +59,15 @@ public class EventContainer {
     public TaskContainer getTaskContainer()
     {
         return taskContainer;
+    }
+
+    public ArrayList<SchedulerEvent> getSchedulerEvents() { return schedulerEvents; }
+    public ArrayList<AppEvent> getAppEvents() { return appEvents; }
+    public  ArrayList<HackerEvent> getHackerEvents() { return hackerEvents; }
+
+    public int getEndTimeStamp()
+    {
+        return endTimeStamp;
     }
 
 }

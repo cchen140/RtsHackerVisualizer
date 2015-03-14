@@ -54,7 +54,7 @@ public class HackerEvent extends Event {
     {
         int scaledOffsetX = offsetX + (int) (timeStamp*scaleX);
         int movedOffsetY = 0;
-        if (task.isBoxChecked()) {
+        if (task.isDisplayBoxChecked()) {
             g.setFont(new Font("TimesRoman", Font.BOLD, 18));
             if (task.getId() == highHackerId)
             {
@@ -79,6 +79,11 @@ public class HackerEvent extends Event {
                 System.err.println("Error occurs in HackerEvent drawEvent function!");
             }
         }
+    }
+
+    @Override
+    public int getDrawHeight() {
+        return 0;
     }
 
     private  void drawArrow(Graphics g1, int x1, int y1, int x2, int y2) {

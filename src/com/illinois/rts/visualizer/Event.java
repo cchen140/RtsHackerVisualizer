@@ -21,6 +21,8 @@ public abstract class Event {
     {
         endTimeStamp = inputTimeStamp;
     }
+    public int getEndTimeStamp() { return endTimeStamp; }
 
     public abstract void drawEvent(Graphics2D g, int offsetX, int offsetY, double scaleX, double scaleY);
+    public abstract int getDrawHeight();
 }

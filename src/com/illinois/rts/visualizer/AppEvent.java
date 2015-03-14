@@ -23,7 +23,7 @@ public class AppEvent extends Event {
     {
         int scaledOffsetX = offsetX + (int) (timeStamp*scaleX);
         int movedOffsetY = 0;
-        if (task.isBoxChecked()) {
+        if (task.isDisplayBoxChecked()) {
             g.setFont(new Font("TimesRoman", Font.BOLD, 18));
 
             /* Display in South */
@@ -34,6 +34,11 @@ public class AppEvent extends Event {
 //            g.drawString(note, scaledOffsetX, offsetY - 70);
 //            drawArrow(g, scaledOffsetX, offsetY - 50, scaledOffsetX, offsetY);
         }
+    }
+
+    @Override
+    public int getDrawHeight() {
+        return 0;
     }
 
     private  void drawArrow(Graphics g1, int x1, int y1, int x2, int y2) {

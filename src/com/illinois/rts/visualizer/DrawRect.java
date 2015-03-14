@@ -31,6 +31,7 @@ public class DrawRect extends DrawUnit {
     {
         height = inputHeight;
     }
+    public int getHeight() { return height; }
     public void setSize(int inputWidth, int inputHeight)
     {
         width = inputWidth;

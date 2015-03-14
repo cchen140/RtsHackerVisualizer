@@ -27,7 +27,7 @@ public class SchedulerEvent extends Event {
         if (endTimeStamp > 0) {
             int scaledWidth = (int) ((endTimeStamp - timeStamp) * scaleX);
             int scaledOffsetX = offsetX + (int) (timeStamp*scaleX);
-            if (task.isBoxChecked() == true) {
+            if (task.isDisplayBoxChecked() == true) {
                 drawObject.setHeightScale(scaleY);
                 drawObject.setWidth(scaledWidth);
                 drawObject.draw(g, scaledOffsetX, offsetY);
@@ -45,4 +45,11 @@ public class SchedulerEvent extends Event {
         }
         //System.out.println(timeStamp);
     }
+
+    @Override
+    public int getDrawHeight() {
+        return drawObject.getHeight();
+    }
+
+    Task getTask() { return task; }
 }

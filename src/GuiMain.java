@@ -137,7 +137,7 @@ public class GuiMain implements ActionListener, MouseListener {
                 Task clickedTask = (Task) taskList.getModel().getElementAt(index);
                 if (e.getPoint().getX() <= 40)
                 { // Clicking occurs within the color icon.
-                    clickedTask.setBoxChecked(!clickedTask.isBoxChecked());
+                    clickedTask.setDisplayBoxChecked(!clickedTask.isDisplayBoxChecked());
 //                    System.out.format("Icon clicked.\n");
                 }
                 /* Force drawing panel and list to update the appearance*/

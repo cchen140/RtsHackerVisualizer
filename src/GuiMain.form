@@ -7,12 +7,6 @@
     <properties/>
     <border type="none"/>
     <children>
-      <component id="138ee" class="com.illinois.rts.visualizer.PanelDrawer" binding="zPanel">
-        <constraints border-constraint="Center"/>
-        <properties>
-          <background color="-1558978"/>
-        </properties>
-      </component>
       <grid id="bf452" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints border-constraint="North"/>
         <properties>
@@ -220,6 +214,20 @@
           </grid>
         </children>
       </grid>
+      <scrollpane id="3a66d">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="e3eb9" class="com.illinois.rts.visualizer.PanelDrawer" binding="zPanel">
+            <constraints/>
+            <properties>
+              <background color="-1558978"/>
+              <preferredSize width="1000" height="10"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
     </children>
   </grid>
 </form>

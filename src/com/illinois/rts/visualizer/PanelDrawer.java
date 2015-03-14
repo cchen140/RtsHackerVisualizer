@@ -11,6 +11,10 @@ public class PanelDrawer extends ZoomablePanel {
     public boolean doNotDraw = false;
     public EventContainer eventContainer = new EventContainer();
 
+    private SchedulerEventVirtualDrawPanelGroup schedulerEventsDrawPanel = null;
+    private VirtualDrawPanelGroup hackerEventsDrawPanel = null;
+
+
     public PanelDrawer()
     {
         super();
@@ -22,8 +26,13 @@ public class PanelDrawer extends ZoomablePanel {
         if (doNotDraw == false) {
             //g.scale(1, 1);
             //g.translate(100, -75);
-            eventContainer.drawVerticalCenter(g, this.getHeight());//draw(g);
+            //eventContainer.drawVerticalCenter(g, this.getHeight());//draw(g);
             //System.out.println(this.getHeight());
+
+            schedulerEventsDrawPanel.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y, 1, 1);
+            this.setPreferredSize(new Dimension(
+                    schedulerEventsDrawPanel.getWidth()+ProgConfig.PANEL_DRAWER_PADDING_X*2,
+                    schedulerEventsDrawPanel.getHeight()+ProgConfig.PANEL_DRAWER_PADDING_Y*2));
         }
     }
 
@@ -59,6 +68,7 @@ public class PanelDrawer extends ZoomablePanel {
     {
         //scheduleEventContainer.clearAll();
         eventContainer = inputEventContainer;
+        schedulerEventsDrawPanel = new SchedulerEventVirtualDrawPanelGroup(eventContainer);
         repaint();
     }
 

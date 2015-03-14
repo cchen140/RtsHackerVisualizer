@@ -252,7 +252,8 @@ MouseListener, MouseMotionListener
 	private void myPreDraw(Graphics2D g)
 	{
 		Dimension size = getSize();
-		g.setColor(Color.white);
+//		g.setColor(Color.white);
+        g.setColor(Color.lightGray);
 		g.fillRect(0,0,size.width,size.height);
 		
 		preDraw(g);

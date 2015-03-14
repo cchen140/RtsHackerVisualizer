@@ -21,7 +21,7 @@ public class TaskListRenderer extends JLabel implements ListCellRenderer {
                 isSelected, cellHasFocus);
 
         if (value instanceof Object) {
-            theIcon = new TaskListColorIcon(((Task)value).getTaskColor(), ((Task)value).isBoxChecked(), ((Task)value).getSymbol());
+            theIcon = new TaskListColorIcon(((Task)value).getTaskColor(), ((Task)value).isDisplayBoxChecked(), ((Task)value).getSymbol());
             theText = ((Task)value).getTitle();
         } else {
             theFont = list.getFont();

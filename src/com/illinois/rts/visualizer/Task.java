@@ -9,7 +9,7 @@ public class Task {
     private String title = "";
     private String symbol = ""; // Mainly for representing high/low hacker with symbol "H"/"L" in the icon.
     private Color color = Color.black;
-    private Boolean boxChecked = true;
+    private Boolean displayBoxChecked = true;
     private int id = 0;
 
     public Task(){}
@@ -64,12 +64,12 @@ public class Task {
         return title;
     }
 
-    public void setBoxChecked(Boolean inputChecked)
+    public void setDisplayBoxChecked(Boolean inputChecked)
     {
-        boxChecked = inputChecked;
+        displayBoxChecked = inputChecked;
     }
-    public Boolean isBoxChecked()
+    public Boolean isDisplayBoxChecked()
     {
-        return boxChecked;
+        return displayBoxChecked;
     }
 }

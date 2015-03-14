@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Created by CY on 2/17/2015.
@@ -83,4 +84,6 @@ public class TaskContainer {
     {
         tasks.clear();
     }
+
+    public int size() { return tasks.size(); }
 }
