@@ -38,7 +38,7 @@ public class LogLoader extends DialogFileLoader {
 
     public EventContainer loadDemoLog() throws IOException
     {
-        String demoLogFilePath = "./log/demoLog2.txt";
+        String demoLogFilePath = "./log/demoLog3.txt";
         if (loadLog(this.openFile(demoLogFilePath)) == false)
             throw new InvalidParameterException("Demo log file is incorrect.");
         else
