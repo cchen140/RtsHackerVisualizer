@@ -6,15 +6,22 @@ package com.illinois.rts.visualizer;
 public class ProgConfig {
     static void ProgConfig() {}
 
-    public static final int PANEL_DRAWER_PADDING_Y = 10;
-    public static final int PANEL_DRAWER_PADDING_X = 10;
+    public static int PANEL_DRAWER_PADDING_Y = 10;
+    public static int PANEL_DRAWER_PADDING_X = 10;
 
-    public static final int VIRTUAL_PANEL_PADDING_Y = 20;
-    public static final int VIRTUAL_PANEL_PADDING_X = 20;
-    public static final int TRACE_GAP_Y = 20;
+    public static int VIRTUAL_PANEL_MARGIN_Y = 20;
+    public static int VIRTUAL_PANEL_MARGIN_X = 20;
 
-    public static final int TRACE_HEIGHT = 100;
 
-    public static final int TIME_LINE_UNIT_TIME = 100;
+    /* Trace Settings */
+    public static int TIME_LINE_UNIT_TIME = 100;
+    public static int TRACE_HEIGHT = 100;
+    public static int TRACE_GAP_Y = 20;
+
+    // Scheduler Traces
+    public static boolean DISPLAY_SCHEDULER_SUMMARY_TRACE = true;
+    public static boolean DISPLAY_SCHEDULER_TASK_TRACES = true;
+
+
 
 }

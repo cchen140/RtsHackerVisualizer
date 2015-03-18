@@ -67,11 +67,20 @@
             </properties>
             <border type="none"/>
             <children>
-              <grid id="ee7bb" layout-manager="FlowLayout" hgap="5" vgap="2" flow-align="2">
+              <grid id="ee7bb" layout-manager="FlowLayout" hgap="10" vgap="2" flow-align="2">
                 <constraints border-constraint="East"/>
                 <properties/>
                 <border type="none"/>
                 <children>
+                  <component id="71672" class="javax.swing.JButton" binding="buttonSettings">
+                    <constraints/>
+                    <properties>
+                      <font size="16"/>
+                      <label value="Settings"/>
+                      <preferredSize width="120" height="30"/>
+                      <text value="Settings"/>
+                    </properties>
+                  </component>
                   <component id="5b7a7" class="javax.swing.JButton" binding="buttonOpenFile">
                     <constraints/>
                     <properties>
@@ -100,6 +109,14 @@
                     </properties>
                   </component>
                 </children>
+              </grid>
+              <grid id="ce9cb" layout-manager="FlowLayout" hgap="5" vgap="2" flow-align="2">
+                <constraints border-constraint="Center"/>
+                <properties>
+                  <preferredSize width="130" height="10"/>
+                </properties>
+                <border type="none"/>
+                <children/>
               </grid>
             </children>
           </grid>

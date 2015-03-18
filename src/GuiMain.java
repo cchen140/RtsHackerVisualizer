@@ -16,6 +16,7 @@ public class GuiMain implements ActionListener, MouseListener {
     private JList taskList;
     private JPanel taskListPanel;
     private JTextPane msgTextPane;
+    private JButton buttonSettings;
 
     JFrame frame = new JFrame("RTS Hacker Visualizer");
 
@@ -28,7 +29,7 @@ public class GuiMain implements ActionListener, MouseListener {
         frame.setContentPane(new GuiMain().panel1);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1000, 600);
+        frame.setSize(1200, 800);
         //frame.pack();   // pack() will adjust the frame size according to the components it has.
 
         frame.setVisible(true);
@@ -45,6 +46,7 @@ public class GuiMain implements ActionListener, MouseListener {
         /* Action listener for buttons */
         btnHideTaskList.addActionListener(this);
         buttonOpenFile.addActionListener(this);
+        buttonSettings.addActionListener(this);
 
         taskList.addMouseListener(this);
 
@@ -70,7 +72,7 @@ public class GuiMain implements ActionListener, MouseListener {
     //@Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btnHideTaskList) {
-            System.out.println("test5");
+            //System.out.println("test5");
             //zPanel.toggleDoNotDraw();
 
             if (taskListPanel.isVisible() == true)
@@ -94,6 +96,17 @@ public class GuiMain implements ActionListener, MouseListener {
             } catch (Exception ex) {
 
             }
+        } else if (e.getSource() == buttonSettings) {
+//            ProgramLogMessenger.getInstance().putLine("settings button clicked.");
+//            System.out.println("setting button clicked.");
+//            GuiSettings guiSettings = GuiSettings.getInstance();
+//            guiSettings.initGui();
+            DialogSettings dialogSettings = DialogSettings.getInstance();
+            //dialogSettings.pack();
+            //dialogSettings.setVisible(true);
+            dialogSettings.showDialog();
+//            System.out.println("exit dialog.");
+            zPanel.repaint();
         }
 
 
@@ -110,6 +123,8 @@ public class GuiMain implements ActionListener, MouseListener {
     private void drawPlotFromLogLoader()
     {
         zPanel.setEventContainer(logLoader.getEventContainer());
+        // zPanel (PanelDrawer) will update the content automatically, periodically.
+
         taskList.setListData(logLoader.getEventContainer().getTaskContainer().getTasksAsArray());
     }
 
