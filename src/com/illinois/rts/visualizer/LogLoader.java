@@ -53,6 +53,7 @@ public class LogLoader extends DialogFileLoader {
     private Boolean loadLog(BufferedReader fileReader)
     {
         int lineCounter = 1;
+        firstTimeStamp = -1;
 
         try {
             String line = null;
