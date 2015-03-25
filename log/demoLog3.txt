@@ -88,6 +88,10 @@ Test Word 128000 Read:  #Request=240003  #Hit=127925
 1, "APP-1"
 6, "Tmr Svc"
 
+@HackerList
+3, H
+4, L
+
 @MixedLog
 64101973,       2,      32,     "Loading 32KB."
 65540876,       1,      64,     "Loading 64KB."
