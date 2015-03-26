@@ -15,14 +15,18 @@ public class ProgConfig {
     public static int VIRTUAL_PANEL_MARGIN_X = 20;
 
 
+    /* Configuration from log */
+    public static double TIMESTAMP_UNIT_NS = 3; // 3ns
+
     /* Trace Settings */
-    public static int TIME_LINE_UNIT_TIME = 100;
+    public static int TIMESTAMP_SCALE_DIVIDER = 30000;
+    public static int TIME_LINE_UNIT_NS = 10000000; // 10ms
     public static int TRACE_HEIGHT = 100;
     public static int TRACE_GAP_Y = 60;
     public static int TRACE_PANEL_BORDER_WIDTH = 1;
     public static Color TRACE_PANEL_BACKGROUND = Color.GRAY;
     public static Color TRACE_PANEL_FOREGROUND = Color.WHITE;
-    public static Color TRACE_PANEL_BORDER_COLOR = Color.GRAY;
+    public static Color TRACE_PANEL_BORDER_COLOR = Color.LIGHT_GRAY;
     public static Color TRACE_PANEL_TEXT_COLOR = Color.BLACK;
 
     // Scheduler Traces

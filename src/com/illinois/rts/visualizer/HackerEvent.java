@@ -50,9 +50,10 @@ public class HackerEvent extends Event {
     }
 
     @Override
-    public void drawEvent(Graphics2D g, int offsetX, int offsetY, double scaleX, double scaleY)
+    public void drawEvent(Graphics2D g, int offsetX, int offsetY)
     {
-        int scaledOffsetX = offsetX + (int) (timeStamp*scaleX);
+//        int currentOffsetX = offsetX + (int) (timeStamp/scaleX);
+        int currentOffsetX = offsetX + timeStamp;
         int movedOffsetY = 0;
         if (task.isDisplayBoxChecked()) {
             g.setFont(new Font("TimesRoman", Font.BOLD, 16));
@@ -61,18 +62,18 @@ public class HackerEvent extends Event {
             {
                 /* Display in North */
                 g.setColor(Color.black);
-                //g.drawLine(scaledOffsetX, offsetY - 50, scaledOffsetX, offsetY);
+                //g.drawLine(currentOffsetX, offsetY - 50, currentOffsetX, offsetY);
                 //drawObject.setFillColor(task.getTaskColor());
-//                g.fillRect(scaledOffsetX - BAR_WIDTH / 2, offsetY - scaledRecordData, BAR_WIDTH, scaledRecordData);
-                //g.drawString(note, scaledOffsetX, offsetY - 70);
-                //drawArrow(g, scaledOffsetX, offsetY - 50, scaledOffsetX, offsetY);
+//                g.fillRect(currentOffsetX - BAR_WIDTH / 2, offsetY - scaledRecordData, BAR_WIDTH, scaledRecordData);
+                //g.drawString(note, currentOffsetX, offsetY - 70);
+                //drawArrow(g, currentOffsetX, offsetY - 50, currentOffsetX, offsetY);
             }
             else if (task.getId() == lowHackerId)
             {
                 /* Display in South */
                 g.setColor(task.getTaskColor());
-                g.drawString(note, scaledOffsetX-5, offsetY + ProgConfig.TRACE_HEIGHT + 25);
-                drawArrow(g, scaledOffsetX, offsetY + ProgConfig.TRACE_HEIGHT + 5, scaledOffsetX, offsetY + ProgConfig.TRACE_HEIGHT);
+                g.drawString(note, currentOffsetX-5, offsetY + ProgConfig.TRACE_HEIGHT + 25);
+                drawArrow(g, currentOffsetX, offsetY + ProgConfig.TRACE_HEIGHT + 5, currentOffsetX, offsetY + ProgConfig.TRACE_HEIGHT);
             }
             else
             {

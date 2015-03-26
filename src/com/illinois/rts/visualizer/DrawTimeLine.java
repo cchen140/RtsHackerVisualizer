@@ -28,19 +28,20 @@ public class DrawTimeLine extends DrawUnit {
             g.drawLine(offsetX+i, offsetY+UNIT_TIME_MARKER_LENGTH/2, offsetX+i, offsetY-UNIT_TIME_MARKER_LENGTH/2);
 
             if (displayTimeStamp == true) {
+                String timeString = nsToShortString((i/unitTime)*ProgConfig.TIME_LINE_UNIT_NS);
                 g.setFont(new Font("TimesRoman", Font.PLAIN, 14));
 
                 /* Find the center point of the string to be drawn. */
                 FontMetrics fm = g.getFontMetrics();
-                int stringWidth = fm.stringWidth(String.valueOf(i));
+                int stringWidth = fm.stringWidth(timeString);
 
                 if (displayTimeStampInNorth == true) {
                     // Display in north.
-                    g.drawString(String.valueOf(i), offsetX + i - stringWidth / 2, offsetY - 5);
+                    g.drawString(timeString, offsetX + i - stringWidth / 2, offsetY - 5);
                 }
                 else {
                     // Display in south.
-                    g.drawString(String.valueOf(i), offsetX + i - stringWidth / 2, offsetY + 20);
+                    g.drawString(timeString, offsetX + i - stringWidth / 2, offsetY + 20);
                 }
             }
         }
@@ -58,5 +59,30 @@ public class DrawTimeLine extends DrawUnit {
     public void setDisplayTimeStampInNorth(boolean inDisplay)
     {
         displayTimeStampInNorth = inDisplay;
+    }
+
+    protected String nsToShortString(int inValue)
+    {
+        String resultString = new String();
+        if (inValue >= 1000000000)
+        {
+            resultString = String.valueOf((double) inValue/1000000000) + " s";
+            return resultString;
+        }
+        else if (inValue >= 1000000)
+        {
+            resultString = String.valueOf((double) inValue/1000000) + " ms";
+            return resultString;
+        }
+        else if (inValue >= 1000)
+        {
+            resultString = String.valueOf((double) inValue/1000) + " us";
+            return resultString;
+        }
+        else
+        {
+            resultString = String.valueOf((double) inValue) + " ns";
+            return resultString;
+        }
     }
 }

@@ -171,7 +171,7 @@ public class LogLoader extends DialogFileLoader {
                 firstTimeStamp = timeStamp;
             }
             /* TODO: the scale of the timestamp should be flexible and configurable. */
-            timeStamp = (timeStamp - firstTimeStamp) / 10000;
+            timeStamp = (int) ((timeStamp - firstTimeStamp) * ProgConfig.TIMESTAMP_UNIT_NS / ProgConfig.TIMESTAMP_SCALE_DIVIDER);
 
             int eventTaskId = Integer.valueOf(splitStrings[1].trim()).intValue();
             int eventData = Integer.valueOf(splitStrings[2].trim()).intValue();

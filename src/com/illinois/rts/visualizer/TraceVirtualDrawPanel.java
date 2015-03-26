@@ -13,6 +13,8 @@ public class TraceVirtualDrawPanel {
     private int offsetX = 0;
     private int offsetY = 0;
 
+//    protected int scaleX = 1;
+
     private boolean timeLineEnabled = true;
 
     public TraceVirtualDrawPanel(ArrayList inEventArray)
@@ -20,7 +22,8 @@ public class TraceVirtualDrawPanel {
         eventArray = inEventArray;
         endTimeStamp = findEndTimeStamp();
 
-        timeLine = new DrawTimeLine(endTimeStamp, ProgConfig.TIME_LINE_UNIT_TIME);
+//        timeLine = new DrawTimeLine(endTimeStamp, ProgConfig.TIME_LINE_UNIT_TIME);
+        timeLine = new DrawTimeLine(endTimeStamp, (int) ((ProgConfig.TIME_LINE_UNIT_NS/ProgConfig.TIMESTAMP_SCALE_DIVIDER)/ProgConfig.TIMESTAMP_UNIT_NS));
         timeLine.setDisplayTimeStamp(false);
     }
 
@@ -44,14 +47,14 @@ public class TraceVirtualDrawPanel {
         return resultEndTimeStamp;
     }
 
-    public int Draw(Graphics2D g, int inOffsetX, int inOffsetY, double inScaleX, double inScaleY)
+    public int Draw(Graphics2D g, int inOffsetX, int inOffsetY)
     {
         int currentOffsetY = inOffsetY;
 
         // Draw trace
         for (Object currentObj : eventArray) {
             Event currentEvent = (Event) currentObj;
-            currentEvent.drawEvent(g, inOffsetX, inOffsetY, inScaleX, inScaleY);
+            currentEvent.drawEvent(g, inOffsetX, inOffsetY);
         }
 
         currentOffsetY += ProgConfig.TRACE_HEIGHT;
@@ -62,6 +65,11 @@ public class TraceVirtualDrawPanel {
 
         return currentOffsetY;
     }
+
+//    public void setScaleX(int inScaleX)
+//    {
+//        scaleX = inScaleX;
+//    }
 
 
     public boolean getTimeLineEnabled(){ return timeLineEnabled; }

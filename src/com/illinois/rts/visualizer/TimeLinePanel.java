@@ -11,7 +11,7 @@ public class TimeLinePanel extends JPanel {
 
     public TimeLinePanel() {
         super();
-        timeLine = new DrawTimeLine(0, ProgConfig.TIME_LINE_UNIT_TIME);
+        timeLine = new DrawTimeLine(0, (int) (ProgConfig.TIME_LINE_UNIT_NS/ProgConfig.TIMESTAMP_SCALE_DIVIDER));
         timeLine.setDisplayTimeStampInNorth(true);
 //        timeLine.setDisplayTimeStamp(true);
     }

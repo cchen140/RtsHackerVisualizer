@@ -7,7 +7,7 @@ import java.awt.*;
  */
 public class SchedulerEvent extends Event {
     public static final int EVENT_SCHEDULER = 0;
-    public static final int DRAW_HEIGHT = 150;
+//    public static final int DRAW_HEIGHT = 150;
 
     private Task task = null;
     private DrawPhase drawObject = new DrawPhase();
@@ -21,20 +21,21 @@ public class SchedulerEvent extends Event {
         drawObject.setFillColor(task.getTaskColor());
     }
 
-    public void drawEvent(Graphics2D g, int offsetX, int offsetY, double scaleX, double scaleY)
+    public void drawEvent(Graphics2D g, int offsetX, int offsetY)
     {
 
         if (endTimeStamp > 0) {
-            int scaledWidth = (int) ((endTimeStamp - timeStamp) * scaleX);
-            int scaledOffsetX = offsetX + (int) (timeStamp*scaleX);
+//            int scaledWidth = (int) ((endTimeStamp - timeStamp) / scaleX);
+            int eventWidth = endTimeStamp - timeStamp;
+            int currentOffsetX = offsetX + timeStamp;
             if (task.isDisplayBoxChecked() == true) {
-                drawObject.setHeightScale(scaleY);
-                drawObject.setWidth(scaledWidth);
-                drawObject.draw(g, scaledOffsetX, offsetY);
+//                drawObject.setHeightScale(scaleY);
+                drawObject.setWidth(eventWidth);
+                drawObject.draw(g, currentOffsetX, offsetY);
             }
             else
             {
-                drawObject.drawUnderLine(g, scaledOffsetX, offsetY);
+                drawObject.drawUnderLine(g, currentOffsetX, offsetY);
             }
 
         }

@@ -34,12 +34,14 @@ public class PanelDrawer extends ZoomablePanel {
     protected void draw(Graphics2D g) {
 
         if (doNotDraw == false) {
-            //g.scale(1, 1);
-            //g.translate(100, -75);
-            //eventContainer.drawVerticalCenter(g, this.getHeight());//draw(g);
-            //System.out.println(this.getHeight());
 
-            schedulerEventsDrawPanel.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y, 1, 1);
+
+            /* Setup virtual drawing panel */
+            schedulerEventsDrawPanel.setMarginX(ProgConfig.VIRTUAL_PANEL_MARGIN_X);
+            schedulerEventsDrawPanel.setMarginY(ProgConfig.VIRTUAL_PANEL_MARGIN_Y);
+//            schedulerEventsDrawPanel.setScaleX(ProgConfig.TIMESTAMP_SCALE_DIVIDER);
+
+            schedulerEventsDrawPanel.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y);
 //            timeLinePanel.draw();
 //            schedulerEventsDrawPanel.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y+1000, 1, 1);
 

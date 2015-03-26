@@ -19,17 +19,18 @@ public class AppEvent extends Event {
         note = inNote;
     }
 
-    public void drawEvent(Graphics2D g, int offsetX, int offsetY, double scaleX, double scaleY)
+    public void drawEvent(Graphics2D g, int offsetX, int offsetY)
     {
-        int scaledOffsetX = offsetX + (int) (timeStamp*scaleX);
+//        int scaledOffsetX = offsetX + (int) (timeStamp/scaleX);
+        int currentOffsetX = offsetX + timeStamp;
         int movedOffsetY = 0;
         if (task.isDisplayBoxChecked()) {
             g.setFont(new Font("TimesRoman", Font.BOLD, 16));
             g.setColor(task.getTaskColor());
 
             /* Display in South */
-            g.drawString(note, scaledOffsetX-5, offsetY + ProgConfig.TRACE_HEIGHT + 25);
-            drawArrow(g, scaledOffsetX, offsetY + ProgConfig.TRACE_HEIGHT + 5, scaledOffsetX, offsetY + ProgConfig.TRACE_HEIGHT);
+            g.drawString(note, currentOffsetX-5, offsetY + ProgConfig.TRACE_HEIGHT + 25);
+            drawArrow(g, currentOffsetX, offsetY + ProgConfig.TRACE_HEIGHT + 5, currentOffsetX, offsetY + ProgConfig.TRACE_HEIGHT);
 
             /* Display in North */
 //            g.drawString(note, scaledOffsetX, offsetY - 70);

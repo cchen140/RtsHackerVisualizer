@@ -18,7 +18,7 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
     private int width = 0;
     private int height = 0;
     private DrawRect background = new DrawRect();
-    private DrawTimeLine timeLine = null;
+//    private DrawTimeLine timeLine = null;
     private DrawTraceGap traceGap = null;
 
 
@@ -35,7 +35,7 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
         background.setFillColor(ProgConfig.TRACE_PANEL_FOREGROUND);
         background.setSize(width, height);
 
-        timeLine = new DrawTimeLine(eventContainer.getEndTimeStamp(), ProgConfig.TIME_LINE_UNIT_TIME);
+//        timeLine = new DrawTimeLine(eventContainer.getEndTimeStamp(), (int) ((ProgConfig.TIME_LINE_UNIT_NS/ProgConfig.TIMESTAMP_SCALE_DIVIDER)/ProgConfig.TIMESTAMP_UNIT_NS));
 
         traceGap = new DrawTraceGap();
         traceGap.setFillColor(ProgConfig.TRACE_PANEL_BORDER_COLOR);
@@ -43,7 +43,7 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
     }
 
     @Override
-    public void draw(Graphics2D g, int offsetX, int offsetY, double scaleX, double scaleY) {
+    public void draw(Graphics2D g, int offsetX, int offsetY) {
 
         int currentOffsetX = offsetX;
         int currentOffsetY = offsetY;
@@ -60,8 +60,8 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
 //        System.out.println(offsetY);
 
         // Make some boarder space.
-        currentOffsetY += ProgConfig.VIRTUAL_PANEL_MARGIN_Y;
-        currentOffsetX += ProgConfig.VIRTUAL_PANEL_MARGIN_X;
+        currentOffsetY += marginY;
+        currentOffsetX += marginX;
 
 
         //traceGap.draw(g, width+currentOffsetX, 0, currentOffsetY);
@@ -73,7 +73,7 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
         if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true) {
 //            TraceVirtualDrawPanel schedulerDrawPanel = new TraceVirtualDrawPanel(schedulerEvents);
             TraceVirtualDrawPanel schedulerDrawPanel = new TraceVirtualDrawPanel(eventContainer.getAllEvents());
-            currentOffsetY = schedulerDrawPanel.Draw(g, currentOffsetX, currentOffsetY, scaleX, scaleY);
+            currentOffsetY = schedulerDrawPanel.Draw(g, currentOffsetX, currentOffsetY);
 
             if (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES == true)
             {// If it's going to draw individual traces, draw gap.
@@ -106,7 +106,7 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
 
                 // Draw trace
                 TraceVirtualDrawPanel taskDrawPanel = new TraceVirtualDrawPanel(taskEvents);
-                currentOffsetY = taskDrawPanel.Draw(g, currentOffsetX, currentOffsetY, scaleX, scaleY);
+                currentOffsetY = taskDrawPanel.Draw(g, currentOffsetX, currentOffsetY);
 
                 // Move brush and draw trace border (gap)
                 currentOffsetY += ProgConfig.TRACE_GAP_Y/2;
@@ -155,7 +155,7 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
     private int calculateWidth()
     {
         int resultWidth = 0;
-        resultWidth += ProgConfig.VIRTUAL_PANEL_MARGIN_X *2;    // Left and right borders.
+        resultWidth += marginX*2;    // Left and right borders.
         //resultWidth += eventContainer.getSchedulerEvents().get(eventContainer.getSchedulerEvents().size()-2).getEndTimeStamp(); // Length of event records.
         resultWidth += eventContainer.getEndTimeStamp();
         return resultWidth;
