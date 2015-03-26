@@ -21,6 +21,7 @@ public class TraceVirtualDrawPanel {
         endTimeStamp = findEndTimeStamp();
 
         timeLine = new DrawTimeLine(endTimeStamp, ProgConfig.TIME_LINE_UNIT_TIME);
+        timeLine.setDisplayTimeStamp(false);
     }
 
     public void setOffset(int inOffsetX, int inOffsetY)

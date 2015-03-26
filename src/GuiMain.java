@@ -22,6 +22,8 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private JScrollBar zPanelScrollBarHorizontal;
     private JScrollPane zPanelScrollHorizontal;
     private JScrollPane zPanelScrollVertical;
+    private TimeLinePanel zPanelTimeLine;
+    private JScrollPane zPanelTimeLineScrollHorizontal;
 
     JFrame frame = new JFrame("RTS Hacker Visualizer");
 
@@ -63,6 +65,10 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         ListCellRenderer rendererTraceList = new TraceListRenderer();
         zPanelList.setCellRenderer(rendererTraceList);
         zPanelList.setFixedCellHeight(ProgConfig.TRACE_HEIGHT + ProgConfig.TRACE_GAP_Y);
+
+//        zPanelTimeLine
+        zPanel.setTraceList(zPanelList);
+        zPanel.setTimeLinePanel(zPanelTimeLine);
 
         /* Load default demo log file. */
         try {
@@ -141,7 +147,6 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 
     private void drawPlotFromLogLoader()
     {
-        zPanel.setTraceList(zPanelList);
         zPanel.setEventContainer(logLoader.getEventContainer());
         // zPanel (PanelDrawer) will update the content automatically, periodically.
 
@@ -197,6 +202,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
             zPanelScrollBarHorizontal.setMaximum(zPanelScrollHorizontal.getHorizontalScrollBar().getMaximum());
             zPanelScrollBarHorizontal.setUnitIncrement(zPanelScrollHorizontal.getHorizontalScrollBar().getUnitIncrement());
             zPanelScrollHorizontal.getHorizontalScrollBar().setValue(zPanelScrollBarHorizontal.getValue());
+            zPanelTimeLineScrollHorizontal.getHorizontalScrollBar().setValue(zPanelScrollBarHorizontal.getValue());
         }
     }
 }

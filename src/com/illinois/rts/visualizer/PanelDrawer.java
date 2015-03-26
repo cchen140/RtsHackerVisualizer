@@ -16,6 +16,7 @@ public class PanelDrawer extends ZoomablePanel {
     private VirtualDrawPanelGroup hackerEventsDrawPanel = null;
 
     private JList traceList = null;
+    private TimeLinePanel timeLinePanel = null;
 
 
     public PanelDrawer()
@@ -27,6 +28,7 @@ public class PanelDrawer extends ZoomablePanel {
     {
         traceList = inList;
     }
+    public void setTimeLinePanel(TimeLinePanel inTimeLinePanel) {timeLinePanel = inTimeLinePanel;}
 
    // @Override
     protected void draw(Graphics2D g) {
@@ -38,15 +40,28 @@ public class PanelDrawer extends ZoomablePanel {
             //System.out.println(this.getHeight());
 
             schedulerEventsDrawPanel.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y, 1, 1);
+//            timeLinePanel.draw();
 //            schedulerEventsDrawPanel.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y+1000, 1, 1);
 
+            /* Set panel dimension according to the content to be drawn. */
             this.setPreferredSize(new Dimension(
                     schedulerEventsDrawPanel.getWidth()+ProgConfig.PANEL_DRAWER_PADDING_X*2,
                     schedulerEventsDrawPanel.getHeight()+ProgConfig.PANEL_DRAWER_PADDING_Y*2));
 
+            /* Set scroll panel height for enabling vertical scroll bar. */
             this.getParent().getParent().setPreferredSize(new Dimension(
                     -1,//this.getParent().getParent().getWidth(),
                     schedulerEventsDrawPanel.getHeight() + ProgConfig.PANEL_DRAWER_PADDING_Y * 2));
+
+            // Is time line panel initialized?
+            if (timeLinePanel != null) {
+            /* Set the width of time line panel */
+                timeLinePanel.setPreferredSize(new Dimension(
+                        schedulerEventsDrawPanel.getWidth() + ProgConfig.PANEL_DRAWER_PADDING_X * 2,
+                        -1
+                ));
+//                timeLinePanel.setTimeLine()
+            }
 
             //System.out.println(this.getParent().getParent().getParent().getName());
 
