@@ -64,6 +64,14 @@ public class EventContainer {
     public ArrayList<SchedulerEvent> getSchedulerEvents() { return schedulerEvents; }
     public ArrayList<AppEvent> getAppEvents() { return appEvents; }
     public  ArrayList<HackerEvent> getHackerEvents() { return hackerEvents; }
+    public ArrayList getAllEvents()
+    {
+        ArrayList resultArrayList = new ArrayList();
+        resultArrayList.addAll(schedulerEvents);
+        resultArrayList.addAll(appEvents);
+        resultArrayList.addAll(hackerEvents);
+        return resultArrayList;
+    }
 
     public int getEndTimeStamp()
     {

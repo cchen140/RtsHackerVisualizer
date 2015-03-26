@@ -2,6 +2,7 @@ package com.illinois.rts.visualizer;
 
 import com.illinois.premsim.gui.ZoomablePanel;
 
+import javax.swing.*;
 import java.awt.*;
 
 /**
@@ -14,10 +15,17 @@ public class PanelDrawer extends ZoomablePanel {
     private SchedulerEventVirtualDrawPanelGroup schedulerEventsDrawPanel = null;
     private VirtualDrawPanelGroup hackerEventsDrawPanel = null;
 
+    private JList traceList = null;
+
 
     public PanelDrawer()
     {
         super();
+    }
+
+    public void setTraceList(JList inList)
+    {
+        traceList = inList;
     }
 
    // @Override
@@ -30,9 +38,25 @@ public class PanelDrawer extends ZoomablePanel {
             //System.out.println(this.getHeight());
 
             schedulerEventsDrawPanel.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y, 1, 1);
+//            schedulerEventsDrawPanel.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y+1000, 1, 1);
+
             this.setPreferredSize(new Dimension(
                     schedulerEventsDrawPanel.getWidth()+ProgConfig.PANEL_DRAWER_PADDING_X*2,
                     schedulerEventsDrawPanel.getHeight()+ProgConfig.PANEL_DRAWER_PADDING_Y*2));
+
+            this.getParent().getParent().setPreferredSize(new Dimension(
+                    -1,//this.getParent().getParent().getWidth(),
+                    schedulerEventsDrawPanel.getHeight() + ProgConfig.PANEL_DRAWER_PADDING_Y * 2));
+
+            //System.out.println(this.getParent().getParent().getParent().getName());
+
+            // Is trace list initialized? (Should the list be displayed and updated?)
+            if (traceList != null)
+            {// Update trace list.
+                traceList.setListData(schedulerEventsDrawPanel.getTraceListArray());
+                traceList.setBackground(ProgConfig.TRACE_PANEL_FOREGROUND);
+                traceList.setFixedCellHeight(ProgConfig.TRACE_HEIGHT + ProgConfig.TRACE_GAP_Y);
+            }
         }
     }
 

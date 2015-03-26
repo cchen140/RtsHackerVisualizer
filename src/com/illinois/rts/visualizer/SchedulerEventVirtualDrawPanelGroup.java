@@ -1,6 +1,7 @@
 package com.illinois.rts.visualizer;
 
 import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 //import com.illinois.rts.visualizer.ProgramConfigurations;
 
@@ -18,6 +19,7 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
     private int height = 0;
     private DrawRect background = new DrawRect();
     private DrawTimeLine timeLine = null;
+    private DrawTraceGap traceGap = null;
 
 
     public SchedulerEventVirtualDrawPanelGroup(EventContainer inEventContainer)
@@ -30,10 +32,13 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
         width = calculateWidth();
         height = calculateHeight();
 
-        background.setFillColor(Color.white);
+        background.setFillColor(ProgConfig.TRACE_PANEL_FOREGROUND);
         background.setSize(width, height);
 
         timeLine = new DrawTimeLine(eventContainer.getEndTimeStamp(), ProgConfig.TIME_LINE_UNIT_TIME);
+
+        traceGap = new DrawTraceGap();
+        traceGap.setFillColor(ProgConfig.TRACE_PANEL_BORDER_COLOR);
 
     }
 
@@ -49,18 +54,34 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
         // Draw background
         width = calculateWidth();
         height = calculateHeight();
-        background.setSize(width, height);
-        background.draw(g, offsetX, offsetY);
+        background.setSize(width+1, height+5);
+        background.draw(g, offsetX-1, offsetY-5);
+//        System.out.println(offsetX);
+//        System.out.println(offsetY);
 
         // Make some boarder space.
         currentOffsetY += ProgConfig.VIRTUAL_PANEL_MARGIN_Y;
         currentOffsetX += ProgConfig.VIRTUAL_PANEL_MARGIN_X;
 
+
+        //traceGap.draw(g, width+currentOffsetX, 0, currentOffsetY);
+
+        // Insert half Y gap
+        currentOffsetY += ProgConfig.TRACE_GAP_Y/2;
+
         // Draw summary trace
         if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true) {
-            TraceVirtualDrawPanel schedulerDrawPanel = new TraceVirtualDrawPanel(schedulerEvents);
+//            TraceVirtualDrawPanel schedulerDrawPanel = new TraceVirtualDrawPanel(schedulerEvents);
+            TraceVirtualDrawPanel schedulerDrawPanel = new TraceVirtualDrawPanel(eventContainer.getAllEvents());
             currentOffsetY = schedulerDrawPanel.Draw(g, currentOffsetX, currentOffsetY, scaleX, scaleY);
-            currentOffsetY += ProgConfig.TRACE_GAP_Y;
+
+            if (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES == true)
+            {// If it's going to draw individual traces, draw gap.
+                currentOffsetY += ProgConfig.TRACE_GAP_Y/2;
+                traceGap.draw(g, 0, currentOffsetY, width+currentOffsetX);
+                currentOffsetY += ProgConfig.TRACE_GAP_Y/2;
+            }
+
         }
 
 
@@ -72,19 +93,53 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
                     // This task is not displaying, go check next task.
                     continue;
                 }
-                ArrayList taskSchedulerEvents = new ArrayList();
+                ArrayList taskEvents = new ArrayList();
                 for (SchedulerEvent currentSchEvent : schedulerEvents) {
                     if (currentSchEvent.getTask().getId() == currentTask.getId())
-                        taskSchedulerEvents.add(currentSchEvent);
+                        taskEvents.add(currentSchEvent);
+                }
+
+                for (AppEvent currentAppEvent : eventContainer.getAppEvents()) {
+                    if (currentAppEvent.getTaskId() == currentTask.getId())
+                        taskEvents.add(currentAppEvent);
                 }
 
                 // Draw trace
-                TraceVirtualDrawPanel taskDrawPanel = new TraceVirtualDrawPanel(taskSchedulerEvents);
+                TraceVirtualDrawPanel taskDrawPanel = new TraceVirtualDrawPanel(taskEvents);
                 currentOffsetY = taskDrawPanel.Draw(g, currentOffsetX, currentOffsetY, scaleX, scaleY);
-                currentOffsetY += ProgConfig.TRACE_GAP_Y;
+
+                // Move brush and draw trace border (gap)
+                currentOffsetY += ProgConfig.TRACE_GAP_Y/2;
+                traceGap.draw(g, 0, currentOffsetY, width+currentOffsetX);
+                currentOffsetY += ProgConfig.TRACE_GAP_Y/2;
             }
         }
 
+    }
+
+    public Object[] getTraceListArray()
+    {
+        ArrayList resultArray = new ArrayList();
+        // summary trace
+        if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true) {
+            resultArray.add("Combined");
+        }
+        // Draw individuals
+        if (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES == true) {
+            for (Object currentObj : taskContainer.getTasksAsArray()) {
+                Task currentTask = (Task) currentObj;
+                if (currentTask.isDisplayBoxChecked() == false) {
+                    // This task is not displaying, go check next task.
+                    continue;
+                }
+                else
+                {
+                    resultArray.add(currentTask.getTitle());
+                }
+            }
+        }
+
+        return resultArray.toArray();
     }
 
     @Override
@@ -114,6 +169,11 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
             return 0;
 
         resultHeight += ProgConfig.VIRTUAL_PANEL_MARGIN_Y *2;   // Upper and lower borders.
+
+        if ((ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE==true)
+                || (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES==true)) {
+            resultHeight += ProgConfig.TRACE_GAP_Y;   // 1/2 Y gap before first trace and another 1/2 /Y gap after last trace.
+        }
 
         if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true)
             resultHeight += eventContainer.getSchedulerEvents().get(0).getDrawHeight();  // Summary trace.

@@ -24,11 +24,12 @@ public class AppEvent extends Event {
         int scaledOffsetX = offsetX + (int) (timeStamp*scaleX);
         int movedOffsetY = 0;
         if (task.isDisplayBoxChecked()) {
-            g.setFont(new Font("TimesRoman", Font.BOLD, 18));
+            g.setFont(new Font("TimesRoman", Font.BOLD, 16));
+            g.setColor(task.getTaskColor());
 
             /* Display in South */
-            g.drawString(note, scaledOffsetX-5, offsetY + SchedulerEvent.DRAW_HEIGHT + 80);
-            drawArrow(g, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT + 50, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT);
+            g.drawString(note, scaledOffsetX-5, offsetY + ProgConfig.TRACE_HEIGHT + 25);
+            drawArrow(g, scaledOffsetX, offsetY + ProgConfig.TRACE_HEIGHT + 5, scaledOffsetX, offsetY + ProgConfig.TRACE_HEIGHT);
 
             /* Display in North */
 //            g.drawString(note, scaledOffsetX, offsetY - 70);
@@ -56,5 +57,9 @@ public class AppEvent extends Event {
         g.drawLine(0, 0, len, 0);
         g.fillPolygon(new int[] {len, len-ARR_SIZE, len-ARR_SIZE, len},
                 new int[] {0, -ARR_SIZE, ARR_SIZE, 0}, 4);
+    }
+
+    public int getTaskId(){
+        return task.getId();
     }
 }

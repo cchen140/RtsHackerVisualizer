@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.border.Border;
 
 import com.illinois.rts.visualizer.*;
 
@@ -8,7 +9,7 @@ import java.awt.event.*;
 /**
  * Created by CY on 2/10/2015.
  */
-public class GuiMain implements ActionListener, MouseListener {
+public class GuiMain implements ActionListener, MouseListener, AdjustmentListener {
     private JPanel panel1;
     private JButton btnHideTaskList;
     private JButton buttonOpenFile;
@@ -17,6 +18,10 @@ public class GuiMain implements ActionListener, MouseListener {
     private JPanel taskListPanel;
     private JTextPane msgTextPane;
     private JButton buttonSettings;
+    private JList zPanelList;
+    private JScrollBar zPanelScrollBarHorizontal;
+    private JScrollPane zPanelScrollHorizontal;
+    private JScrollPane zPanelScrollVertical;
 
     JFrame frame = new JFrame("RTS Hacker Visualizer");
 
@@ -50,8 +55,14 @@ public class GuiMain implements ActionListener, MouseListener {
 
         taskList.addMouseListener(this);
 
+        zPanelScrollBarHorizontal.addAdjustmentListener(this);
+
         ListCellRenderer rendererTaskList = new TaskListRenderer();
         taskList.setCellRenderer(rendererTaskList);
+
+        ListCellRenderer rendererTraceList = new TraceListRenderer();
+        zPanelList.setCellRenderer(rendererTraceList);
+        zPanelList.setFixedCellHeight(ProgConfig.TRACE_HEIGHT + ProgConfig.TRACE_GAP_Y);
 
         /* Load default demo log file. */
         try {
@@ -66,6 +77,14 @@ public class GuiMain implements ActionListener, MouseListener {
         progMsger = ProgramLogMessenger.getInstance();
         progMsger.setDocument(msgTextPane.getStyledDocument());
         msgTextPane.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+
+        // Make zPanel visible.
+        /* For fixing the problem that the zPanel cannot be displayed
+         * correctly in form designer. Set it invisible can temporarily
+         * make the display normal in the form designer. */
+        zPanel.setVisible(true);
+
+        zPanelScrollVertical.getHorizontalScrollBar().setPreferredSize(new Dimension(20, -1));
 
     }
 
@@ -122,6 +141,7 @@ public class GuiMain implements ActionListener, MouseListener {
 
     private void drawPlotFromLogLoader()
     {
+        zPanel.setTraceList(zPanelList);
         zPanel.setEventContainer(logLoader.getEventContainer());
         // zPanel (PanelDrawer) will update the content automatically, periodically.
 
@@ -168,4 +188,15 @@ public class GuiMain implements ActionListener, MouseListener {
         }
     }
 
+    @Override
+    public void adjustmentValueChanged(AdjustmentEvent e) {
+        if (e.getSource() == zPanelScrollBarHorizontal)
+        {
+            //System.out.println("moving");
+            /* Scroll zPanelScrollHorizontal panel according to zPanelScrollBarHorizontal */
+            zPanelScrollBarHorizontal.setMaximum(zPanelScrollHorizontal.getHorizontalScrollBar().getMaximum());
+            zPanelScrollBarHorizontal.setUnitIncrement(zPanelScrollHorizontal.getHorizontalScrollBar().getUnitIncrement());
+            zPanelScrollHorizontal.getHorizontalScrollBar().setValue(zPanelScrollBarHorizontal.getValue());
+        }
+    }
 }

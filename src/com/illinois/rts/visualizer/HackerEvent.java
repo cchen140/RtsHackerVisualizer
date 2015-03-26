@@ -55,14 +55,15 @@ public class HackerEvent extends Event {
         int scaledOffsetX = offsetX + (int) (timeStamp*scaleX);
         int movedOffsetY = 0;
         if (task.isDisplayBoxChecked()) {
-            g.setFont(new Font("TimesRoman", Font.BOLD, 18));
+            g.setFont(new Font("TimesRoman", Font.BOLD, 16));
+
             if (task.getId() == highHackerId)
             {
                 /* Display in North */
                 g.setColor(Color.black);
                 //g.drawLine(scaledOffsetX, offsetY - 50, scaledOffsetX, offsetY);
                 //drawObject.setFillColor(task.getTaskColor());
-                g.fillRect(scaledOffsetX - BAR_WIDTH / 2, offsetY - scaledRecordData, BAR_WIDTH, scaledRecordData);
+//                g.fillRect(scaledOffsetX - BAR_WIDTH / 2, offsetY - scaledRecordData, BAR_WIDTH, scaledRecordData);
                 //g.drawString(note, scaledOffsetX, offsetY - 70);
                 //drawArrow(g, scaledOffsetX, offsetY - 50, scaledOffsetX, offsetY);
             }
@@ -70,8 +71,8 @@ public class HackerEvent extends Event {
             {
                 /* Display in South */
                 g.setColor(task.getTaskColor());
-                g.drawString(note, scaledOffsetX-5, offsetY + SchedulerEvent.DRAW_HEIGHT + 40);
-                drawArrow(g, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT + 20, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT);
+                g.drawString(note, scaledOffsetX-5, offsetY + ProgConfig.TRACE_HEIGHT + 25);
+                drawArrow(g, scaledOffsetX, offsetY + ProgConfig.TRACE_HEIGHT + 5, scaledOffsetX, offsetY + ProgConfig.TRACE_HEIGHT);
             }
             else
             {

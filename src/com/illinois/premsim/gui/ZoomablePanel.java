@@ -1,5 +1,7 @@
 package com.illinois.premsim.gui;
 
+import com.illinois.rts.visualizer.ProgConfig;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -253,17 +255,19 @@ MouseListener, MouseMotionListener
 	{
 		Dimension size = getSize();
 //		g.setColor(Color.white);
-        g.setColor(Color.lightGray);
+        g.setColor(ProgConfig.TRACE_PANEL_BACKGROUND);
 		g.fillRect(0,0,size.width,size.height);
 		
 		preDraw(g);
 		
 		double scale = getScale();
 		
-		g.scale(scale,scale);
+//		g.scale(scale,scale);
+        g.scale(scale, 1);
 		
 		// move
-		g.translate(moveX,moveY);
+//		g.translate(moveX,moveY);
+//        g.translate(moveX, 0);
 	}
 
 	public void mouseWheelMoved(MouseWheelEvent e)
