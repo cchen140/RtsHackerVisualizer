@@ -121,7 +121,7 @@ public class LogLoader extends DialogFileLoader {
             return false;
         }
 
-        ProgramLogMessenger.getInstance().putLine(String.format("%d lines loaded from the log file.\n", lineCounter));
+        ProgMsg.putLine("%d lines loaded from the log file.\n", lineCounter);
         System.out.format("%d lines loaded from the log file.\n", lineCounter);
         return true;
     }

@@ -1,5 +1,4 @@
 import javax.swing.*;
-import javax.swing.border.Border;
 
 import com.illinois.rts.visualizer.*;
 
@@ -29,7 +28,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 
     private static GuiMain instance = null;
     private LogLoader logLoader = new LogLoader();
-    public ProgramLogMessenger progMsger = null;
+//    public ProgMsg progMsger = null;
 
     public void initGui() {
 
@@ -51,11 +50,12 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private GuiMain() {
 
         // Set up program log messenger handler.
-        progMsger = ProgramLogMessenger.getInstance();
-        progMsger.setDocument(msgTextPane.getStyledDocument());
+//        progMsger = ProgMsg.getInstance();
+//        progMsger.setDocument(msgTextPane.getStyledDocument());
+        ProgMsg.setDocument(msgTextPane.getStyledDocument());
         msgTextPane.setFont(new Font("TimesRoman", Font.PLAIN, 16));
 
-        
+
         /* Action listener for buttons */
         btnHideTaskList.addActionListener(this);
         buttonOpenFile.addActionListener(this);
@@ -84,7 +84,6 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
             System.err.println(ex);
             //ex.printStackTrace();
         }
-
 
 
         // Make zPanel visible.

@@ -2,53 +2,53 @@ package com.illinois.rts.visualizer;
 
 import javax.swing.text.*;
 import java.awt.*;
+import java.util.Formatter;
 
 /**
  * Created by CY on 3/11/2015.
  */
-public class ProgramLogMessenger {
-    private static ProgramLogMessenger instance = null;
+public class ProgMsg {
+    private static ProgMsg instance = null;
     private static StyledDocument outDoc = null;
     //private StyledDocument
 
-    private ProgramLogMessenger(){}
+    private ProgMsg(){}
 
-    public static synchronized ProgramLogMessenger getInstance()
+    public static synchronized ProgMsg getInstance()
     {
         if (instance == null) {
-            instance = new ProgramLogMessenger();
+            instance = new ProgMsg();
         }
 
         return instance;
     }
 
-    public void setDocument(StyledDocument inDoc)
+    public static void setDocument(StyledDocument inDoc)
     {
         outDoc = inDoc;
-        this.sysPutLine("Log messenger initialized.");
+        sysPutLine("Log messenger initialized.");
     }
 
-    public void putLine(String inStr)
+    public static void putLine(String format, Object... args)
     {
-        /* Uncomment the following code to print out the method caller. */
+          /* Uncomment the following code to print out the method caller. */
 //        Throwable t = new Throwable();
 //        StackTraceElement ste = t.getStackTrace()[1];
 //        inStr = "[" + ste.getMethodName() + "] " + inStr;
-
-        colorPutLine(inStr, Color.black);
+        colorPutLine(new Formatter().format(format, args).toString(), Color.black);
     }
 
-    public void errPutline(String inStr)
+    public static void errPutline(String format, Object... args)
     {
-        colorPutLine(inStr, Color.red);
+        colorPutLine(new Formatter().format(format, args).toString(), Color.red);
     }
 
-    public void sysPutLine(String inStr)
+    public static void sysPutLine(String format, Object... args)
     {
-        colorPutLine(inStr, Color.blue);
+        colorPutLine(new Formatter().format(format, args).toString(), Color.blue);
     }
 
-    public void colorPutLine(String inStr, Color inColor)
+    private static void colorPutLine(String inStr, Color inColor)
     {
         if (outDoc == null)
         {
