@@ -12,7 +12,7 @@ public class PanelDrawer extends ZoomablePanel {
     public boolean doNotDraw = false;
     public EventContainer eventContainer = new EventContainer();
 
-    private SchedulerEventVirtualDrawPanelGroup schedulerEventsDrawPanel = null;
+    private CombinedTraceGroup combinedTraceGroup = null;
     private VirtualDrawPanelGroup hackerEventsDrawPanel = null;
 
     private TimeLine topTimeLine = null;
@@ -41,25 +41,25 @@ public class PanelDrawer extends ZoomablePanel {
 
 
 
-            schedulerEventsDrawPanel.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y);
+            combinedTraceGroup.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y);
 //            timeLinePanel.draw();
-//            schedulerEventsDrawPanel.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y+1000, 1, 1);
+//            combinedTraceGroup.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y+1000, 1, 1);
 
             /* Set panel dimension according to the content to be drawn. */
             this.setPreferredSize(new Dimension(
-                    schedulerEventsDrawPanel.getWidth()+ProgConfig.PANEL_DRAWER_PADDING_X*2,
-                    schedulerEventsDrawPanel.getHeight()+ProgConfig.PANEL_DRAWER_PADDING_Y*2));
+                    combinedTraceGroup.getWidth()+ProgConfig.PANEL_DRAWER_PADDING_X*2,
+                    combinedTraceGroup.getHeight()+ProgConfig.PANEL_DRAWER_PADDING_Y*2));
 
             /* Set scroll panel height for enabling vertical scroll bar. */
             this.getParent().getParent().setPreferredSize(new Dimension(
                     -1,//this.getParent().getParent().getWidth(),
-                    schedulerEventsDrawPanel.getHeight() + ProgConfig.PANEL_DRAWER_PADDING_Y * 2));
+                    combinedTraceGroup.getHeight() + ProgConfig.PANEL_DRAWER_PADDING_Y * 2));
 
             // Is time line panel initialized?
             if (timeLinePanel != null) {
             /* Set the width of time line panel */
                 timeLinePanel.setPreferredSize(new Dimension(
-                        schedulerEventsDrawPanel.getWidth() + ProgConfig.PANEL_DRAWER_PADDING_X * 2,
+                        combinedTraceGroup.getWidth() + ProgConfig.PANEL_DRAWER_PADDING_X * 2,
                         -1
                 ));
                 timeLinePanel.repaint();
@@ -71,7 +71,7 @@ public class PanelDrawer extends ZoomablePanel {
             // Is trace list initialized? (Should the list be displayed and updated?)
             if (traceList != null)
             {// Update trace list.
-                traceList.setListData(schedulerEventsDrawPanel.getTraceListArray());
+                traceList.setListData(combinedTraceGroup.getTraceListArray());
                 traceList.setBackground(ProgConfig.TRACE_PANEL_FOREGROUND);
                 traceList.setFixedCellHeight(ProgConfig.TRACE_HEIGHT + ProgConfig.TRACE_GAP_Y);
             }
@@ -111,7 +111,7 @@ public class PanelDrawer extends ZoomablePanel {
         //scheduleEventContainer.clearAll();
         eventContainer = inputEventContainer;
 //        topTimeLine.setSettings(inputEventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
-        schedulerEventsDrawPanel = new SchedulerEventVirtualDrawPanelGroup(eventContainer, new TimeLine());
+        combinedTraceGroup = new CombinedTraceGroup(eventContainer, new TimeLine());
         applyNewSettings(); // This will also update the scaledBeginTimestamp in each event.
         repaint();
     }
@@ -119,14 +119,14 @@ public class PanelDrawer extends ZoomablePanel {
     public void applyNewSettings()
     {
         /* Setup virtual drawing panel */
-        schedulerEventsDrawPanel.setMarginX(ProgConfig.VIRTUAL_PANEL_MARGIN_X);
-        schedulerEventsDrawPanel.setMarginY(ProgConfig.VIRTUAL_PANEL_MARGIN_Y);
-//            schedulerEventsDrawPanel.setScaleX(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
+        combinedTraceGroup.setMarginX(ProgConfig.VIRTUAL_PANEL_MARGIN_X);
+        combinedTraceGroup.setMarginY(ProgConfig.VIRTUAL_PANEL_MARGIN_Y);
+//            combinedTraceGroup.setScaleX(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
 
         eventContainer.applyHorizontalScale(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
 
         topTimeLine.setSettings(eventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
-        schedulerEventsDrawPanel.updateTimeLineSettings(topTimeLine);
+        combinedTraceGroup.updateTimeLineSettings(topTimeLine);
         timeLinePanel.updateTimeLineSettings(topTimeLine);
     }
 

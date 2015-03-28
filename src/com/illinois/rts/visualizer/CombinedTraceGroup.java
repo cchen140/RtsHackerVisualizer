@@ -7,7 +7,7 @@ import java.util.ArrayList;
 /**
  * Created by CY on 3/13/2015.
  */
-public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
+public class CombinedTraceGroup extends VirtualDrawPanelGroup {
 //    private int gapY = 5;
 
     private EventContainer eventContainer = null;
@@ -23,7 +23,7 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
     private TimeLine timeLine = null;
 
 
-    public SchedulerEventVirtualDrawPanelGroup(EventContainer inEventContainer, TimeLine inTimeLine)
+    public CombinedTraceGroup(EventContainer inEventContainer, TimeLine inTimeLine)
     {
         super();
         eventContainer = inEventContainer;
