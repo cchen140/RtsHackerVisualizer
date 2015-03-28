@@ -13,7 +13,7 @@ public class PanelDrawer extends ZoomablePanel {
     public EventContainer eventContainer = new EventContainer();
 
     private CombinedTraceGroup combinedTraceGroup = null;
-    private VirtualDrawPanelGroup hackerEventsDrawPanel = null;
+    private TraceGroup hackerEventsDrawPanel = null;
 
     private TimeLine topTimeLine = null;
 

@@ -9,7 +9,7 @@ import java.awt.*;
 /**
  * Created by CY on 3/13/2015.
  */
-public abstract class VirtualDrawPanelGroup {
+public abstract class TraceGroup {
     // scaleX Refer to how many nano seconds one drawing unit is since by default one drawing unit is one nano second.
 //    protected int scaleX = 1;
 

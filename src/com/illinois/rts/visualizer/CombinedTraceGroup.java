@@ -7,7 +7,7 @@ import java.util.ArrayList;
 /**
  * Created by CY on 3/13/2015.
  */
-public class CombinedTraceGroup extends VirtualDrawPanelGroup {
+public class CombinedTraceGroup extends TraceGroup {
 //    private int gapY = 5;
 
     private EventContainer eventContainer = null;
