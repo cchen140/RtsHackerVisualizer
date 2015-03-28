@@ -15,8 +15,11 @@ public class DialogSettings extends JDialog {
     private JTextField textFieldTraceGap;
     private JTextField textFieldVirtualPanelMarginY;
     private JTextField textFieldVirtualPanelMarginX;
+    private JTextField textFieldHorizontalScale;
 
     private static DialogSettings instance = null;
+
+    private boolean isSettingsUpdated = false;
 
     private DialogSettings() {
         setContentPane(contentPane);
@@ -81,7 +84,8 @@ public class DialogSettings extends JDialog {
     public void updateDialog()
     {
         /* Trace Setting */
-        textFieldTimeLineUnit.setText(String.valueOf(ProgConfig.TIME_LINE_UNIT_NS));
+        textFieldTimeLineUnit.setText(String.valueOf(ProgConfig.TIME_LINE_PERIOD_NS));
+        textFieldHorizontalScale.setText(String.valueOf(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER));
         checkBoxEnableSchedulerSummaryTrace.setSelected(ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE);
         checkBoxEnableSchedulerTaskTraces.setSelected(ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES);
 
@@ -96,7 +100,8 @@ public class DialogSettings extends JDialog {
     public void applySettings()
     {
         /* Trace Setting */
-        ProgConfig.TIME_LINE_UNIT_NS = Integer.valueOf(textFieldTimeLineUnit.getText());
+        ProgConfig.TIME_LINE_PERIOD_NS = Integer.valueOf(textFieldTimeLineUnit.getText());
+        ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER = Integer.valueOf(textFieldHorizontalScale.getText());
         ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE = checkBoxEnableSchedulerSummaryTrace.isSelected();
         ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES = checkBoxEnableSchedulerTaskTraces.isSelected();
 
@@ -105,6 +110,8 @@ public class DialogSettings extends JDialog {
         ProgConfig.VIRTUAL_PANEL_MARGIN_Y = Integer.valueOf(textFieldVirtualPanelMarginY.getText());
         ProgConfig.TRACE_GAP_Y = Integer.valueOf(textFieldTraceGap.getText());
         ProgConfig.TRACE_HEIGHT = Integer.valueOf(textFieldTraceHeight.getText());
+
+        isSettingsUpdated = true;
     }
 
     public void showDialog()
@@ -112,5 +119,12 @@ public class DialogSettings extends JDialog {
         updateDialog();
         this.pack();
         this.setVisible(true);
+    }
+
+    public boolean isSettingsUpdated()
+    {
+        boolean result = isSettingsUpdated;
+        isSettingsUpdated = false;
+        return result;
     }
 }

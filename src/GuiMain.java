@@ -50,6 +50,12 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 
     private GuiMain() {
 
+        // Set up program log messenger handler.
+        progMsger = ProgramLogMessenger.getInstance();
+        progMsger.setDocument(msgTextPane.getStyledDocument());
+        msgTextPane.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+
+        
         /* Action listener for buttons */
         btnHideTaskList.addActionListener(this);
         buttonOpenFile.addActionListener(this);
@@ -79,15 +85,13 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
             //ex.printStackTrace();
         }
 
-        // Set up program log messenger handler.
-        progMsger = ProgramLogMessenger.getInstance();
-        progMsger.setDocument(msgTextPane.getStyledDocument());
-        msgTextPane.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+
 
         // Make zPanel visible.
         /* For fixing the problem that the zPanel cannot be displayed
          * correctly in form designer. Set it invisible can temporarily
          * make the display normal in the form designer. */
+//        zPanel.applyNewSettings();
         zPanel.setVisible(true);
 
         zPanelScrollVertical.getHorizontalScrollBar().setPreferredSize(new Dimension(20, -1));
@@ -130,7 +134,12 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
             //dialogSettings.pack();
             //dialogSettings.setVisible(true);
             dialogSettings.showDialog();
-//            System.out.println("exit dialog.");
+
+            if (dialogSettings.isSettingsUpdated() == true)
+            {
+                zPanel.applyNewSettings();
+            }
+
             zPanel.repaint();
         }
 

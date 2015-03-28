@@ -15,6 +15,8 @@ public class PanelDrawer extends ZoomablePanel {
     private SchedulerEventVirtualDrawPanelGroup schedulerEventsDrawPanel = null;
     private VirtualDrawPanelGroup hackerEventsDrawPanel = null;
 
+    private TimeLine topTimeLine = null;
+
     private JList traceList = null;
     private TimeLinePanel timeLinePanel = null;
 
@@ -22,6 +24,7 @@ public class PanelDrawer extends ZoomablePanel {
     public PanelDrawer()
     {
         super();
+        topTimeLine = new TimeLine();
     }
 
     public void setTraceList(JList inList)
@@ -36,10 +39,7 @@ public class PanelDrawer extends ZoomablePanel {
         if (doNotDraw == false) {
 
 
-            /* Setup virtual drawing panel */
-            schedulerEventsDrawPanel.setMarginX(ProgConfig.VIRTUAL_PANEL_MARGIN_X);
-            schedulerEventsDrawPanel.setMarginY(ProgConfig.VIRTUAL_PANEL_MARGIN_Y);
-//            schedulerEventsDrawPanel.setScaleX(ProgConfig.TIMESTAMP_SCALE_DIVIDER);
+
 
             schedulerEventsDrawPanel.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y);
 //            timeLinePanel.draw();
@@ -62,6 +62,7 @@ public class PanelDrawer extends ZoomablePanel {
                         schedulerEventsDrawPanel.getWidth() + ProgConfig.PANEL_DRAWER_PADDING_X * 2,
                         -1
                 ));
+                timeLinePanel.repaint();
 //                timeLinePanel.setTimeLine()
             }
 
@@ -109,8 +110,24 @@ public class PanelDrawer extends ZoomablePanel {
     {
         //scheduleEventContainer.clearAll();
         eventContainer = inputEventContainer;
-        schedulerEventsDrawPanel = new SchedulerEventVirtualDrawPanelGroup(eventContainer);
+//        topTimeLine.setSettings(inputEventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
+        schedulerEventsDrawPanel = new SchedulerEventVirtualDrawPanelGroup(eventContainer, new TimeLine());
+        applyNewSettings(); // This will also update the scaledBeginTimestamp in each event.
         repaint();
+    }
+
+    public void applyNewSettings()
+    {
+        /* Setup virtual drawing panel */
+        schedulerEventsDrawPanel.setMarginX(ProgConfig.VIRTUAL_PANEL_MARGIN_X);
+        schedulerEventsDrawPanel.setMarginY(ProgConfig.VIRTUAL_PANEL_MARGIN_Y);
+//            schedulerEventsDrawPanel.setScaleX(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
+
+        eventContainer.applyHorizontalScale(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
+
+        topTimeLine.setSettings(eventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
+        schedulerEventsDrawPanel.updateTimeLineSettings(topTimeLine);
+        timeLinePanel.updateTimeLineSettings(topTimeLine);
     }
 
 /*TODO: default point? movng to center of the screen should be done by panel.*/

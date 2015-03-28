@@ -121,6 +121,7 @@ public class LogLoader extends DialogFileLoader {
             return false;
         }
 
+        ProgramLogMessenger.getInstance().putLine(String.format("%d lines loaded from the log file.\n", lineCounter));
         System.out.format("%d lines loaded from the log file.\n", lineCounter);
         return true;
     }
@@ -171,13 +172,13 @@ public class LogLoader extends DialogFileLoader {
                 firstTimeStamp = timeStamp;
             }
             /* TODO: the scale of the timestamp should be flexible and configurable. */
-            timeStamp = (int) ((timeStamp - firstTimeStamp) * ProgConfig.TIMESTAMP_UNIT_NS / ProgConfig.TIMESTAMP_SCALE_DIVIDER);
+            int timestampNs = (int) ((timeStamp - firstTimeStamp) * ProgConfig.TIMESTAMP_UNIT_NS );/// ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
 
             int eventTaskId = Integer.valueOf(splitStrings[1].trim()).intValue();
             int eventData = Integer.valueOf(splitStrings[2].trim()).intValue();
             String eventString = splitStrings[3].trim().substring(1, splitStrings[3].trim().length() - 1);
 
-            eventContainer.add(timeStamp, eventTaskId, eventData, eventString);
+            eventContainer.add(timestampNs, eventTaskId, eventData, eventString);
             return true;
         }
         else {

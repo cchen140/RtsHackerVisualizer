@@ -14,7 +14,8 @@ public class SchedulerEvent extends Event {
 
     public SchedulerEvent(int inTimeStamp, Task inTask, String inNote)
     {
-        timeStamp = inTimeStamp;
+        orgBeginTimestampNs = inTimeStamp;
+        scaledBeginTimestamp = inTimeStamp;
         task = inTask;
 
         drawObject.setLabel(task.getTitle());
@@ -24,10 +25,10 @@ public class SchedulerEvent extends Event {
     public void drawEvent(Graphics2D g, int offsetX, int offsetY)
     {
 
-        if (endTimeStamp > 0) {
-//            int scaledWidth = (int) ((endTimeStamp - timeStamp) / scaleX);
-            int eventWidth = endTimeStamp - timeStamp;
-            int currentOffsetX = offsetX + timeStamp;
+        if (scaledEndTimestamp > 0) {
+//            int scaledWidth = (int) ((scaledEndTimestamp - scaledBeginTimestamp) / scaleX);
+            int eventWidth = scaledEndTimestamp - scaledBeginTimestamp;
+            int currentOffsetX = offsetX + scaledBeginTimestamp;
             if (task.isDisplayBoxChecked() == true) {
 //                drawObject.setHeightScale(scaleY);
                 drawObject.setWidth(eventWidth);
@@ -41,10 +42,10 @@ public class SchedulerEvent extends Event {
         }
         else
         {
-            //((DrawPhase) drawObject).draw(g, timeStamp, 20);
+            //((DrawPhase) drawObject).draw(g, scaledBeginTimestamp, 20);
             System.err.println("Drawing ScheduleEvent error: TimeStamp <= 0");
         }
-        //System.out.println(timeStamp);
+        //System.out.println(scaledBeginTimestamp);
     }
 
     @Override

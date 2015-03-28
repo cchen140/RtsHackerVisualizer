@@ -13,7 +13,8 @@ public class AppEvent extends Event {
 
     AppEvent(int inTimeStamp, Task inTask, int inData, String inNote)
     {
-        timeStamp = inTimeStamp;
+        orgBeginTimestampNs = inTimeStamp;
+        scaledBeginTimestamp = inTimeStamp;
         task = inTask;
         recordData = inData;
         note = inNote;
@@ -21,8 +22,8 @@ public class AppEvent extends Event {
 
     public void drawEvent(Graphics2D g, int offsetX, int offsetY)
     {
-//        int scaledOffsetX = offsetX + (int) (timeStamp/scaleX);
-        int currentOffsetX = offsetX + timeStamp;
+//        int scaledOffsetX = offsetX + (int) (scaledBeginTimestamp/scaleX);
+        int currentOffsetX = offsetX + scaledBeginTimestamp;
         int movedOffsetY = 0;
         if (task.isDisplayBoxChecked()) {
             g.setFont(new Font("TimesRoman", Font.BOLD, 16));

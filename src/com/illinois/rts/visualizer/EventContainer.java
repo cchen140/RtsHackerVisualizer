@@ -1,6 +1,5 @@
 package com.illinois.rts.visualizer;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 /**
@@ -17,29 +16,31 @@ public class EventContainer {
     private ArrayList<HackerEvent> hackerEvents = new ArrayList<HackerEvent>();
     private TaskContainer taskContainer = new TaskContainer();
 
-    private int endTimeStamp = 0;
+    private int scaledEndTimestamp = 0;
+    private int orgEndTimestampNs = 0;
 
     public EventContainer(){}
 
-    public void add(int inTimeStamp, int inEventTaskId, int inData, String inEventString)
+    public void add(int inTimestampNs, int inEventTaskId, int inData, String inEventString)
     {
         if (inEventTaskId == SchedulerEvent.EVENT_SCHEDULER) {
             if (schedulerEvents.size() > 0) {
-                schedulerEvents.get(schedulerEvents.size() - 1).setEndTimeStamp(inTimeStamp);
+                schedulerEvents.get(schedulerEvents.size() - 1).setOrgEndTimestampNs(inTimestampNs);
             }
-            schedulerEvents.add(new SchedulerEvent(inTimeStamp, taskContainer.getTaskById(inData), inEventString));
+            schedulerEvents.add(new SchedulerEvent(inTimestampNs, taskContainer.getTaskById(inData), inEventString));
 
             // Assume that the added scheduler event is in order, the latest one should be the latest.
-            // if (endTimeStamp < inTimeStamp)
-            endTimeStamp = inTimeStamp;
+            // if (scaledEndTimestamp < inTimestampNs)
+            orgEndTimestampNs = inTimestampNs;
+            scaledEndTimestamp = inTimestampNs;
         }
         else if ((inEventTaskId==HackerEvent.highHackerId) || (inEventTaskId==HackerEvent.lowHackerId))
         {
-            hackerEvents.add(new HackerEvent(inTimeStamp, taskContainer.getTaskById(inEventTaskId), inData, inEventString));
+            hackerEvents.add(new HackerEvent(inTimestampNs, taskContainer.getTaskById(inEventTaskId), inData, inEventString));
         }
         else
         {
-            appEvents.add(new AppEvent(inTimeStamp, taskContainer.getTaskById(inEventTaskId), inData, inEventString));
+            appEvents.add(new AppEvent(inTimestampNs, taskContainer.getTaskById(inEventTaskId), inData, inEventString));
         }
     }
 
@@ -73,9 +74,29 @@ public class EventContainer {
         return resultArrayList;
     }
 
-    public int getEndTimeStamp()
+    public int getScaledEndTimestamp()
     {
-        return endTimeStamp;
+        return scaledEndTimestamp;
+    }
+    public int getOrgEndTimestampNs() { return orgEndTimestampNs; }
+
+    public void applyHorizontalScale(int inScale)
+    {
+        for (SchedulerEvent currentEvent : schedulerEvents) {
+            currentEvent.applyScaleX(inScale);
+        }
+
+        for (AppEvent currentEvent : appEvents)
+        {
+            currentEvent.applyScaleX(inScale);
+        }
+
+        for (HackerEvent currentEvent : hackerEvents)
+        {
+            currentEvent.applyScaleX(inScale);
+        }
+
+        scaledEndTimestamp = orgEndTimestampNs /inScale;
     }
 
 }

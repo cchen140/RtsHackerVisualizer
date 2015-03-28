@@ -19,8 +19,8 @@ public class ProgConfig {
     public static double TIMESTAMP_UNIT_NS = 3; // 3ns
 
     /* Trace Settings */
-    public static int TIMESTAMP_SCALE_DIVIDER = 30000;
-    public static int TIME_LINE_UNIT_NS = 10000000; // 10ms
+    public static int TRACE_HORIZONTAL_SCALE_DIVIDER = 30000;
+    public static int TIME_LINE_PERIOD_NS = 10000000; // 10ms
     public static int TRACE_HEIGHT = 100;
     public static int TRACE_GAP_Y = 60;
     public static int TRACE_PANEL_BORDER_WIDTH = 1;

@@ -1,7 +1,6 @@
 package com.illinois.rts.visualizer;
 
 import java.awt.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 //import com.illinois.rts.visualizer.ProgramConfigurations;
 
@@ -21,13 +20,17 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
 //    private DrawTimeLine timeLine = null;
     private DrawTraceGap traceGap = null;
 
+    private TimeLine timeLine = null;
 
-    public SchedulerEventVirtualDrawPanelGroup(EventContainer inEventContainer)
+
+    public SchedulerEventVirtualDrawPanelGroup(EventContainer inEventContainer, TimeLine inTimeLine)
     {
         super();
         eventContainer = inEventContainer;
         taskContainer = inEventContainer.getTaskContainer();
         schedulerEvents = inEventContainer.getSchedulerEvents();
+
+        timeLine = inTimeLine;
 
         width = calculateWidth();
         height = calculateHeight();
@@ -35,7 +38,7 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
         background.setFillColor(ProgConfig.TRACE_PANEL_FOREGROUND);
         background.setSize(width, height);
 
-//        timeLine = new DrawTimeLine(eventContainer.getEndTimeStamp(), (int) ((ProgConfig.TIME_LINE_UNIT_NS/ProgConfig.TIMESTAMP_SCALE_DIVIDER)/ProgConfig.TIMESTAMP_UNIT_NS));
+//        timeLine = new DrawTimeLine(eventContainer.getScaledEndTimestamp(), (int) ((ProgConfig.TIME_LINE_PERIOD_NS/ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER)/ProgConfig.TIMESTAMP_UNIT_NS));
 
         traceGap = new DrawTraceGap();
         traceGap.setFillColor(ProgConfig.TRACE_PANEL_BORDER_COLOR);
@@ -72,8 +75,8 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
         // Draw summary trace
         if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true) {
 //            TraceVirtualDrawPanel schedulerDrawPanel = new TraceVirtualDrawPanel(schedulerEvents);
-            TraceVirtualDrawPanel schedulerDrawPanel = new TraceVirtualDrawPanel(eventContainer.getAllEvents());
-            currentOffsetY = schedulerDrawPanel.Draw(g, currentOffsetX, currentOffsetY);
+            Trace schedulerCombinedTrace = new Trace(eventContainer.getAllEvents(), new TimeLine(timeLine));
+            currentOffsetY = schedulerCombinedTrace.Draw(g, currentOffsetX, currentOffsetY);
 
             if (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES == true)
             {// If it's going to draw individual traces, draw gap.
@@ -105,7 +108,7 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
                 }
 
                 // Draw trace
-                TraceVirtualDrawPanel taskDrawPanel = new TraceVirtualDrawPanel(taskEvents);
+                Trace taskDrawPanel = new Trace(taskEvents, new TimeLine(timeLine));
                 currentOffsetY = taskDrawPanel.Draw(g, currentOffsetX, currentOffsetY);
 
                 // Move brush and draw trace border (gap)
@@ -156,8 +159,8 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
     {
         int resultWidth = 0;
         resultWidth += marginX*2;    // Left and right borders.
-        //resultWidth += eventContainer.getSchedulerEvents().get(eventContainer.getSchedulerEvents().size()-2).getEndTimeStamp(); // Length of event records.
-        resultWidth += eventContainer.getEndTimeStamp();
+        //resultWidth += eventContainer.getSchedulerEvents().get(eventContainer.getSchedulerEvents().size()-2).getScaledEndTimestamp(); // Length of event records.
+        resultWidth += eventContainer.getScaledEndTimestamp();
         return resultWidth;
     }
 
@@ -193,6 +196,11 @@ public class SchedulerEventVirtualDrawPanelGroup extends VirtualDrawPanelGroup {
         }
 
         return resultHeight;
+    }
+
+    void updateTimeLineSettings(TimeLine inTimeLine)
+    {
+        timeLine.copyTimeSettings(inTimeLine);
     }
 
 }

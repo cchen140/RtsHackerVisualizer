@@ -20,9 +20,10 @@ public class HackerEvent extends Event {
     private int scaledRecordData = 0;
     private String note = "";
 
-    HackerEvent(int inTimeStamp, Task inTask, int inData, String inNote)
+    HackerEvent(int inTimestampNs, Task inTask, int inData, String inNote)
     {
-        timeStamp = inTimeStamp;
+        orgBeginTimestampNs = inTimestampNs;
+        scaledBeginTimestamp = inTimestampNs;
         task = inTask;
         recordData = inData;
 
@@ -52,8 +53,8 @@ public class HackerEvent extends Event {
     @Override
     public void drawEvent(Graphics2D g, int offsetX, int offsetY)
     {
-//        int currentOffsetX = offsetX + (int) (timeStamp/scaleX);
-        int currentOffsetX = offsetX + timeStamp;
+//        int currentOffsetX = offsetX + (int) (scaledBeginTimestamp/scaleX);
+        int currentOffsetX = offsetX + scaledBeginTimestamp;
         int movedOffsetY = 0;
         if (task.isDisplayBoxChecked()) {
             g.setFont(new Font("TimesRoman", Font.BOLD, 16));

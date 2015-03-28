@@ -287,7 +287,7 @@
                         </constraints>
                         <properties>
                           <font size="18" style="0"/>
-                          <text value="Time Line Unit Time"/>
+                          <text value="Time Line Period (ns)"/>
                         </properties>
                       </component>
                     </children>
@@ -350,7 +350,7 @@
                         </constraints>
                         <properties>
                           <font size="18" style="0"/>
-                          <text value="Enable Summary Trace"/>
+                          <text value="Trace Horizontal Scale"/>
                         </properties>
                       </component>
                     </children>
@@ -365,7 +365,7 @@
                     </properties>
                     <border type="none"/>
                     <children>
-                      <component id="49103" class="javax.swing.JTextField" default-binding="true">
+                      <component id="49103" class="javax.swing.JTextField" binding="textFieldHorizontalScale">
                         <constraints>
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false">
                             <preferred-size width="50" height="-1"/>

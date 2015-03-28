@@ -7,30 +7,34 @@ import java.awt.*;
  */
 public abstract class Event {
     //public static final int EVENT_SCHEDULER = 0;
-    protected int orgTimeStamp = 0;
-    protected int orgEndTimeStamp = 0;
+    protected int orgBeginTimestampNs = 0;
+    protected int orgEndTimestampNs = 0;
 
-    protected int timeStamp = 0;
-    protected int endTimeStamp = 0;
+    protected int scaledBeginTimestamp = 0;
+    protected int scaledEndTimestamp = 0;
 
     public Event(){}
 
-    public int getTimeStamp()
+    public int getScaledBeginTimestamp()
     {
-        return timeStamp;
+        return scaledBeginTimestamp;
     }
-    public void setEndTimeStamp(int inputTimeStamp)
+    public void setOrgEndTimestampNs(int inputTimeStamp)
     {
-        endTimeStamp = inputTimeStamp;
+        orgEndTimestampNs = inputTimeStamp;
     }
-    public int getEndTimeStamp() { return endTimeStamp; }
+    public int getScaledEndTimestamp() { return scaledEndTimestamp; }
+    public int getOrgEndTimestampNs()
+    {
+        return orgEndTimestampNs;
+    }
 
     public abstract void drawEvent(Graphics2D g, int offsetX, int offsetY);
     public abstract int getDrawHeight();
 
     public void applyScaleX(int inScaleX)
     {
-        timeStamp = timeStamp/inScaleX;
-        endTimeStamp = endTimeStamp/inScaleX;
+        scaledBeginTimestamp = orgBeginTimestampNs /inScaleX;
+        scaledEndTimestamp = orgEndTimestampNs /inScaleX;
     }
 }

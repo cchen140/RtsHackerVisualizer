@@ -6,10 +6,10 @@ import java.util.ArrayList;
 /**
  * Created by CY on 3/13/2015.
  */
-public class TraceVirtualDrawPanel {
+public class Trace {
     private ArrayList eventArray = null;
-    private DrawTimeLine timeLine = null;
-    private int endTimeStamp = 0;
+    private TimeLine timeLine = null;
+    private int endTimestampNs = 0;
     private int offsetX = 0;
     private int offsetY = 0;
 
@@ -17,14 +17,15 @@ public class TraceVirtualDrawPanel {
 
     private boolean timeLineEnabled = true;
 
-    public TraceVirtualDrawPanel(ArrayList inEventArray)
+    public Trace(ArrayList inEventArray, TimeLine inTimeLine)
     {
         eventArray = inEventArray;
-        endTimeStamp = findEndTimeStamp();
+        endTimestampNs = findEndTimestampNs();
 
-//        timeLine = new DrawTimeLine(endTimeStamp, ProgConfig.TIME_LINE_UNIT_TIME);
-        timeLine = new DrawTimeLine(endTimeStamp, (int) ((ProgConfig.TIME_LINE_UNIT_NS/ProgConfig.TIMESTAMP_SCALE_DIVIDER)/ProgConfig.TIMESTAMP_UNIT_NS));
-        timeLine.setDisplayTimeStamp(false);
+        timeLine = inTimeLine;
+//        timeLine = new DrawTimeLine(scaledEndTimestamp, ProgConfig.TIME_LINE_UNIT_TIME);
+//        timeLine = new TimeLine(endTimestampNs, (int) ((ProgConfig.TIME_LINE_PERIOD_NS /ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER)/ProgConfig.TIMESTAMP_UNIT_NS));
+//        timeLine.setDisplayMarkerLabels(false);
     }
 
     public void setOffset(int inOffsetX, int inOffsetY)
@@ -33,18 +34,18 @@ public class TraceVirtualDrawPanel {
         offsetY = inOffsetY;
     }
 
-    private int findEndTimeStamp()
+    private int findEndTimestampNs()
     {
-        int resultEndTimeStamp = 0;
+        int resultEndTimestampNs = 0;
         for (Object currentObj : eventArray)
         {
             Event currentEvent = (Event) currentObj;
-            if (currentEvent.getEndTimeStamp() > resultEndTimeStamp)
+            if (currentEvent.getOrgEndTimestampNs() > resultEndTimestampNs)
             {
-                resultEndTimeStamp = currentEvent.getEndTimeStamp();
+                resultEndTimestampNs = currentEvent.getOrgEndTimestampNs();
             }
         }
-        return resultEndTimeStamp;
+        return resultEndTimestampNs;
     }
 
     public int Draw(Graphics2D g, int inOffsetX, int inOffsetY)
@@ -60,8 +61,10 @@ public class TraceVirtualDrawPanel {
         currentOffsetY += ProgConfig.TRACE_HEIGHT;
 
         // Draw time line
-        if (timeLineEnabled == true)
+        if (timeLineEnabled == true) {
+            timeLine.setDisplayMarkerLabels(false);
             timeLine.draw(g, inOffsetX, currentOffsetY);
+        }
 
         return currentOffsetY;
     }
