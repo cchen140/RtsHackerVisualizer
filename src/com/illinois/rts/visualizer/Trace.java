@@ -14,6 +14,7 @@ public class Trace {
     private int offsetX = 0;
     private int offsetY = 0;
 
+    private Color traceColor = null;
     private String traceName = null;
     private Task traceTask = null; // If it is a trace for a specific task, then this value should be set.
 
@@ -43,7 +44,6 @@ public class Trace {
     {
         this(inTraceName, inEventArray, inTimeLine);
         traceTask = inTask;
-        traceName = null;
     }
 
     public void setOffset(int inOffsetX, int inOffsetY)
@@ -121,5 +121,10 @@ public class Trace {
     public Task getTask()
     {
         return traceTask;
+    }
+
+    public String getName()
+    {
+        return traceName;
     }
 }

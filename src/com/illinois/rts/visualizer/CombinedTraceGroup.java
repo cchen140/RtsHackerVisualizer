@@ -140,19 +140,14 @@ public class CombinedTraceGroup extends TraceGroup {
         ArrayList resultArray = new ArrayList();
         // summary trace
         if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true) {
-            resultArray.add("Combined");
+            resultArray.add(combinedTrace);
         }
         // Draw individuals
         if (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES == true) {
-            for (Object currentObj : taskContainer.getTasksAsArray()) {
-                Task currentTask = (Task) currentObj;
-                if (currentTask.isDisplayBoxChecked() == false) {
-                    // This task is not displaying, go check next task.
-                    continue;
-                }
-                else
+            for (Trace currentTrace : traces) {
+                if (currentTrace.getTask().isDisplayBoxChecked() == true)
                 {
-                    resultArray.add(currentTask.getTitle());
+                    resultArray.add(currentTrace);
                 }
             }
         }

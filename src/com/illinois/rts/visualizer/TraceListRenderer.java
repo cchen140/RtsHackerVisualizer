@@ -21,9 +21,12 @@ public class TraceListRenderer extends JLabel implements ListCellRenderer {
                 isSelected, cellHasFocus);
 
         if (value instanceof Object) {
-            theText = (String) value;
-//            theIcon = new TaskListColorIcon(((Task)value).getTaskColor(), ((Task)value).isDisplayBoxChecked(), ((Task)value).getSymbol());
-//            theText = ((Task)value).getTitle();
+            Trace currentTrace = (Trace) value;
+            if (currentTrace.getTask() != null)
+            {
+                theIcon = new TaskListColorIcon(currentTrace.getTask().getTaskColor(), currentTrace.getTask().isDisplayBoxChecked(), currentTrace.getTask().getSymbol());
+            }
+            theText = currentTrace.getName();
         } else {
             theFont = list.getFont();
             theForeground = list.getForeground();
