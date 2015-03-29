@@ -32,11 +32,11 @@ public class SchedulerEvent extends Event {
             if (task.isDisplayBoxChecked() == true) {
 //                drawObject.setHeightScale(scaleY);
                 drawObject.setWidth(eventWidth);
-                drawObject.draw(g, currentOffsetX, offsetY);
+                drawObject.draw(g, currentOffsetX, offsetY-drawObject.getHeight());
             }
             else
             {
-                drawObject.drawUnderLine(g, currentOffsetX, offsetY);
+//                drawObject.drawUnderLine(g, currentOffsetX, offsetY);
             }
 
         }
@@ -49,8 +49,8 @@ public class SchedulerEvent extends Event {
     }
 
     @Override
-    public int getGraphHeight() {
-        return drawObject.getHeight();
+    public TraceSpace getGraphSpace() {
+        return new TraceSpace(drawObject.getHeight(), 0);
     }
 
     Task getTask() { return task; }

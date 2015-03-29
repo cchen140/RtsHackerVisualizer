@@ -70,7 +70,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 
         ListCellRenderer rendererTraceList = new TraceListRenderer();
         zPanelList.setCellRenderer(rendererTraceList);
-        zPanelList.setFixedCellHeight(ProgConfig.TRACE_HEIGHT + ProgConfig.TRACE_GAP_Y);
+//        zPanelList.setFixedCellHeight(ProgConfig.TRACE_HEIGHT + ProgConfig.TRACE_GAP_Y);
 
 //        zPanelTimeLine
         zPanel.setTraceList(zPanelList);
@@ -137,9 +137,9 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
             if (dialogSettings.isSettingsUpdated() == true)
             {
                 zPanel.applyNewSettings();
+                zPanel.repaint();
             }
 
-            zPanel.repaint();
         }
 
 

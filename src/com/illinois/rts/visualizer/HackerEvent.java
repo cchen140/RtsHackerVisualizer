@@ -73,8 +73,8 @@ public class HackerEvent extends Event {
             {
                 /* Display in South */
                 g.setColor(task.getTaskColor());
-                g.drawString(note, currentOffsetX-5, offsetY + ProgConfig.TRACE_HEIGHT + 25);
-                drawArrow(g, currentOffsetX, offsetY + ProgConfig.TRACE_HEIGHT + 5, currentOffsetX, offsetY + ProgConfig.TRACE_HEIGHT);
+                g.drawString(note, currentOffsetX-5, offsetY + 25);
+                drawArrow(g, currentOffsetX, offsetY + 5, currentOffsetX, offsetY);
             }
             else
             {
@@ -85,24 +85,8 @@ public class HackerEvent extends Event {
     }
 
     @Override
-    public int getGraphHeight() {
-        return 0;
+    public TraceSpace getGraphSpace() {
+        return new TraceSpace(0, 25);
     }
 
-    private  void drawArrow(Graphics g1, int x1, int y1, int x2, int y2) {
-        int ARR_SIZE = 7;
-        Graphics2D g = (Graphics2D) g1.create();
-
-        double dx = x2 - x1, dy = y2 - y1;
-        double angle = Math.atan2(dy, dx);
-        int len = (int) Math.sqrt(dx*dx + dy*dy);
-        AffineTransform at = AffineTransform.getTranslateInstance(x1, y1);
-        at.concatenate(AffineTransform.getRotateInstance(angle));
-        g.transform(at);
-
-        // Draw horizontal arrow starting in (0, 0)
-        g.drawLine(0, 0, len, 0);
-        g.fillPolygon(new int[] {len, len-ARR_SIZE, len-ARR_SIZE, len},
-                new int[] {0, -ARR_SIZE, ARR_SIZE, 0}, 4);
-    }
 }

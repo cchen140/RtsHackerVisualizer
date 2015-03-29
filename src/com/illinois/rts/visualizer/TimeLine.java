@@ -8,9 +8,9 @@ import java.awt.*;
 public class TimeLine extends DrawUnit {
     private static final int TIMELINE_MARKER_LENGTH = 6;
     private int endTimestampNs = 0;
-    private int nsPerUnit = 0;
-    private int periodInNs = 0;
-    private int numOfUnitInPeriod = 0;
+    private int nsPerUnit = 1;
+    private int periodInNs = 1;
+    private int numOfUnitInPeriod = 1;
     private boolean displayMarkerLabels = true;
     private boolean displayMarkerLabelsInNorth = false;
 

@@ -16,6 +16,8 @@ public abstract class TraceGroup {
     protected int marginX = 0;
     protected int marginY = 0;
 
+    protected int traceMarginY = 0;
+
 //    public abstract void draw(Graphics2D g, int offsetX, int offsetY, double scaleX, double scaleY);
     public abstract void draw(Graphics2D g, int offsetX, int offsetY);
     public abstract int getHeight();
@@ -40,4 +42,5 @@ public abstract class TraceGroup {
     {
         marginY = inMarginY;
     }
+    public abstract void updateTraceMarginY(int inTraceMarginY);
 }

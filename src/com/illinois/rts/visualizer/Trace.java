@@ -10,7 +10,8 @@ public class Trace {
     private ArrayList eventArray = null;
     private TimeLine timeLine = null;
     private int endTimestampNs = 0;
-    private int height = 0;
+    private int marginY = 0;
+    private TraceSpace traceSpace = null;
     private int offsetX = 0;
     private int offsetY = 0;
 
@@ -30,7 +31,7 @@ public class Trace {
         endTimestampNs = findEndTimestampNs();
         timeLine.setEndTimestampNs(endTimestampNs);
 
-        height = findMaxGraphHeight();
+        traceSpace = calculateTraceSpace();
     }
 
     public Trace(String inTraceName, ArrayList inEventArray, TimeLine inTimeLine)
@@ -46,11 +47,11 @@ public class Trace {
         traceTask = inTask;
     }
 
-    public void setOffset(int inOffsetX, int inOffsetY)
-    {
-        offsetX = inOffsetX;
-        offsetY = inOffsetY;
-    }
+//    public void setOffset(int inOffsetX, int inOffsetY)
+//    {
+//        offsetX = inOffsetX;
+//        offsetY = inOffsetY;
+//    }
 
     private int findEndTimestampNs()
     {
@@ -66,31 +67,28 @@ public class Trace {
         return resultEndTimestampNs;
     }
 
-    private int findMaxGraphHeight()
+    private TraceSpace calculateTraceSpace()
     {
-        int resultMaxHeight = 0;
+        TraceSpace resultTraceSpace = new TraceSpace(0, 0);
         for (Object currentObj : eventArray)
         {
             Event currentEvent = (Event) currentObj;
-            if (currentEvent.getGraphHeight() > resultMaxHeight)
-            {
-                resultMaxHeight  = currentEvent.getGraphHeight();
-            }
+            resultTraceSpace.extendSpace(currentEvent.getGraphSpace());
         }
-        return resultMaxHeight;
+        return resultTraceSpace;
     }
 
     public int Draw(Graphics2D g, int inOffsetX, int inOffsetY)
     {
-        int currentOffsetY = inOffsetY;
+        int currentOffsetY = inOffsetY + marginY;
+
+        currentOffsetY += traceSpace.getNorthHeight();
 
         // Draw trace
         for (Object currentObj : eventArray) {
             Event currentEvent = (Event) currentObj;
-            currentEvent.drawEvent(g, inOffsetX, inOffsetY);
+            currentEvent.drawEvent(g, inOffsetX, currentOffsetY);
         }
-
-        currentOffsetY += ProgConfig.TRACE_HEIGHT;
 
         // Draw time line
         if (timeLineEnabled == true) {
@@ -98,7 +96,9 @@ public class Trace {
             timeLine.draw(g, inOffsetX, currentOffsetY);
         }
 
-        return currentOffsetY;
+        currentOffsetY += traceSpace.getSouthHeight();
+
+        return currentOffsetY+marginY;
     }
 
 //    public void setScaleX(int inScaleX)
@@ -111,6 +111,12 @@ public class Trace {
     public void setTimeLineEnabled(boolean inEnable)
     {
         timeLineEnabled = inEnable;
+    }
+
+    public void updateMarginY(int inMarginY)
+    {
+        // Update marginY value.
+        marginY = inMarginY;
     }
 
     public TimeLine getTimeLine()
@@ -126,5 +132,10 @@ public class Trace {
     public String getName()
     {
         return traceName;
+    }
+
+    public int getTraceHeight()
+    {
+        return traceSpace.getHeight() + marginY*2;
     }
 }

@@ -78,7 +78,7 @@ public class PanelDrawer extends ZoomablePanel {
             {// Update trace list.
                 traceList.setListData(combinedTraceGroup.getTraceListArray());
                 traceList.setBackground(ProgConfig.TRACE_PANEL_FOREGROUND);
-                traceList.setFixedCellHeight(ProgConfig.TRACE_HEIGHT + ProgConfig.TRACE_GAP_Y);
+//                traceList.setFixedCellHeight(ProgConfig.TRACE_HEIGHT + ProgConfig.TRACE_GAP_Y);
             }
         }
     }
@@ -117,20 +117,24 @@ public class PanelDrawer extends ZoomablePanel {
         topTimeLine.setEndTimestampNs(eventContainer.getOrgEndTimestampNs());
 
         // Update time line from settings.
-        topTimeLine.setTimeValues(eventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
-
-//        topTimeLine.setTimeValues(inputEventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
-        combinedTraceGroup = new CombinedTraceGroup(eventContainer, new TimeLine(topTimeLine));
+//        topTimeLine.setTimeValues(eventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
+//
+////        topTimeLine.setTimeValues(inputEventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
+//        combinedTraceGroup = new CombinedTraceGroup(eventContainer, new TimeLine(topTimeLine));
         applyNewSettings(); // This will also update the scaledBeginTimestamp in each event.
-//        repaint();
+
     }
 
     public void applyNewSettings()
     {
+        combinedTraceGroup = new CombinedTraceGroup(eventContainer, new TimeLine(topTimeLine));
+
         /* Setup virtual drawing panel */
         combinedTraceGroup.setMarginX(ProgConfig.VIRTUAL_PANEL_MARGIN_X);
         combinedTraceGroup.setMarginY(ProgConfig.VIRTUAL_PANEL_MARGIN_Y);
 //            combinedTraceGroup.setScaleX(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
+
+        combinedTraceGroup.updateTraceMarginY(ProgConfig.TRACE_MARGIN_Y);
 
         eventContainer.applyHorizontalScale(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
 
@@ -138,6 +142,8 @@ public class PanelDrawer extends ZoomablePanel {
         topTimeLine.setTimeValues(eventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
         combinedTraceGroup.copyTimeLineValues(topTimeLine);
         timeLinePanel.getTimeLine().copyTimeValues(topTimeLine);
+
+        repaint();
     }
 
 /*TODO: default point? movng to center of the screen should be done by panel.*/

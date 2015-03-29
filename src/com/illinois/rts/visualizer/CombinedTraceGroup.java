@@ -16,6 +16,7 @@ public class CombinedTraceGroup extends TraceGroup {
 
     private int width = 0;
     private int height = 0;
+
     private DrawRect background = new DrawRect();
 //    private DrawTimeLine timeLine = null;
     private DrawTraceGap traceGap = null;
@@ -100,17 +101,15 @@ public class CombinedTraceGroup extends TraceGroup {
         //traceGap.draw(g, width+currentOffsetX, 0, currentOffsetY);
 
         // Insert half Y gap
-        currentOffsetY += ProgConfig.TRACE_GAP_Y/2;
+//        currentOffsetY += ProgConfig.TRACE_GAP_Y/2;
 
         // Draw summary trace
         if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true) {
             currentOffsetY = combinedTrace.Draw(g, currentOffsetX, currentOffsetY);
 
             if (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES == true)
-            {// If it's going to draw individual traces, draw gap.
-                currentOffsetY += ProgConfig.TRACE_GAP_Y/2;
+            {// If task traces will be drawn, draw gap.
                 traceGap.draw(g, 0, currentOffsetY, width+currentOffsetX);
-                currentOffsetY += ProgConfig.TRACE_GAP_Y/2;
             }
 
         }
@@ -126,10 +125,8 @@ public class CombinedTraceGroup extends TraceGroup {
                 // Draw trace
                 currentOffsetY = currentTrace.Draw(g, currentOffsetX, currentOffsetY);
 
-                // Move brush and draw trace border (gap)
-                currentOffsetY += ProgConfig.TRACE_GAP_Y/2;
+                // Draw trace border
                 traceGap.draw(g, 0, currentOffsetY, width+currentOffsetX);
-                currentOffsetY += ProgConfig.TRACE_GAP_Y/2;
             }
         }
 
@@ -165,6 +162,20 @@ public class CombinedTraceGroup extends TraceGroup {
         return calculateWidth();
     }
 
+    @Override
+    public void updateTraceMarginY(int inTraceMarginY) {
+        traceMarginY = inTraceMarginY;
+
+        // Update margin for combined trace.
+        combinedTrace.updateMarginY(traceMarginY);
+
+        // Update margin for each task trace.
+        for (Trace currentTrace : traces)
+        {
+            currentTrace.updateMarginY(traceMarginY);
+        }
+    }
+
     private int calculateWidth()
     {
         int resultWidth = 0;
@@ -183,20 +194,20 @@ public class CombinedTraceGroup extends TraceGroup {
 
         resultHeight += ProgConfig.VIRTUAL_PANEL_MARGIN_Y *2;   // Upper and lower borders.
 
-        if ((ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE==true)
-                || (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES==true)) {
-            resultHeight += ProgConfig.TRACE_GAP_Y;   // 1/2 Y gap before first trace and another 1/2 /Y gap after last trace.
-        }
+//        if ((ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE==true)
+//                || (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES==true)) {
+//            resultHeight += ProgConfig.TRACE_GAP_Y;   // 1/2 Y gap before first trace and another 1/2 /Y gap after last trace.
+//        }
 
         if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true)
-            resultHeight += eventContainer.getSchedulerEvents().get(0).getGraphHeight();  // Summary trace.
+            resultHeight += combinedTrace.getTraceHeight();  // Summary trace.
 
         if (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES == true) {
-            for (Object currentObj : taskContainer.getTasksAsArray()) {
-                Task currentTask = (Task) currentObj;
-                if (currentTask.isDisplayBoxChecked() == true) {// Yes, this task is gonna be displayed
-                    resultHeight += ProgConfig.TRACE_GAP_Y;//gapY;
-                    resultHeight += schedulerEvents.get(0).getGraphHeight();
+            for (Trace currentTrace : traces)
+            {
+                if (currentTrace.getTask().isDisplayBoxChecked() == true)
+                {
+                    resultHeight += currentTrace.getTraceHeight();
                 }
             }
 
