@@ -19,16 +19,16 @@ public class TimeLine extends DrawUnit {
     public TimeLine(int inEndTimestampNs, int inNsPerUnit, int inPeriodInNs)
     {
         super();
-        setSettings(inEndTimestampNs, inNsPerUnit, inPeriodInNs);
+        setTimeValues(inEndTimestampNs, inNsPerUnit, inPeriodInNs);
     }
 
     public TimeLine(TimeLine inTimeLine)
     {
         super();
-        copyTimeSettings(inTimeLine);
+        copyTimeValues(inTimeLine);
     }
 
-    public void setSettings(int inEndTimestampNs, int inNsPerUnit, int inPeriodInNs)
+    public void setTimeValues(int inEndTimestampNs, int inNsPerUnit, int inPeriodInNs)
     {
         endTimestampNs = inEndTimestampNs;
         nsPerUnit = inNsPerUnit;
@@ -37,9 +37,9 @@ public class TimeLine extends DrawUnit {
         numOfUnitInPeriod = periodInNs / nsPerUnit;
     }
 
-    public void copyTimeSettings(TimeLine inTimeLine)
+    public void copyTimeValues(TimeLine inTimeLine)
     {
-        setSettings(inTimeLine.getEndTimestampNs(), inTimeLine.getNsPerUnit(), inTimeLine.getPeriodInNs());
+        setTimeValues(inTimeLine.getEndTimestampNs(), inTimeLine.getNsPerUnit(), inTimeLine.getPeriodInNs());
     }
 
 

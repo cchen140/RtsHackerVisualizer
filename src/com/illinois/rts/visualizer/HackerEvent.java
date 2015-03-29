@@ -85,7 +85,7 @@ public class HackerEvent extends Event {
     }
 
     @Override
-    public int getDrawHeight() {
+    public int getGraphHeight() {
         return 0;
     }
 

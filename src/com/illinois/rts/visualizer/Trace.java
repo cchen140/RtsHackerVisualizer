@@ -10,8 +10,12 @@ public class Trace {
     private ArrayList eventArray = null;
     private TimeLine timeLine = null;
     private int endTimestampNs = 0;
+    private int height = 0;
     private int offsetX = 0;
     private int offsetY = 0;
+
+    private String traceName = null;
+    private Task traceTask = null; // If it is a trace for a specific task, then this value should be set.
 
 //    protected int scaleX = 1;
 
@@ -20,12 +24,26 @@ public class Trace {
     public Trace(ArrayList inEventArray, TimeLine inTimeLine)
     {
         eventArray = inEventArray;
-        endTimestampNs = findEndTimestampNs();
-
         timeLine = inTimeLine;
-//        timeLine = new DrawTimeLine(scaledEndTimestamp, ProgConfig.TIME_LINE_UNIT_TIME);
-//        timeLine = new TimeLine(endTimestampNs, (int) ((ProgConfig.TIME_LINE_PERIOD_NS /ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER)/ProgConfig.TIMESTAMP_UNIT_NS));
-//        timeLine.setDisplayMarkerLabels(false);
+
+        endTimestampNs = findEndTimestampNs();
+        timeLine.setEndTimestampNs(endTimestampNs);
+
+        height = findMaxGraphHeight();
+    }
+
+    public Trace(String inTraceName, ArrayList inEventArray, TimeLine inTimeLine)
+    {
+        this(inEventArray, inTimeLine);
+        traceName = inTraceName;
+        traceTask = null;
+    }
+
+    public Trace(String inTraceName, Task inTask, ArrayList inEventArray, TimeLine inTimeLine)
+    {
+        this(inTraceName, inEventArray, inTimeLine);
+        traceTask = inTask;
+        traceName = null;
     }
 
     public void setOffset(int inOffsetX, int inOffsetY)
@@ -46,6 +64,20 @@ public class Trace {
             }
         }
         return resultEndTimestampNs;
+    }
+
+    private int findMaxGraphHeight()
+    {
+        int resultMaxHeight = 0;
+        for (Object currentObj : eventArray)
+        {
+            Event currentEvent = (Event) currentObj;
+            if (currentEvent.getGraphHeight() > resultMaxHeight)
+            {
+                resultMaxHeight  = currentEvent.getGraphHeight();
+            }
+        }
+        return resultMaxHeight;
     }
 
     public int Draw(Graphics2D g, int inOffsetX, int inOffsetY)
@@ -79,5 +111,15 @@ public class Trace {
     public void setTimeLineEnabled(boolean inEnable)
     {
         timeLineEnabled = inEnable;
+    }
+
+    public TimeLine getTimeLine()
+    {
+        return timeLine;
+    }
+
+    public Task getTask()
+    {
+        return traceTask;
     }
 }

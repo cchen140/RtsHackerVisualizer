@@ -22,6 +22,8 @@ public class CombinedTraceGroup extends TraceGroup {
 
     private TimeLine timeLine = null;
 
+    private Trace combinedTrace = null;
+    private ArrayList<Trace> traces = new ArrayList<Trace>();
 
     public CombinedTraceGroup(EventContainer inEventContainer, TimeLine inTimeLine)
     {
@@ -31,6 +33,8 @@ public class CombinedTraceGroup extends TraceGroup {
         schedulerEvents = inEventContainer.getSchedulerEvents();
 
         timeLine = inTimeLine;
+
+        initializeTraces();
 
         width = calculateWidth();
         height = calculateHeight();
@@ -42,6 +46,32 @@ public class CombinedTraceGroup extends TraceGroup {
 
         traceGap = new DrawTraceGap();
         traceGap.setFillColor(ProgConfig.TRACE_PANEL_BORDER_COLOR);
+
+    }
+
+    private void initializeTraces()
+    {
+        /* Initialize the combined trace. */
+        combinedTrace = new Trace("Combined", eventContainer.getAllEvents(), new TimeLine(timeLine));
+
+        /* Initialize traces for each task */
+        traces.clear();
+        for (Object currentObj : taskContainer.getTasksAsArray()) {
+            Task currentTask = (Task) currentObj;
+
+            ArrayList taskEvents = new ArrayList();
+            for (SchedulerEvent currentSchEvent : schedulerEvents) {
+                if (currentSchEvent.getTask().getId() == currentTask.getId())
+                    taskEvents.add(currentSchEvent);
+            }
+
+            for (AppEvent currentAppEvent : eventContainer.getAppEvents()) {
+                if (currentAppEvent.getTaskId() == currentTask.getId())
+                    taskEvents.add(currentAppEvent);
+            }
+
+            traces.add( new Trace(currentTask.getTitle(), currentTask, taskEvents, new TimeLine(timeLine)) );
+        }
 
     }
 
@@ -74,9 +104,7 @@ public class CombinedTraceGroup extends TraceGroup {
 
         // Draw summary trace
         if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true) {
-//            TraceVirtualDrawPanel schedulerDrawPanel = new TraceVirtualDrawPanel(schedulerEvents);
-            Trace schedulerCombinedTrace = new Trace(eventContainer.getAllEvents(), new TimeLine(timeLine));
-            currentOffsetY = schedulerCombinedTrace.Draw(g, currentOffsetX, currentOffsetY);
+            currentOffsetY = combinedTrace.Draw(g, currentOffsetX, currentOffsetY);
 
             if (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES == true)
             {// If it's going to draw individual traces, draw gap.
@@ -90,26 +118,13 @@ public class CombinedTraceGroup extends TraceGroup {
 
         // Draw individuals
         if (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES == true) {
-            for (Object currentObj : taskContainer.getTasksAsArray()) {
-                Task currentTask = (Task) currentObj;
-                if (currentTask.isDisplayBoxChecked() == false) {
-                    // This task is not displaying, go check next task.
+            for (Trace currentTrace : traces)
+            {
+                if (currentTrace.getTask().isDisplayBoxChecked() == false)
                     continue;
-                }
-                ArrayList taskEvents = new ArrayList();
-                for (SchedulerEvent currentSchEvent : schedulerEvents) {
-                    if (currentSchEvent.getTask().getId() == currentTask.getId())
-                        taskEvents.add(currentSchEvent);
-                }
-
-                for (AppEvent currentAppEvent : eventContainer.getAppEvents()) {
-                    if (currentAppEvent.getTaskId() == currentTask.getId())
-                        taskEvents.add(currentAppEvent);
-                }
 
                 // Draw trace
-                Trace taskDrawPanel = new Trace(taskEvents, new TimeLine(timeLine));
-                currentOffsetY = taskDrawPanel.Draw(g, currentOffsetX, currentOffsetY);
+                currentOffsetY = currentTrace.Draw(g, currentOffsetX, currentOffsetY);
 
                 // Move brush and draw trace border (gap)
                 currentOffsetY += ProgConfig.TRACE_GAP_Y/2;
@@ -179,14 +194,14 @@ public class CombinedTraceGroup extends TraceGroup {
         }
 
         if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true)
-            resultHeight += eventContainer.getSchedulerEvents().get(0).getDrawHeight();  // Summary trace.
+            resultHeight += eventContainer.getSchedulerEvents().get(0).getGraphHeight();  // Summary trace.
 
         if (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES == true) {
             for (Object currentObj : taskContainer.getTasksAsArray()) {
                 Task currentTask = (Task) currentObj;
                 if (currentTask.isDisplayBoxChecked() == true) {// Yes, this task is gonna be displayed
                     resultHeight += ProgConfig.TRACE_GAP_Y;//gapY;
-                    resultHeight += schedulerEvents.get(0).getDrawHeight();
+                    resultHeight += schedulerEvents.get(0).getGraphHeight();
                 }
             }
 
@@ -198,9 +213,20 @@ public class CombinedTraceGroup extends TraceGroup {
         return resultHeight;
     }
 
-    void updateTimeLineSettings(TimeLine inTimeLine)
+    void copyTimeLineValues(TimeLine inTimeLine)
     {
-        timeLine.copyTimeSettings(inTimeLine);
+        timeLine.copyTimeValues(inTimeLine);
+
+        // Update time line setting for combined trace.
+        combinedTrace.getTimeLine().copyTimeValues(inTimeLine);
+
+        // Update time line settings for traces.
+        for (Trace currentTrace : traces)
+        {
+            currentTrace.getTimeLine().copyTimeValues(inTimeLine);
+        }
     }
+
+//    int findHighestDrawHeight
 
 }

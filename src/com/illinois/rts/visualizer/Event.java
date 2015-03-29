@@ -30,7 +30,7 @@ public abstract class Event {
     }
 
     public abstract void drawEvent(Graphics2D g, int offsetX, int offsetY);
-    public abstract int getDrawHeight();
+    public abstract int getGraphHeight();
 
     public void applyScaleX(int inScaleX)
     {

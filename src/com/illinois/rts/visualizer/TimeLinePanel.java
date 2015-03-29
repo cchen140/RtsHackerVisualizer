@@ -29,9 +29,9 @@ public class TimeLinePanel extends JPanel {
         timeLine.setDisplayMarkerLabelsInNorth(true);
     }
 
-    void updateTimeLineSettings(TimeLine inTimeLine)
+    public TimeLine getTimeLine()
     {
-        timeLine.copyTimeSettings(inTimeLine);
+        return timeLine;
     }
 
     protected void paintComponent(Graphics g) {

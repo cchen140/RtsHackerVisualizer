@@ -49,7 +49,7 @@ public class SchedulerEvent extends Event {
     }
 
     @Override
-    public int getDrawHeight() {
+    public int getGraphHeight() {
         return drawObject.getHeight();
     }
 
