@@ -145,7 +145,7 @@
                       <dividerLocation value="289"/>
                       <dividerSize value="0"/>
                       <inheritsPopupMenu value="false"/>
-                      <lastDividerLocation value="383"/>
+                      <lastDividerLocation value="-1"/>
                       <resizeWeight value="0.5"/>
                     </properties>
                     <border type="empty"/>
@@ -487,7 +487,7 @@
                         </constraints>
                         <properties>
                           <font size="18" style="0"/>
-                          <text value="Trace Gap"/>
+                          <text value="Trace Margin-top-bottom"/>
                         </properties>
                       </component>
                     </children>
@@ -502,7 +502,7 @@
                     </properties>
                     <border type="none"/>
                     <children>
-                      <component id="4c56b" class="javax.swing.JTextField" binding="textFieldTraceGap">
+                      <component id="4c56b" class="javax.swing.JTextField" binding="textFieldTraceMarginY">
                         <constraints>
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false">
                             <preferred-size width="50" height="-1"/>

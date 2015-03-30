@@ -194,11 +194,6 @@ public class CombinedTraceGroup extends TraceGroup {
 
         resultHeight += ProgConfig.VIRTUAL_PANEL_MARGIN_Y *2;   // Upper and lower borders.
 
-//        if ((ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE==true)
-//                || (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES==true)) {
-//            resultHeight += ProgConfig.TRACE_GAP_Y;   // 1/2 Y gap before first trace and another 1/2 /Y gap after last trace.
-//        }
-
         if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true)
             resultHeight += combinedTrace.getTraceHeight();  // Summary trace.
 
@@ -211,9 +206,6 @@ public class CombinedTraceGroup extends TraceGroup {
                 }
             }
 
-            // If summary trace is not displayed, then the gap should be decrease by one unit.
-            if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == false)
-                resultHeight -= ProgConfig.TRACE_GAP_Y;
         }
 
         return resultHeight;
@@ -232,7 +224,5 @@ public class CombinedTraceGroup extends TraceGroup {
             currentTrace.getTimeLine().copyTimeValues(inTimeLine);
         }
     }
-
-//    int findHighestDrawHeight
-
+    
 }

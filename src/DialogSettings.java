@@ -12,7 +12,7 @@ public class DialogSettings extends JDialog {
     private JCheckBox checkBoxEnableSchedulerSummaryTrace;
     private JCheckBox checkBoxEnableSchedulerTaskTraces;
     private JTextField textFieldTraceHeight;
-    private JTextField textFieldTraceGap;
+    private JTextField textFieldTraceMarginY;
     private JTextField textFieldVirtualPanelMarginY;
     private JTextField textFieldVirtualPanelMarginX;
     private JTextField textFieldHorizontalScale;
@@ -92,7 +92,7 @@ public class DialogSettings extends JDialog {
         /* Trace Layout */
         textFieldVirtualPanelMarginX.setText(String.valueOf(ProgConfig.VIRTUAL_PANEL_MARGIN_X));
         textFieldVirtualPanelMarginY.setText(String.valueOf(ProgConfig.VIRTUAL_PANEL_MARGIN_Y));
-        textFieldTraceGap.setText(String.valueOf(ProgConfig.TRACE_GAP_Y));
+        textFieldTraceMarginY.setText(String.valueOf(ProgConfig.TRACE_MARGIN_Y));
         textFieldTraceHeight.setText(String.valueOf(ProgConfig.TRACE_HEIGHT));
 
     }
@@ -108,7 +108,7 @@ public class DialogSettings extends JDialog {
         /* Trace Layout */
         ProgConfig.VIRTUAL_PANEL_MARGIN_X = Integer.valueOf(textFieldVirtualPanelMarginX.getText());
         ProgConfig.VIRTUAL_PANEL_MARGIN_Y = Integer.valueOf(textFieldVirtualPanelMarginY.getText());
-        ProgConfig.TRACE_GAP_Y = Integer.valueOf(textFieldTraceGap.getText());
+        ProgConfig.TRACE_MARGIN_Y = Integer.valueOf(textFieldTraceMarginY.getText());
         ProgConfig.TRACE_HEIGHT = Integer.valueOf(textFieldTraceHeight.getText());
 
         isSettingsUpdated = true;

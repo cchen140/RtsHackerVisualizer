@@ -22,7 +22,6 @@ public class ProgConfig {
     public static int TRACE_HORIZONTAL_SCALE_DIVIDER = 30000;
     public static int TIME_LINE_PERIOD_NS = 10000000; // 10ms
     public static int TRACE_HEIGHT = 100;
-    public static int TRACE_GAP_Y = 60;
     public static int TRACE_MARGIN_Y = 30;
     public static int TRACE_PANEL_BORDER_WIDTH = 1;
     public static Color TRACE_PANEL_BACKGROUND = Color.GRAY;
