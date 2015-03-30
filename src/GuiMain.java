@@ -75,6 +75,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 //        zPanelTimeLine
         zPanel.setTraceList(zPanelList);
         zPanel.setTimeLinePanel(zPanelTimeLine);
+        zPanel.setHorizontalScrollBar(zPanelScrollBarHorizontal);
 
         /* Load default demo log file. */
         try {
@@ -206,10 +207,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     public void adjustmentValueChanged(AdjustmentEvent e) {
         if (e.getSource() == zPanelScrollBarHorizontal)
         {
-            //System.out.println("moving");
-            /* Scroll zPanelScrollHorizontal panel according to zPanelScrollBarHorizontal */
-            zPanelScrollBarHorizontal.setMaximum(zPanelScrollHorizontal.getHorizontalScrollBar().getMaximum());
-            zPanelScrollBarHorizontal.setUnitIncrement(zPanelScrollHorizontal.getHorizontalScrollBar().getUnitIncrement());
+            /* Scroll zPanelScrollHorizontal panel and TimeLine panel according to zPanelScrollBarHorizontal */
             zPanelScrollHorizontal.getHorizontalScrollBar().setValue(zPanelScrollBarHorizontal.getValue());
             zPanelTimeLineScrollHorizontal.getHorizontalScrollBar().setValue(zPanelScrollBarHorizontal.getValue());
         }

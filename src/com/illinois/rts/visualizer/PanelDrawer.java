@@ -18,6 +18,7 @@ public class PanelDrawer extends ZoomablePanel {
     private TimeLine topTimeLine = new TimeLine();
 
     private JList traceList = null;
+    private JScrollBar horizontalScrollBar = null;
     private TimeLinePanel timeLinePanel = null;
 
 
@@ -31,7 +32,16 @@ public class PanelDrawer extends ZoomablePanel {
     {
         traceList = inList;
     }
-    public void setTimeLinePanel(TimeLinePanel inTimeLinePanel) {timeLinePanel = inTimeLinePanel;}
+    public void setTimeLinePanel(TimeLinePanel inTimeLinePanel)
+    {
+        timeLinePanel = inTimeLinePanel;
+    }
+
+    public void setHorizontalScrollBar(JScrollBar inScrollBar)
+    {
+        horizontalScrollBar = inScrollBar;
+    }
+
 
    // @Override
     protected void draw(Graphics2D g) {
@@ -126,6 +136,12 @@ public class PanelDrawer extends ZoomablePanel {
         {// Update trace list.
             traceList.setListData(combinedTraceGroup.getTraceListArray());
             traceList.setBackground(ProgConfig.TRACE_PANEL_FOREGROUND);
+        }
+
+        /* Scroll zPanelScrollHorizontal panel according to zPanelScrollBarHorizontal */
+        if (horizontalScrollBar != null) {
+            horizontalScrollBar.setMaximum(combinedTraceGroup.getWidth() + ProgConfig.PANEL_DRAWER_PADDING_X * 2);
+            horizontalScrollBar.setUnitIncrement(1);
         }
 
         repaint();
