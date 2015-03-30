@@ -40,46 +40,9 @@ public class PanelDrawer extends ZoomablePanel {
         if (eventContainer == null)
             return;
 
-
-        if (doNotDraw == false) {
-
-
-
-
+        if (doNotDraw == false)
+        {
             combinedTraceGroup.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y);
-//            timeLinePanel.draw();
-//            combinedTraceGroup.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y+1000, 1, 1);
-
-            /* Set panel dimension according to the content to be drawn. */
-            this.setPreferredSize(new Dimension(
-                    combinedTraceGroup.getWidth()+ProgConfig.PANEL_DRAWER_PADDING_X*2,
-                    combinedTraceGroup.getHeight()+ProgConfig.PANEL_DRAWER_PADDING_Y*2));
-
-            /* Set scroll panel height for enabling vertical scroll bar. */
-            this.getParent().getParent().setPreferredSize(new Dimension(
-                    -1,//this.getParent().getParent().getWidth(),
-                    combinedTraceGroup.getHeight() + ProgConfig.PANEL_DRAWER_PADDING_Y * 2));
-
-            // Is time line panel initialized?
-            if (timeLinePanel != null) {
-            /* Set the width of time line panel */
-                timeLinePanel.setPreferredSize(new Dimension(
-                        combinedTraceGroup.getWidth() + ProgConfig.PANEL_DRAWER_PADDING_X * 2,
-                        -1
-                ));
-                timeLinePanel.repaint();
-//                timeLinePanel.setTimeLine()
-            }
-
-            //System.out.println(this.getParent().getParent().getParent().getName());
-
-            // Is trace list initialized? (Should the list be displayed and updated?)
-            if (traceList != null)
-            {// Update trace list.
-                traceList.setListData(combinedTraceGroup.getTraceListArray());
-                traceList.setBackground(ProgConfig.TRACE_PANEL_FOREGROUND);
-//                traceList.setFixedCellHeight(ProgConfig.TRACE_HEIGHT + ProgConfig.TRACE_GAP_Y);
-            }
         }
     }
 
@@ -116,11 +79,6 @@ public class PanelDrawer extends ZoomablePanel {
         eventContainer = inputEventContainer;
         topTimeLine.setEndTimestampNs(eventContainer.getOrgEndTimestampNs());
 
-        // Update time line from settings.
-//        topTimeLine.setTimeValues(eventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
-//
-////        topTimeLine.setTimeValues(inputEventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
-//        combinedTraceGroup = new CombinedTraceGroup(eventContainer, new TimeLine(topTimeLine));
         applyNewSettings(); // This will also update the scaledBeginTimestamp in each event.
 
     }
@@ -142,6 +100,33 @@ public class PanelDrawer extends ZoomablePanel {
         topTimeLine.setTimeValues(eventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
         combinedTraceGroup.copyTimeLineValues(topTimeLine);
         timeLinePanel.getTimeLine().copyTimeValues(topTimeLine);
+
+                    /* Set panel dimension according to the content to be drawn. */
+        this.setPreferredSize(new Dimension(
+                combinedTraceGroup.getWidth()+ProgConfig.PANEL_DRAWER_PADDING_X*2,
+                combinedTraceGroup.getHeight()+ProgConfig.PANEL_DRAWER_PADDING_Y*2));
+
+            /* Set scroll panel height for enabling vertical scroll bar. */
+        this.getParent().getParent().setPreferredSize(new Dimension(
+                -1,//this.getParent().getParent().getWidth(),
+                combinedTraceGroup.getHeight() + ProgConfig.PANEL_DRAWER_PADDING_Y * 2));
+
+        // Is time line panel initialized?
+        if (timeLinePanel != null) {
+            /* Set the width of time line panel */
+            timeLinePanel.setPreferredSize(new Dimension(
+                    combinedTraceGroup.getWidth() + ProgConfig.PANEL_DRAWER_PADDING_X * 2,
+                    -1
+            ));
+            timeLinePanel.repaint();
+        }
+
+        // Is trace list initialized? (Should the list be displayed and updated?)
+        if (traceList != null)
+        {// Update trace list.
+            traceList.setListData(combinedTraceGroup.getTraceListArray());
+            traceList.setBackground(ProgConfig.TRACE_PANEL_FOREGROUND);
+        }
 
         repaint();
     }

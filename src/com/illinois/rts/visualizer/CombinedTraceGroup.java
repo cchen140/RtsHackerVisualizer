@@ -224,5 +224,5 @@ public class CombinedTraceGroup extends TraceGroup {
             currentTrace.getTimeLine().copyTimeValues(inTimeLine);
         }
     }
-    
+
 }

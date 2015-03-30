@@ -189,6 +189,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 //                    System.out.format("Icon clicked.\n");
                 }
                 /* Force drawing panel and list to update the appearance*/
+                zPanel.applyNewSettings();
                 zPanel.repaint();
                 taskList.repaint();
             }
