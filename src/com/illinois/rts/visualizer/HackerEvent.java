@@ -65,7 +65,7 @@ public class HackerEvent extends Event {
                 g.setColor(Color.black);
                 //g.drawLine(currentOffsetX, offsetY - 50, currentOffsetX, offsetY);
                 //drawObject.setFillColor(task.getTaskColor());
-//                g.fillRect(currentOffsetX - BAR_WIDTH / 2, offsetY - scaledRecordData, BAR_WIDTH, scaledRecordData);
+                g.fillRect(currentOffsetX - BAR_WIDTH / 2, offsetY - scaledRecordData, BAR_WIDTH, scaledRecordData);
                 //g.drawString(note, currentOffsetX, offsetY - 70);
                 //drawArrow(g, currentOffsetX, offsetY - 50, currentOffsetX, offsetY);
             }
@@ -82,6 +82,10 @@ public class HackerEvent extends Event {
                 System.err.println("Error occurs in HackerEvent drawEvent function!");
             }
         }
+    }
+
+    public int getTaskId(){
+        return task.getId();
     }
 
     @Override

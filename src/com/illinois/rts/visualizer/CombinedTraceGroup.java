@@ -53,7 +53,7 @@ public class CombinedTraceGroup extends TraceGroup {
     private void initializeTraces()
     {
         /* Initialize the combined trace. */
-        combinedTrace = new Trace("Combined", eventContainer.getAllEvents(), new TimeLine(timeLine));
+        combinedTrace = new Trace("Combined", eventContainer.getAppAndSchedulerEvents(), new TimeLine(timeLine));
 
         /* Initialize traces for each task */
         traces.clear();
@@ -69,6 +69,12 @@ public class CombinedTraceGroup extends TraceGroup {
             for (AppEvent currentAppEvent : eventContainer.getAppEvents()) {
                 if (currentAppEvent.getTaskId() == currentTask.getId())
                     taskEvents.add(currentAppEvent);
+            }
+
+            for (HackerEvent currentHackerEvent : eventContainer.getHackerEvents())
+            {
+                if (currentHackerEvent.getTaskId() == currentTask.getId())
+                    taskEvents.add(currentHackerEvent);
             }
 
             traces.add( new Trace(currentTask.getTitle(), currentTask, taskEvents, new TimeLine(timeLine)) );

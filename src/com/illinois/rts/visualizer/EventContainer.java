@@ -6,6 +6,10 @@ import java.util.ArrayList;
  * Created by CY on 2/16/2015.
  */
 public class EventContainer {
+    public static final int SCHEDULER_EVENT = 0;
+    public static final int APP_EVENT = 1;
+    public static final int HACKER_EVENT = 2;
+
     private static final int PAINT_OFFSET_X = 100;
     private static final int PAINT_OFFSET_Y = 150;//-75;//75;
     private static final double SCALE_X = 1.0;
@@ -21,9 +25,9 @@ public class EventContainer {
 
     public EventContainer(){}
 
-    public void add(int inTimestampNs, int inEventTaskId, int inData, String inEventString)
+    public void add(int inEventType, int inTimestampNs, int inEventTaskId, int inData, String inEventString)
     {
-        if (inEventTaskId == SchedulerEvent.EVENT_SCHEDULER) {
+        if (inEventType == SCHEDULER_EVENT) {
             if (schedulerEvents.size() > 0) {
                 schedulerEvents.get(schedulerEvents.size() - 1).setOrgEndTimestampNs(inTimestampNs);
             }
@@ -34,11 +38,11 @@ public class EventContainer {
             orgEndTimestampNs = inTimestampNs;
             scaledEndTimestamp = inTimestampNs;
         }
-        else if ((inEventTaskId==HackerEvent.highHackerId) || (inEventTaskId==HackerEvent.lowHackerId))
+        else if (inEventType == HACKER_EVENT)
         {
             hackerEvents.add(new HackerEvent(inTimestampNs, taskContainer.getTaskById(inEventTaskId), inData, inEventString));
         }
-        else
+        else if (inEventType == APP_EVENT)
         {
             appEvents.add(new AppEvent(inTimestampNs, taskContainer.getTaskById(inEventTaskId), inData, inEventString));
         }
@@ -71,6 +75,14 @@ public class EventContainer {
         resultArrayList.addAll(schedulerEvents);
         resultArrayList.addAll(appEvents);
         resultArrayList.addAll(hackerEvents);
+        return resultArrayList;
+    }
+
+    public ArrayList getAppAndSchedulerEvents()
+    {
+        ArrayList resultArrayList = new ArrayList();
+        resultArrayList.addAll(schedulerEvents);
+        resultArrayList.addAll(appEvents);
         return resultArrayList;
     }
 

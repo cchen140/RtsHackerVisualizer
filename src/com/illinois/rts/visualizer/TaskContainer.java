@@ -31,7 +31,7 @@ public class TaskContainer {
             return false;
         }
 
-        tasks.put(taskId, new Task(taskId, taskTitle, getColorByIndex(tasks.size())));
+        tasks.put(taskId, new Task(taskId, taskTitle, getColorByIndex(taskId)));
         return true;
 
     }
