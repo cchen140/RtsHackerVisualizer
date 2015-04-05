@@ -49,4 +49,6 @@ public class AppEvent extends Event {
     public int getTaskId(){
         return task.getId();
     }
+
+    Task getTask() { return task; }
 }

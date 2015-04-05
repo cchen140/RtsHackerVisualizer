@@ -7,7 +7,7 @@ import java.security.InvalidParameterException;
 /**
  * Created by CY on 2/16/2015.
  */
-public class LogLoader extends DialogFileLoader {
+public class LogLoader extends DialogFileHandler {
     private static final int LOG_BLOCK_UNKNOWN = 0;
     private static final int LOG_BLOCK_TASK_LIST = 1;
     private static final int LOG_BLOCK_SCHEDULER_LOG = 2;
@@ -138,6 +138,8 @@ public class LogLoader extends DialogFileLoader {
 
         ProgMsg.putLine("%d lines loaded from the log file.", lineCounter);
         System.out.format("%d lines loaded from the log file.\n", lineCounter);
+
+        ProgMsg.putLine("first time stamp: %d", firstTimeStamp);
         return true;
     }
 

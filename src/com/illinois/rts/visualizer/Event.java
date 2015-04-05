@@ -16,6 +16,7 @@ public abstract class Event {
 
     public Event(){}
 
+    public int getOrgBeginTimestampNs() { return orgBeginTimestampNs; }
     public int getScaledBeginTimestamp()
     {
         return scaledBeginTimestamp;

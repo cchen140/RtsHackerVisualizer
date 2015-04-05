@@ -104,4 +104,8 @@ public class HackerEvent extends Event {
         }
     }
 
+    public int getRecordData()
+    {
+        return recordData;
+    }
 }

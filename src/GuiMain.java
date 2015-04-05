@@ -4,6 +4,7 @@ import com.illinois.rts.visualizer.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 /**
  * Created by CY on 2/10/2015.
@@ -23,6 +24,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private JScrollPane zPanelScrollVertical;
     private TimeLinePanel zPanelTimeLine;
     private JScrollPane zPanelTimeLineScrollHorizontal;
+    private JButton buttonExportLog;
 
     JFrame frame = new JFrame("RTS Hacker Visualizer");
 
@@ -60,6 +62,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         btnHideTaskList.addActionListener(this);
         buttonOpenFile.addActionListener(this);
         buttonSettings.addActionListener(this);
+        buttonExportLog.addActionListener(this);
 
         taskList.addMouseListener(this);
 
@@ -81,6 +84,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         try {
             logLoader.loadDemoLog();
             drawPlotFromLogLoader();
+            buttonExportLog.setEnabled(true);
         } catch (Exception ex) {
             System.err.println(ex);
             //ex.printStackTrace();
@@ -121,6 +125,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 if (logLoader.loadLogFromDialog() != null) {
                 /* TODO: you may want to do something after loading the log file. */
                     drawPlotFromLogLoader();
+                    buttonExportLog.setEnabled(true);
                 }
             } catch (Exception ex) {
 
@@ -141,6 +146,16 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 zPanel.repaint();
             }
 
+        } else if (e.getSource() == buttonExportLog) {
+            if (logLoader.getEventContainer() != null)
+            {
+                DataExporter dataExporter = new DataExporter(logLoader.getEventContainer());
+                try {
+                    dataExporter.exportMathematicalDataFromDialog();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
 
 
@@ -162,6 +177,11 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         taskList.setListData(logLoader.getEventContainer().getTaskContainer().getTasksAsArray());
     }
 
+
+    private void exportMathematicalLog(EventContainer inEventContainer)
+    {
+
+    }
 
     public void mousePressed(MouseEvent e) {
     }

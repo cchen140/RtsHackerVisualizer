@@ -69,6 +69,20 @@ public class EventContainer {
     public ArrayList<SchedulerEvent> getSchedulerEvents() { return schedulerEvents; }
     public ArrayList<AppEvent> getAppEvents() { return appEvents; }
     public  ArrayList<HackerEvent> getHackerEvents() { return hackerEvents; }
+
+    public ArrayList<HackerEvent> getLowHackerEvents()
+    {
+        ArrayList resultArrayList = new ArrayList();
+        for (HackerEvent currentEvent : hackerEvents)
+        {
+            if (currentEvent.getTaskId() == HackerEvent.lowHackerId)
+            {
+                resultArrayList.add(currentEvent);
+            }
+        }
+        return resultArrayList;
+    }
+
     public ArrayList getAllEvents()
     {
         ArrayList resultArrayList = new ArrayList();
