@@ -55,4 +55,9 @@ public abstract class Event {
         g.fillPolygon(new int[] {len, len-ARR_SIZE, len-ARR_SIZE, len},
                 new int[] {0, -ARR_SIZE, ARR_SIZE, 0}, 4);
     }
+
+    protected int getGraphicStringWidth(Graphics2D g, String inString) {
+        FontMetrics fm = g.getFontMetrics();
+        return fm.stringWidth(inString);
+    }
 }

@@ -63,10 +63,15 @@ public class HackerEvent extends Event {
             {
                 /* Display in North */
                 g.setColor(Color.black);
+
+                String drawnString = String.valueOf(recordData);
+                int stringWidth = getGraphicStringWidth(g, drawnString);
+
                 //g.drawLine(currentOffsetX, offsetY - 50, currentOffsetX, offsetY);
                 //drawObject.setFillColor(task.getTaskColor());
-                g.fillRect(currentOffsetX - BAR_WIDTH / 2, offsetY - scaledRecordData, BAR_WIDTH, scaledRecordData);
-                //g.drawString(note, currentOffsetX, offsetY - 70);
+//                g.fillRect(currentOffsetX - BAR_WIDTH / 2, offsetY - scaledRecordData, BAR_WIDTH, scaledRecordData);
+                g.drawString(drawnString, currentOffsetX-stringWidth/2, offsetY + 25);
+                //g.drawString(note, currentOffsetX, offsetY - 70); // H label
                 //drawArrow(g, currentOffsetX, offsetY - 50, currentOffsetX, offsetY);
             }
             else if (task.getId() == lowHackerId)
@@ -90,7 +95,13 @@ public class HackerEvent extends Event {
 
     @Override
     public TraceSpace getGraphSpace() {
-        return new TraceSpace(0, 25);
+        if (getTaskId() == highHackerId) {
+            return new TraceSpace(0, 25);
+        }
+        else //if (getTaskId() == lowHackerId)
+        {
+            return new TraceSpace(0, 25);
+        }
     }
 
 }
