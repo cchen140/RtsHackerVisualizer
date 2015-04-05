@@ -31,7 +31,15 @@ public class TaskContainer {
             return false;
         }
 
-        tasks.put(taskId, new Task(taskId, taskTitle, getColorByIndex(taskId)));
+        Color currentColor;
+        if (taskTitle.equalsIgnoreCase("IDLE")) {
+            currentColor = Color.lightGray;
+        }
+        else {
+            currentColor = getColorByIndex(taskId);
+        }
+
+        tasks.put(taskId, new Task(taskId, taskTitle, currentColor));
         return true;
 
     }
