@@ -11,12 +11,14 @@ public class SchedulerEvent extends Event {
 
     private Task task = null;
     private DrawPhase drawObject = new DrawPhase();
+    private String note = "";
 
     public SchedulerEvent(int inTimeStamp, Task inTask, String inNote)
     {
         orgBeginTimestampNs = inTimeStamp;
         scaledBeginTimestamp = inTimeStamp;
         task = inTask;
+        note = inNote;
 
         drawObject.setLabel(task.getTitle());
         drawObject.setFillColor(task.getTaskColor());
@@ -54,4 +56,9 @@ public class SchedulerEvent extends Event {
     }
 
     Task getTask() { return task; }
+
+    String getNote()
+    {
+        return note;
+    }
 }
