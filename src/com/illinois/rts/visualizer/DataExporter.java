@@ -21,13 +21,13 @@ public class DataExporter extends DialogFileHandler{
     public void exportMathematicalDataFromDialog() throws IOException {
 
         openWriteFileFromDialog();  // set up fileWriter.
-        if (generateMathematicalData(eventContainer, fileWriter) == true) {
-            ProgMsg.putLine("Successfully generate mathematical data file.");
+        if (generateBusyIntervalDataFromScheduler(eventContainer, fileWriter) == true) {
+            ProgMsg.putLine("Successfully generate busy interval data file.");
             fileWriter.close();
         }
         else
         {
-
+            ProgMsg.errPutline("Failed to generate busy interval data file");
         }
 
     }
@@ -38,7 +38,7 @@ public class DataExporter extends DialogFileHandler{
      * @param inFileWriter the BufferedWriter of the file to be written.
      * @return 'true' if succeeded and 'false' if something is wrong.
      */
-    protected Boolean generateMathematicalData(EventContainer inEventContainer, BufferedWriter inFileWriter)
+    protected Boolean generateBusyIntervalDataFromHacker(EventContainer inEventContainer, BufferedWriter inFileWriter)
     {
         int previousTimeStamp = 0;
         ArrayList<HackerEvent> lowHackerEvents = inEventContainer.getLowHackerEvents();
@@ -87,4 +87,71 @@ public class DataExporter extends DialogFileHandler{
 
         return true;
     }
+
+
+    /* This method uses the memo attribute of scheduler events to determine whether it is "BEGIN" of
+       a task or "IDLE" status.
+    */
+    protected Boolean generateBusyIntervalDataFromScheduler(EventContainer inEventContainer, BufferedWriter inFileWriter)
+    {
+        ArrayList<SchedulerEvent> schedulerEvents = inEventContainer.getSchedulerEvents();
+        int idleTaskId = 0;
+
+        // Find IDLE task ID
+        for (Object currentObject : inEventContainer.getTaskContainer().getTasksAsArray())
+        {
+            Task currentTask = (Task) currentObject;
+            if (currentTask.getTitle().equalsIgnoreCase("IDLE")){
+                idleTaskId = currentTask.getId();
+                break;
+            }
+        }
+
+        Boolean busyIntervalFound = false;
+        int beginTimeStamp = 0;
+        String groundTruthString = "";
+        for (SchedulerEvent currentEvent: schedulerEvents)
+        {
+            if (busyIntervalFound == false)
+            {
+                if (currentEvent.getTask().getId() == idleTaskId) {
+                    continue;
+                }
+                else
+                { // Busy interval is found.
+                    busyIntervalFound = true;
+
+                    beginTimeStamp = currentEvent.getOrgBeginTimestampNs();
+
+                    groundTruthString = "[";
+                    groundTruthString += currentEvent.getTask().getId();
+                    continue;
+                }
+            }
+
+            if (currentEvent.getTask().getId() == idleTaskId)
+            { // This is the end of a busy interval.
+                groundTruthString += "]";
+                try {
+                    inFileWriter.write(beginTimeStamp + ", " + (currentEvent.getOrgBeginTimestampNs()-beginTimeStamp) + ", " + groundTruthString + "\r\n");
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    System.err.format("IOException @ generateMathematicalData: Failed to write the data to the file.\r\n");
+                    return false;
+                }
+
+                busyIntervalFound = false;
+            }
+            else
+            {
+                if (currentEvent.getNote().equalsIgnoreCase("BEGIN"))
+                { // This is the beginning of a task, not a resuming task that was preempted.
+                    groundTruthString += ", " + currentEvent.getTask().getId();
+                }
+            }
+
+        } // End of scheduler events iteration loop.
+        return true;
+    }
 }
+
