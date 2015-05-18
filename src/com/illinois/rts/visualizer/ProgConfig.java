@@ -16,7 +16,7 @@ public class ProgConfig {
 
 
     /* Configuration from log */
-    public static double TIMESTAMP_UNIT_NS = 3; // 3ns
+    public static double TIMESTAMP_UNIT_NS = 1; // 1 tick represents 1ns
 
     /* Trace Settings */
     public static int TRACE_HORIZONTAL_SCALE_DIVIDER = 30000;
