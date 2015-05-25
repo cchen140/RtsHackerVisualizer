@@ -1,5 +1,7 @@
 import javax.swing.*;
 
+import com.illinois.rts.analysis.busyintervals.BusyInterval;
+import com.illinois.rts.analysis.busyintervals.Decomposition;
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.visualizer.*;
 
@@ -26,6 +28,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private TimeLinePanel zPanelTimeLine;
     private JScrollPane zPanelTimeLineScrollHorizontal;
     private JButton buttonExportLog;
+    private JButton buttonCompute;
 
     JFrame frame = new JFrame("RTS Hacker Visualizer");
 
@@ -66,6 +69,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         buttonOpenFile.addActionListener(this);
         buttonSettings.addActionListener(this);
         buttonExportLog.addActionListener(this);
+        buttonCompute.addActionListener(this);
 
         taskList.addMouseListener(this);
 
@@ -159,8 +163,12 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                     ex.printStackTrace();
                 }
             }
-        }
+        } else if (e.getSource() == buttonCompute) {
+            Decomposition decomposition = new Decomposition(eventContainer.getTaskContainer());
 
+            BusyInterval testBusyInterval = new BusyInterval(128000000, 128000000+11500000);//0, 17700000);
+            decomposition.calculateComposition(testBusyInterval);
+        }
 
     }
 

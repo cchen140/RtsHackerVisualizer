@@ -72,6 +72,14 @@
                 <properties/>
                 <border type="none"/>
                 <children>
+                  <component id="a70e" class="javax.swing.JButton" binding="buttonCompute">
+                    <constraints/>
+                    <properties>
+                      <font size="16"/>
+                      <preferredSize width="120" height="30"/>
+                      <text value="Compute"/>
+                    </properties>
+                  </component>
                   <component id="f4ed3" class="javax.swing.JButton" binding="buttonExportLog">
                     <constraints/>
                     <properties>
