@@ -33,6 +33,8 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private LogLoader logLoader = new LogLoader();
 //    public ProgMsg progMsger = null;
 
+    private EventContainer eventContainer = new EventContainer();
+
     public void initGui() {
 
         frame.setContentPane(new GuiMain().panel1);
@@ -83,13 +85,13 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 
         /* Load default demo log file. */
         try {
-            logLoader.loadDemoLog();
-            drawPlotFromLogLoader();
+            eventContainer = logLoader.loadDemoLog();
             buttonExportLog.setEnabled(true);
         } catch (Exception ex) {
             System.err.println(ex);
             //ex.printStackTrace();
         }
+        drawPlotFromEventContainer();
 
 
         // Make zPanel visible.
@@ -123,9 +125,9 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         } else if (e.getSource() == buttonOpenFile) {
 
             try {
-                if (logLoader.loadLogFromDialog() != null) {
-                /* TODO: you may want to do something after loading the log file. */
-                    drawPlotFromLogLoader();
+                eventContainer = logLoader.loadLogFromDialog();
+                if (eventContainer != null) {
+                    drawPlotFromEventContainer();
                     buttonExportLog.setEnabled(true);
                 }
             } catch (Exception ex) {
@@ -148,9 +150,9 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
             }
 
         } else if (e.getSource() == buttonExportLog) {
-            if (logLoader.getEventContainer() != null)
+            if (eventContainer != null)
             {
-                DataExporter dataExporter = new DataExporter(logLoader.getEventContainer());
+                DataExporter dataExporter = new DataExporter(eventContainer);
                 try {
                     dataExporter.exportMathematicalDataFromDialog();
                 } catch (IOException ex) {
@@ -170,12 +172,12 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         return instance;
     }
 
-    private void drawPlotFromLogLoader()
+    private void drawPlotFromEventContainer()
     {
-        zPanel.setEventContainer(logLoader.getEventContainer());
+        zPanel.setEventContainer(eventContainer);
         // zPanel (PanelDrawer) will update the content automatically, periodically.
 
-        taskList.setListData(logLoader.getEventContainer().getTaskContainer().getTasksAsArray());
+        taskList.setListData(eventContainer.getTaskContainer().getTasksAsArray());
     }
 
 
