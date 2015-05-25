@@ -1,5 +1,7 @@
 package com.illinois.rts.visualizer;
 
+import com.illinois.rts.visualizer.TraceSpace;
+
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 

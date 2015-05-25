@@ -1,5 +1,7 @@
 package com.illinois.rts.visualizer;
 
+import com.illinois.rts.framework.*;
+
 import java.awt.*;
 
 /**

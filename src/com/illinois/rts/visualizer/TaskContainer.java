@@ -1,13 +1,10 @@
 package com.illinois.rts.visualizer;
 
-import com.sun.javafx.scene.control.skin.ColorPalette;
+import com.illinois.rts.framework.Task;
 
-import javax.swing.text.StyleConstants;
 import java.awt.*;
-import java.awt.color.ColorSpace;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 /**
  * Created by CY on 2/17/2015.
@@ -17,13 +14,12 @@ public class TaskContainer {
     public HashMap<Integer, Task> tasks = new HashMap<Integer, Task>();
     private ArrayList<Color> colorList = new ArrayList<Color>();
 
-
     public TaskContainer()
     {
         initColorList();
     }
 
-    public Boolean addTask(int taskId, String taskTitle)
+    public Boolean addTask(int taskId, String taskTitle, int taskType, int taskPeriod, int taskComputationTime, int taskPriority)
     {
         String reTaskTitle = taskTitle.toLowerCase().trim();
         if (tasks.containsKey(reTaskTitle))
@@ -39,7 +35,7 @@ public class TaskContainer {
             currentColor = getColorByIndex(taskId);
         }
 
-        tasks.put(taskId, new Task(taskId, taskTitle, currentColor));
+        tasks.put(taskId, new Task(taskId, taskTitle, currentColor, taskType, taskPeriod, taskComputationTime, taskPriority));
         return true;
 
     }
@@ -52,6 +48,19 @@ public class TaskContainer {
     public Object[] getTasksAsArray()
     {
         return tasks.values().toArray();
+    }
+
+    public Object[] getAppTasksAsArray()
+    {
+        ArrayList<Task> appTasks = new ArrayList<Task>();
+        for (Task thisTask: tasks.values())
+        {
+            if (thisTask.getTaskType() == Task.TASK_TYPE_APP)
+            {
+                appTasks.add(thisTask);
+            }
+        }
+        return appTasks.toArray();
     }
 
     public Color getColorByIndex(int index)

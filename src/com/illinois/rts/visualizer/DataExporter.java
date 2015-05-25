@@ -1,9 +1,9 @@
 package com.illinois.rts.visualizer;
 
+import com.illinois.rts.framework.Task;
+
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 
 /**

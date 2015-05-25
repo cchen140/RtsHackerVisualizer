@@ -1,5 +1,6 @@
 import javax.swing.*;
 
+import com.illinois.rts.framework.Task;
 import com.illinois.rts.visualizer.*;
 
 import java.awt.*;

@@ -41,7 +41,7 @@ public class LogLoader extends DialogFileHandler {
 
     public EventContainer loadDemoLog() throws IOException
     {
-        String demoLogFilePath = "./log/demoLog4.txt";
+        String demoLogFilePath = "./log/demoLog1.txt";
         if (loadLog(this.openFile(demoLogFilePath)) == false)
             throw new InvalidParameterException("Demo log file is incorrect.");
         else
@@ -94,7 +94,7 @@ public class LogLoader extends DialogFileHandler {
                     currentLogBlock = LOG_BLOCK_HACKER_LIST;
                     continue;
                 }
-                else  if (currentLogBlock == LOG_BLOCK_UNKNOWN) // Unknown lines.
+                else if (currentLogBlock == LOG_BLOCK_UNKNOWN) // Unknown lines.
                     continue;
 
 
@@ -162,14 +162,20 @@ public class LogLoader extends DialogFileHandler {
      * @param line One log line string to be parsed. Format: [taskId, TaskName]
      * @return 'true' for successfully parsing the line, whereas 'false' for not.
      */
+    // id, task type, task name, period, computation time, priority
     private Boolean parseLogLineTaskList(String line)
     {
-        /* Format: [taskId, TaskName] */
+        /* Format: [taskId, taskType, taskName, taskPeriod, taskComputationTime, taskPriority] */
         String splitStrings[] = line.split(",");
-        if (splitStrings.length == 2) {
+        if (splitStrings.length == 6) {
             int taskId = Integer.valueOf(splitStrings[0].trim()).intValue();
-            String taskTitle = splitStrings[1].trim().substring(1, splitStrings[1].trim().length() - 1);
-            taskContainer.addTask(taskId, taskTitle);
+            int taskType = Integer.valueOf(splitStrings[1].trim()).intValue();
+            String taskTitle = splitStrings[2].trim().substring(1, splitStrings[2].trim().length() - 1);
+            int taskPeriod = Integer.valueOf(splitStrings[3].trim()).intValue();
+            int taskComputationTime = Integer.valueOf(splitStrings[4].trim()).intValue();
+            int taskPriority = Integer.valueOf(splitStrings[5].trim()).intValue();
+
+            taskContainer.addTask( taskId, taskTitle, taskType, taskPeriod, taskComputationTime, taskPriority);
             return true;
         }
         else {

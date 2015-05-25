@@ -1,5 +1,7 @@
 package com.illinois.rts.visualizer;
 
+import com.illinois.rts.framework.Task;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;

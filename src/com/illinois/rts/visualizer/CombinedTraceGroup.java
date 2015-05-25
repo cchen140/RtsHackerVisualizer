@@ -1,5 +1,7 @@
 package com.illinois.rts.visualizer;
 
+import com.illinois.rts.framework.Task;
+
 import java.awt.*;
 import java.util.ArrayList;
 //import com.illinois.rts.visualizer.ProgramConfigurations;
