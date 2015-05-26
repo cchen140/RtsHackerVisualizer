@@ -6,6 +6,10 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+// For sorting ArrayList
+import java.util.Collections;
+
+
 /**
  * Created by CY on 2/17/2015.
  */
@@ -47,7 +51,15 @@ public class TaskContainer {
 
     public Object[] getTasksAsArray()
     {
-        return tasks.values().toArray();
+        ArrayList<Task> resultTaskList = new ArrayList<Task>();
+        ArrayList<Integer> taskIdList = new ArrayList<Integer>(tasks.keySet());
+        Collections.sort(taskIdList);
+        for (int thisTaskId : taskIdList)
+        {
+            resultTaskList.add(tasks.get(thisTaskId));
+        }
+
+        return resultTaskList.toArray();
     }
 
     public Object[] getAppTasksAsArray()
