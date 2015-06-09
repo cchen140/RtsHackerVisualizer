@@ -18,13 +18,22 @@ public class Decomposition {
         taskContainer = inTaskContainer;
     }
 
+    public Boolean calculateCompositionToBusyIntervalContainer(BusyIntervalContainer inBusyIntervalContainer)
+    {
+        for (BusyInterval thisBusyInterval : inBusyIntervalContainer.getBusyIntervals())
+        {
+            thisBusyInterval.setComposition(calculateComposition(thisBusyInterval));
+        }
+        return true;
+    }
 
     /* */
-    public void calculateComposition(BusyInterval inBusyInterval)
+    public ArrayList<HashMap<Integer, Integer>> calculateComposition(BusyInterval inBusyInterval)
     {
         int intervalNs = inBusyInterval.getIntervalNs();
 //        int matchingInterval = 0;
 
+        /* Calculate N of each task. */
         HashMap<Integer, ArrayList<Integer>> nOfTasks = new HashMap<Integer, ArrayList<Integer>>();
         for (Object thisObject: taskContainer.getAppTasksAsArray())
         {
@@ -55,9 +64,11 @@ public class Decomposition {
 //            matchingInterval += thisResult.get(0);
         }
 
+        // Find Ns match this interval.
         ArrayList<HashMap<Integer, Integer>> resultsNOfTasks;// = new ArrayList<HashMap<Integer, Integer>>();//HashMap<Integer, Integer>();
         resultsNOfTasks = findMatchingNs(nOfTasks, intervalNs, null);
-        System.out.println(resultsNOfTasks);
+//        System.out.println(resultsNOfTasks);
+        return resultsNOfTasks;
 
     }
 

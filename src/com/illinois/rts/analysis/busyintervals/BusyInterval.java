@@ -2,6 +2,7 @@ package com.illinois.rts.analysis.busyintervals;
 import com.illinois.rts.framework.Task;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by CY on 5/21/2015.
@@ -9,7 +10,8 @@ import java.util.ArrayList;
 public class BusyInterval {
     private int beginTimeStampNs = 0;
     private int endTimeStampNs = 0;
-    private ArrayList<Task> composition;
+//    private ArrayList<Task> composition;
+    private ArrayList<HashMap<Integer, Integer>> composition;
     private ArrayList<Task> compositionGroundTruth;
 
     public BusyInterval(int inBeginTimeStamp, int inEndTimeStamp)
@@ -23,7 +25,7 @@ public class BusyInterval {
         compositionGroundTruth = inGroundTruth;
     }
 
-    public void setComposition(ArrayList<Task> inComposition)
+    public void setComposition(ArrayList<HashMap<Integer, Integer>> inComposition)
     {
         composition = inComposition;
     }
@@ -32,4 +34,20 @@ public class BusyInterval {
     {
         return (endTimeStampNs - beginTimeStampNs);
     }
+
+    public int getBeginTimeStampNs()
+    {
+        return beginTimeStampNs;
+    }
+
+    public ArrayList<Task> getCompositionGroundTruth()
+    {
+        return  compositionGroundTruth;
+    }
+
+    public ArrayList<HashMap<Integer, Integer>> getComposition()
+    {
+        return composition;
+    }
+
 }

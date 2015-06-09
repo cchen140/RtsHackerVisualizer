@@ -57,9 +57,9 @@ public class SchedulerEvent extends Event {
         return new TraceSpace(drawObject.getHeight(), 0);
     }
 
-    Task getTask() { return task; }
+    public Task getTask() { return task; }
 
-    String getNote()
+    public String getNote()
     {
         return note;
     }

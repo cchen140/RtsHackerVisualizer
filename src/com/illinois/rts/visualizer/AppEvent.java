@@ -51,5 +51,10 @@ public class AppEvent extends Event {
         return task.getId();
     }
 
-    Task getTask() { return task; }
+    public Task getTask() { return task; }
+
+    public String getNote()
+    {
+        return note;
+    }
 }

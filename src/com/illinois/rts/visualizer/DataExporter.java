@@ -1,5 +1,8 @@
 package com.illinois.rts.visualizer;
 
+import com.illinois.rts.analysis.busyintervals.BusyInterval;
+import com.illinois.rts.analysis.busyintervals.BusyIntervalContainer;
+import com.illinois.rts.analysis.busyintervals.Decomposition;
 import com.illinois.rts.framework.Task;
 
 import java.io.BufferedWriter;
@@ -21,7 +24,7 @@ public class DataExporter extends DialogFileHandler{
     public void exportMathematicalDataFromDialog() throws IOException {
 
         openWriteFileFromDialog();  // set up fileWriter.
-        if (generateBusyIntervalDataFromScheduler(eventContainer, fileWriter) == true) {
+        if (generateBusyIntervalDataFromEvents(eventContainer, fileWriter) == true) {
             ProgMsg.putLine("Successfully generate busy interval data file.");
             fileWriter.close();
         }
@@ -94,6 +97,8 @@ public class DataExporter extends DialogFileHandler{
     */
     protected Boolean generateBusyIntervalDataFromScheduler(EventContainer inEventContainer, BufferedWriter inFileWriter)
     {
+        Decomposition decomposition = new Decomposition(inEventContainer.getTaskContainer());
+
         ArrayList<SchedulerEvent> schedulerEvents = inEventContainer.getSchedulerEvents();
         int idleTaskId = 0;
 
@@ -140,6 +145,10 @@ public class DataExporter extends DialogFileHandler{
                     return false;
                 }
 
+                /* Test decomposition. */
+                BusyInterval busyInterval = new BusyInterval(beginTimeStamp, currentEvent.getOrgBeginTimestampNs());
+                decomposition.calculateComposition(busyInterval);
+                /**/
                 busyIntervalFound = false;
             }
             else
@@ -151,6 +160,54 @@ public class DataExporter extends DialogFileHandler{
             }
 
         } // End of scheduler events iteration loop.
+        return true;
+    }
+
+    /* This method uses the BusyInterval class to build intervals. It uses note attribute of the app events to
+     * determine whether it is "BEGIN" of a task or "IDLE" status.
+     */
+    protected Boolean generateBusyIntervalDataFromEvents(EventContainer inEventContainer, BufferedWriter inFileWriter)
+    {
+        BusyIntervalContainer busyIntervalContainer = new BusyIntervalContainer();
+        busyIntervalContainer.createBusyIntervalsFromEvents(inEventContainer);
+
+        Decomposition decomposition = new Decomposition(inEventContainer.getTaskContainer());
+        // Calculate composition with equations and put the result.
+        decomposition.calculateCompositionToBusyIntervalContainer(busyIntervalContainer);
+
+        for (BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals())
+        {
+            int beginTimeStampNs = thisBusyInterval.getBeginTimeStampNs();
+            int intervalNs = thisBusyInterval.getIntervalNs();
+            ArrayList<Task> compositionGroundTruth = thisBusyInterval.getCompositionGroundTruth();
+            String groundTruthString = "";
+
+            /* Build ground truth string. */
+            groundTruthString = "[";
+            Boolean firstLoop = true;
+            for (Task thisTask: compositionGroundTruth)
+            {
+                if (firstLoop == true)
+                {
+                    firstLoop = false;
+                }
+                else
+                {
+                    groundTruthString += ", ";
+                }
+                groundTruthString += thisTask.getId();
+            }
+            groundTruthString += "]";
+
+
+            try {
+                inFileWriter.write(beginTimeStampNs + ", " + intervalNs + ", " + groundTruthString + ", " + thisBusyInterval.getComposition() + "\r\n");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                System.err.format("IOException @ generateMathematicalData: Failed to write the data to the file.\r\n");
+                return false;
+            }
+        }
         return true;
     }
 }
