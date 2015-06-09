@@ -23,7 +23,8 @@ public class TaskContainer {
         initColorList();
     }
 
-    public Boolean addTask(int taskId, String taskTitle, int taskType, int taskPeriod, int taskComputationTime, int taskPriority)
+
+    public Boolean addTask(int taskId, String taskTitle, int taskType, int taskPeriod, int taskDeadline, int taskComputationTime, int taskPriority)
     {
         String reTaskTitle = taskTitle.toLowerCase().trim();
         if (tasks.containsKey(reTaskTitle))
@@ -31,17 +32,24 @@ public class TaskContainer {
             return false;
         }
 
-        Color currentColor;
-        if (taskTitle.equalsIgnoreCase("IDLE")) {
-            currentColor = Color.lightGray;
+        tasks.put(taskId, new Task(taskId, taskTitle, taskType, taskPeriod, taskComputationTime, taskPriority, taskDeadline));
+
+        if (taskTitle.equalsIgnoreCase("IDLE"))
+        {
+            tasks.get(taskId).setColor(Color.lightGray);
         }
-        else {
-            currentColor = getColorByIndex(taskId);
+        else
+        {
+            tasks.get(taskId).setColor(getColorByIndex(taskId));
         }
 
-        tasks.put(taskId, new Task(taskId, taskTitle, currentColor, taskType, taskPeriod, taskComputationTime, taskPriority));
         return true;
+    }
 
+    public Boolean addTask(int taskId, String taskTitle, int taskType, int taskPeriod, int taskComputationTime, int taskPriority)
+    {
+        // When adding this task, assign deadline as equals period.
+        return addTask(taskId, taskTitle, taskType, taskPeriod, taskPeriod, taskComputationTime, taskPriority);
     }
 
     public Task getTaskById(int searchId)
@@ -49,7 +57,7 @@ public class TaskContainer {
         return tasks.get(searchId);
     }
 
-    public Object[] getTasksAsArray()
+    public ArrayList<Task> getTasksAsArray()
     {
         ArrayList<Task> resultTaskList = new ArrayList<Task>();
         ArrayList<Integer> taskIdList = new ArrayList<Integer>(tasks.keySet());
@@ -59,7 +67,8 @@ public class TaskContainer {
             resultTaskList.add(tasks.get(thisTaskId));
         }
 
-        return resultTaskList.toArray();
+//        return resultTaskList.toArray();
+        return resultTaskList;
     }
 
     public Object[] getAppTasksAsArray()

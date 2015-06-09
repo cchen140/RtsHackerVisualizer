@@ -1,6 +1,7 @@
 package com.illinois.rts.framework;
 
 import java.awt.*;
+import java.util.LinkedList;
 
 /**
  * Created by CY on 2/17/2015.
@@ -16,14 +17,15 @@ public class Task {
     private String symbol = ""; // Mainly for representing high/low hacker with symbol "H"/"L" in the icon.
     private Color color = Color.black;
     private Boolean displayBoxChecked = true;
-    private int id = 0;
+    protected int id = 0;
 
     private int taskType = TASK_TYPE_UNKNOWN;
 
-    private int periodNs = 0;
+    protected int periodNs = 0;
 
-    private int computationTimeNs = 0;
-    private int priority = 0;
+    protected int computationTimeNs = 0;
+    protected int priority = 0;
+    protected int deadlineNs = 0;
 
     public Task(){}
 
@@ -107,4 +109,47 @@ public class Task {
     {
         return taskType;
     }
+
+    public int getDeadlineNs() { return deadlineNs; }
+
+    public int getPriority() { return priority; }
+
+    public void setPriority(int inPriority)
+    {
+        priority = inPriority;
+    }
+
+    public void setDeadlineNs(int inDeadlineNs)
+    {
+        deadlineNs = inDeadlineNs;
+    }
+
+
+
+    /* The following section is from Man-Ki's RM scheduling simulator. */
+    public int initialOffset;
+
+    public long WCRT;
+
+    public long jobSeqNo;
+    public long lastReleaseTime;
+    public long lastFinishTime;
+
+    public long nextReleaseTime;
+
+    public Task(int inTaskId, String inTitle, int inType, int inPeriod, int inComputationTime, int inPriority, int inDeadline)
+    {
+        this(inTaskId, inTitle, null, inType, inPeriod, inComputationTime, inPriority);
+        deadlineNs = inDeadline;
+    }
+
+    @Override
+    public String toString() {
+        return "[Task " + id + "] p = " + periodNs + ", e = " + computationTimeNs
+                + ", d = " + deadlineNs + ", prio = " + priority;
+    }
+
+    public LinkedList<Long> responseTimeHistory = new LinkedList<Long>();
+    public LinkedList<Long> interarrivalTImeHistory = new LinkedList<Long>();
+    public LinkedList<Long> execTimeHistory = new LinkedList<Long>();
 }

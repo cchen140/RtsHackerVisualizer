@@ -3,11 +3,14 @@ import javax.swing.*;
 import com.illinois.rts.analysis.busyintervals.BusyInterval;
 import com.illinois.rts.analysis.busyintervals.Decomposition;
 import com.illinois.rts.framework.Task;
+import com.illinois.rts.simulator.ConfigLoader;
+import com.illinois.rts.simulator.RmScheduling;
 import com.illinois.rts.visualizer.*;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by CY on 2/10/2015.
@@ -135,7 +138,8 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                     buttonExportLog.setEnabled(true);
                 }
             } catch (Exception ex) {
-
+                System.out.println("Error occurs while opening the file.");
+                System.out.println(ex);
             }
         } else if (e.getSource() == buttonSettings) {
 //            ProgramLogMessenger.getInstance().putLine("settings button clicked.");
@@ -164,10 +168,27 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 }
             }
         } else if (e.getSource() == buttonCompute) {
-            Decomposition decomposition = new Decomposition(eventContainer.getTaskContainer());
+            try {
+                ConfigLoader configLoader = new ConfigLoader();
+                TaskContainer simTaskContainer = configLoader.loadConfigFromDialog();
+                System.out.println(simTaskContainer.tasks);
+                if (simTaskContainer.size() > 0) {
+                    RmScheduling rmScheduling = new RmScheduling();
+                    rmScheduling.setTaskContainer(simTaskContainer);
+                    if (rmScheduling.run(100000000) == true)
+                    {
+                        eventContainer = rmScheduling.getSimEventContainer();
+                        if (eventContainer != null) {
+                            drawPlotFromEventContainer();
+                            buttonExportLog.setEnabled(true);
+                        }
+                    }
 
-            BusyInterval testBusyInterval = new BusyInterval(128000000, 128000000+11500000);//0, 17700000);
-            decomposition.calculateComposition(testBusyInterval);
+                }
+            } catch (Exception ex) {
+                System.out.println("Error occurs while opening the config file.");
+                System.out.println(ex);
+            }
         }
 
     }
@@ -185,7 +206,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         zPanel.setEventContainer(eventContainer);
         // zPanel (PanelDrawer) will update the content automatically, periodically.
 
-        taskList.setListData(eventContainer.getTaskContainer().getTasksAsArray());
+        taskList.setListData(eventContainer.getTaskContainer().getTasksAsArray().toArray());
     }
 
 

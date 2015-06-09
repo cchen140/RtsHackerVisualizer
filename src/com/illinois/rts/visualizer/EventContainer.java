@@ -27,7 +27,8 @@ public class EventContainer {
 
     public void add(int inEventType, int inTimestampNs, int inEventTaskId, int inData, String inEventString)
     {
-        if (inEventType == SCHEDULER_EVENT) {
+        if (inEventType == SCHEDULER_EVENT)
+        {// inEventTaskId is 0 as from scheduler, inData is the Id of the task being scheduled.
             if (schedulerEvents.size() > 0) {
                 schedulerEvents.get(schedulerEvents.size() - 1).setOrgEndTimestampNs(inTimestampNs);
             }

@@ -180,6 +180,7 @@ public class LogLoader extends DialogFileHandler {
         }
         else {
             // Incorrect task list log format.
+            System.out.println("Task List is wrong in the log file.");
             return false;
         }
     }
