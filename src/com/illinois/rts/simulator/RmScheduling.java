@@ -9,6 +9,7 @@ import com.illinois.rts.visualizer.Event;
 import com.illinois.rts.visualizer.EventContainer;
 import com.illinois.rts.visualizer.TaskContainer;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -22,6 +23,8 @@ import java.util.StringTokenizer;
 
 public class RmScheduling {
     private static int IDLE_TASK_ID = 99;
+
+    public ProgressUpdater progressUpdater = new ProgressUpdater();
 
     TaskContainer simTaskContainer = null;
     ArrayList<Task> allTasks = null;
@@ -38,7 +41,7 @@ public class RmScheduling {
     String inputFileName = null;
     long NUM_INVOC = 0;
     static boolean DEBUG = false; // ////////////////////////////////////////////////////////////////////////
-    static boolean DEBUG_SCHLOG = true;// Added by CY
+    static boolean DEBUG_SCHLOG = false;// Added by CY
     static Random random = new Random();
 
     private EventContainer simEventContainer = new EventContainer();
@@ -71,7 +74,7 @@ public class RmScheduling {
         // totalUtil?
     }
 
-    public boolean run(long tickLimit) {
+    public boolean runSim(long tickLimit) {
         if (allTasks == null)
         {
             return false;
@@ -86,13 +89,24 @@ public class RmScheduling {
 //            return false;
 
         /* Simulation starts. */
+        progressUpdater.setIsStarted(true);
         while (true) {
             if (release() == false)
                 return false;
             if (schedule() == true)
                 tick++;
-            if (tick == tickLimit)
+
+            progressUpdater.setProgressPercent(((double)tick/(double)tickLimit));
+
+            if (tick == tickLimit) {
+                progressUpdater.setIsFinished(true);
                 break;
+            }
+
+            if (Thread.currentThread().isInterrupted() == true)
+            {
+                return false;
+            }
         }
 
         for (int i = 0; i < numTasks; i++) {
@@ -187,6 +201,52 @@ public class RmScheduling {
 //            e.printStackTrace();
 //        }
         return true;
+    }
+
+    public boolean runSimWithProgressDialog(long tickLimit, Component locationReference)
+    {
+        DialogSimulationProgress dialogSimulationProgress = new DialogSimulationProgress();
+        dialogSimulationProgress.setProgressUpdater(progressUpdater);
+
+        SimThread rmSimThread = new SimThread(tickLimit);
+        dialogSimulationProgress.setWatchedSimThread(rmSimThread);
+        rmSimThread.start();
+
+        dialogSimulationProgress.pack();
+        if (locationReference != null)
+            dialogSimulationProgress.setLocationRelativeTo(locationReference);
+        dialogSimulationProgress.setVisible(true);
+
+        if ( (dialogSimulationProgress.isSimCanceled()==false)&&(rmSimThread.getSimResult()==true))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    class SimThread extends Thread
+    {
+        long simTickLength = 0;
+        Boolean simResult = false;
+
+        public SimThread(long inSimTickLength)
+        {
+            super();
+            simTickLength = inSimTickLength;
+        }
+
+        public void run()
+        {
+            simResult = runSim(simTickLength);
+        }
+
+        public Boolean getSimResult()
+        {
+            return simResult;
+        }
     }
 
     long getNextInterarrivalTime(Task task_i) {
@@ -311,9 +371,7 @@ public class RmScheduling {
             if (job_i.remainingExecTime == job_i.task.getComputationTimeNs()) {
                 //TODO: tick is in long(64-bit) while timestamp is in int(32-bit), inconsistent.
                 simEventContainer.add(EventContainer.SCHEDULER_EVENT, (int) tick, 0, job_i.task.getId(), "BEGIN");
-                System.out.println("OK1");
                 simEventContainer.add(EventContainer.APP_EVENT, (int) tick, job_i.task.getId(), 0, "BEGIN");
-                System.out.println("OK2");
             }
             else {
                 simEventContainer.add(EventContainer.SCHEDULER_EVENT, (int) tick, 0, job_i.task.getId(), "RESUME");

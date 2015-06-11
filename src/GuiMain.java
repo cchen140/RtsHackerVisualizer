@@ -171,11 +171,11 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
             try {
                 ConfigLoader configLoader = new ConfigLoader();
                 TaskContainer simTaskContainer = configLoader.loadConfigFromDialog();
-                System.out.println(simTaskContainer.tasks);
+//                System.out.println(simTaskContainer.tasks);
                 if (simTaskContainer.size() > 0) {
                     RmScheduling rmScheduling = new RmScheduling();
                     rmScheduling.setTaskContainer(simTaskContainer);
-                    if (rmScheduling.run(100000000) == true)
+                    if (rmScheduling.runSimWithProgressDialog(100000000, frame) == true)
                     {
                         eventContainer = rmScheduling.getSimEventContainer();
                         if (eventContainer != null) {
