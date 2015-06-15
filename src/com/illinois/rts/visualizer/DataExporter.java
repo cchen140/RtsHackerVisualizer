@@ -181,6 +181,7 @@ public class DataExporter extends DialogFileHandler{
             int intervalNs = thisBusyInterval.getIntervalNs();
             ArrayList<Task> compositionGroundTruth = thisBusyInterval.getCompositionGroundTruth();
             String groundTruthString = "";
+            String inferenceString = "";
 
             /* Build ground truth string. */
             groundTruthString = "[";
@@ -199,9 +200,42 @@ public class DataExporter extends DialogFileHandler{
             }
             groundTruthString += "]";
 
+            /* Build inferred composition string */
+            inferenceString = "{";
+//            Boolean firstLoop = true;
+            firstLoop = true;
+            for (ArrayList<Task> thisComposition : thisBusyInterval.getComposition())
+            {
+                if (firstLoop == true)
+                {
+                    firstLoop = false;
+                    inferenceString += "[";
+                }
+                else
+                {
+                    inferenceString += ", [";
+                }
+
+                Boolean firstLoopInside = true;
+                for (Task thisTask : thisComposition)
+                {
+                    if (firstLoopInside == true)
+                    {
+                        firstLoopInside = false;
+                    }
+                    else
+                    {
+                        inferenceString += ", ";
+                    }
+                    inferenceString += thisTask.getId();
+                }
+                inferenceString += "]";
+            }
+            inferenceString += "}";
+
 
             try {
-                inFileWriter.write(beginTimeStampNs + ", " + intervalNs + ", " + groundTruthString + ", " + thisBusyInterval.getComposition() + "\r\n");
+                inFileWriter.write(beginTimeStampNs + ", " + intervalNs + ", " + groundTruthString + ", " + inferenceString + "\r\n");
             } catch (IOException ex) {
                 ex.printStackTrace();
                 System.err.format("IOException @ generateMathematicalData: Failed to write the data to the file.\r\n");

@@ -1,8 +1,7 @@
 package com.illinois.rts.analysis.busyintervals;
-import com.illinois.rts.framework.Task;
 
+import com.illinois.rts.framework.Task;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by CY on 5/21/2015.
@@ -10,9 +9,10 @@ import java.util.HashMap;
 public class BusyInterval {
     private int beginTimeStampNs = 0;
     private int endTimeStampNs = 0;
-//    private ArrayList<Task> composition;
-    private ArrayList<HashMap<Integer, Integer>> composition;
     private ArrayList<Task> compositionGroundTruth;
+
+    // There may have multiple inferences, so two-layer array is used here.
+    private ArrayList<ArrayList<Task>> composition = new ArrayList<>();
 
     public BusyInterval(int inBeginTimeStamp, int inEndTimeStamp)
     {
@@ -25,7 +25,7 @@ public class BusyInterval {
         compositionGroundTruth = inGroundTruth;
     }
 
-    public void setComposition(ArrayList<HashMap<Integer, Integer>> inComposition)
+    public void setComposition(ArrayList<ArrayList<Task>> inComposition)
     {
         composition = inComposition;
     }
@@ -44,10 +44,40 @@ public class BusyInterval {
     {
         return  compositionGroundTruth;
     }
-
-    public ArrayList<HashMap<Integer, Integer>> getComposition()
+    
+    public ArrayList<ArrayList<Task>> getComposition()
     {
         return composition;
+    }
+
+    public int getEndTimeStampNs() {
+        return endTimeStampNs;
+    }
+
+    public Boolean contains(int inTimeStamp)
+    {
+        if ((beginTimeStampNs <= inTimeStamp)
+            && (endTimeStampNs >= inTimeStamp))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /* Get the first element in the composition array.
+     * This method is used when there is only one inference in each busy interval.
+     */
+    public ArrayList<Task> getFirstComposition()
+    {
+        if (composition.size() == 0)
+        {
+            composition.add(new ArrayList<Task>());
+        }
+
+        return composition.get(0);
     }
 
 }

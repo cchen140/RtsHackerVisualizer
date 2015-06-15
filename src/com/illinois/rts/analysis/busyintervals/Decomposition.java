@@ -28,7 +28,7 @@ public class Decomposition {
     }
 
     /* */
-    public ArrayList<HashMap<Integer, Integer>> calculateComposition(BusyInterval inBusyInterval)
+    public ArrayList<ArrayList<Task>> calculateComposition(BusyInterval inBusyInterval)
     {
         int intervalNs = inBusyInterval.getIntervalNs();
 //        int matchingInterval = 0;
@@ -65,16 +65,16 @@ public class Decomposition {
         }
 
         // Find Ns match this interval.
-        ArrayList<HashMap<Integer, Integer>> resultsNOfTasks;// = new ArrayList<HashMap<Integer, Integer>>();//HashMap<Integer, Integer>();
-        resultsNOfTasks = findMatchingNs(nOfTasks, intervalNs, null);
+        ArrayList<ArrayList<Task>> resultCompositions;// = new ArrayList<HashMap<Integer, Integer>>();//HashMap<Integer, Integer>();
+        resultCompositions = findMatchingCompositions(nOfTasks, intervalNs, null);
 //        System.out.println(resultsNOfTasks);
-        return resultsNOfTasks;
+        return resultCompositions;
 
     }
 
-    private ArrayList<HashMap<Integer, Integer>> findMatchingNs(HashMap<Integer, ArrayList<Integer>> inNOfTasks, int inTargetInterval, HashMap<Integer, Integer> inProcessingNOfTasks)
+    private ArrayList<ArrayList<Task>> findMatchingCompositions(HashMap<Integer, ArrayList<Integer>> inNOfTasks, int inTargetInterval, HashMap<Integer, Integer> inProcessingNOfTasks)
     {
-        ArrayList<HashMap<Integer, Integer>> resultsNOfTasks = new ArrayList<HashMap<Integer, Integer>>();
+        ArrayList<ArrayList<Task>> resultCompositions = new ArrayList<ArrayList<Task>>();
 
         if (inNOfTasks.isEmpty())
         {
@@ -91,14 +91,23 @@ public class Decomposition {
             {
 //                System.out.println("Matched!!");
 //                System.out.println(inProcessingNOfTasks);
-                resultsNOfTasks.add((HashMap)inProcessingNOfTasks.clone()); // Add a new, cloned HashMap object.
-                return resultsNOfTasks;
+
+                ArrayList thisResultComposition = new ArrayList<Task>();
+                for (int thisTaskId : inProcessingNOfTasks.keySet())
+                {
+                    for (int loop=0; loop<inProcessingNOfTasks.get(thisTaskId); loop++)
+                    {
+                        thisResultComposition.add(taskContainer.getTaskById(thisTaskId));
+                    }
+                }
+                resultCompositions.add(thisResultComposition);
+                return resultCompositions;
             }
             else
             {
                 /* Because addAll() doesn't accept null pointer, thus returning empty arrayList instead. */
                 //return null;
-                return resultsNOfTasks;
+                return resultCompositions;
             }
         }
 
@@ -117,10 +126,10 @@ public class Decomposition {
         for (Integer thisN: nOfThisTask)
         {
             inProcessingNOfTasks.put(thisTaskId, thisN);
-            resultsNOfTasks.addAll( findMatchingNs(restNOfTasks, inTargetInterval, inProcessingNOfTasks) );
+            resultCompositions.addAll(findMatchingCompositions(restNOfTasks, inTargetInterval, inProcessingNOfTasks));
             inProcessingNOfTasks.remove(thisTaskId);
         }
-        return resultsNOfTasks;
+        return resultCompositions;
     }
 
 
