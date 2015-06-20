@@ -45,7 +45,11 @@ public class ProgMsg {
 
     public static void sysPutLine(String format, Object... args)
     {
+        Throwable t = new Throwable();
+        StackTraceElement ste = t.getStackTrace()[1];
+        format = "[" + ste.getMethodName() + "] " + format;
         colorPutLine(new Formatter().format(format, args).toString(), Color.blue);
+        System.out.format(format + "\r\n", args);
     }
 
     private static void colorPutLine(String inStr, Color inColor)
@@ -57,7 +61,7 @@ public class ProgMsg {
         }
 
         try {
-            outDoc.insertString(outDoc.getLength(), inStr + "\n", null);
+            outDoc.insertString(outDoc.getLength(), inStr + "\n\r", null);
 
             Style style = outDoc.addStyle("newStyle", null);
 //            StyleConstants.setFontFamily(errStyle, "monospaced");
