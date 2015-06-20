@@ -173,7 +173,12 @@ public class DataExporter extends DialogFileHandler{
 
         Decomposition decomposition = new Decomposition(inEventContainer.getTaskContainer());
         // Calculate composition with equations and put the result.
-        decomposition.calculateCompositionToBusyIntervalContainer(busyIntervalContainer);
+
+// This is for Amir's algorithm
+//        decomposition.calculateCompositionToBusyIntervalContainer(busyIntervalContainer);
+
+        // This is for Ge's algorithm.
+        decomposition.runGeDecomposition(busyIntervalContainer);
 
         for (BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals())
         {

@@ -84,4 +84,18 @@ public class BusyIntervalContainer {
     {
         return busyIntervals;
     }
+
+    public BusyInterval findBusyIntervalByTimeStamp(int inTimeStamp)
+    {
+        for (BusyInterval thisBusyInterval : busyIntervals)
+        {
+            if (thisBusyInterval.contains(inTimeStamp) == true)
+            {
+                return thisBusyInterval;
+            }
+        }
+
+        // If the program reaches here, that means no interval contains the input time stamp.
+        return null;
+    }
 }

@@ -71,7 +71,99 @@ public class TaskContainer {
         return resultTaskList;
     }
 
-    public Object[] getAppTasksAsArray()
+    public ArrayList<Task> getAppTaskAsArraySortedByComputationTime()
+    {
+        // This method will return a new task array.
+        return SortTasksByComputationTime(getAppTasksAsArray());
+    }
+
+    public ArrayList<Task> getAppTaskAsArraySortedByPeriod()
+    {
+        // This method will return a new task array.
+        return SortTasksByPeriod(getAppTasksAsArray());
+    }
+
+    private ArrayList<Task> SortTasksByComputationTime(ArrayList<Task> inTaskArray)
+    {
+        if (inTaskArray.size() <= 1)
+        { // If only one task is left in the array, then just return it.
+            return new ArrayList<Task>(inTaskArray);
+        }
+
+        /* Find the task that has largest computation time. */
+        Task LargestComputationTimeTask = null;
+        Boolean firstLoop = true;
+        for (Task thisTask : inTaskArray)
+        {
+            if (firstLoop == true)
+            {
+                LargestComputationTimeTask = thisTask;
+                firstLoop = false;
+                continue;
+            }
+            else
+            {
+                if (thisTask.getComputationTimeNs() > LargestComputationTimeTask.getComputationTimeNs())
+                {
+                    LargestComputationTimeTask = thisTask;
+                }
+            }
+        }
+
+        // Clone the input task array and pass it into next layer of recursive function (with largest task removed).
+        ArrayList processingTaskArray = new ArrayList<Task>(inTaskArray);
+        processingTaskArray.remove(LargestComputationTimeTask);
+
+        // Get the rest of tasks sorted in the array.
+        ArrayList<Task> resultTaskArray = SortTasksByComputationTime(processingTaskArray);
+
+        // Add the largest computation time task in the array so that it is in ascending order.
+        resultTaskArray.add(LargestComputationTimeTask);
+        return resultTaskArray;
+
+    }
+
+    private ArrayList<Task> SortTasksByPeriod(ArrayList<Task> inTaskArray)
+    {
+        if (inTaskArray.size() <= 1)
+        { // If only one task is left in the array, then just return it.
+            return new ArrayList<Task>(inTaskArray);
+        }
+
+        /* Find the task that has largest period. */
+        Task LargestPeriodTask = null;
+        Boolean firstLoop = true;
+        for (Task thisTask : inTaskArray)
+        {
+            if (firstLoop == true)
+            {
+                LargestPeriodTask = thisTask;
+                firstLoop = false;
+                continue;
+            }
+            else
+            {
+                if (thisTask.getPeriodNs() > LargestPeriodTask.getPeriodNs())
+                {
+                    LargestPeriodTask = thisTask;
+                }
+            }
+        }
+
+        // Clone the input task array and pass it into next layer of recursive function (with largest task removed).
+        ArrayList processingTaskArray = new ArrayList<Task>(inTaskArray);
+        processingTaskArray.remove(LargestPeriodTask);
+
+        // Get the rest of tasks sorted in the array.
+        ArrayList<Task> resultTaskArray = SortTasksByPeriod(processingTaskArray);
+
+        // Add the largest period task in the array so that it is in ascending order.
+        resultTaskArray.add(LargestPeriodTask);
+        return resultTaskArray;
+
+    }
+
+    public ArrayList<Task> getAppTasksAsArray()
     {
         ArrayList<Task> appTasks = new ArrayList<Task>();
         for (Task thisTask: tasks.values())
@@ -81,7 +173,7 @@ public class TaskContainer {
                 appTasks.add(thisTask);
             }
         }
-        return appTasks.toArray();
+        return appTasks;
     }
 
     public Color getColorByIndex(int index)

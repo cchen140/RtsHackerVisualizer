@@ -27,6 +27,12 @@ public class Decomposition {
         return true;
     }
 
+    public Boolean runGeDecomposition(BusyIntervalContainer inBusyIntervalContainer)
+    {
+        GeDecomposition geDecomposition = new GeDecomposition(taskContainer, inBusyIntervalContainer);
+        return geDecomposition.RunGeDecomposition();
+    }
+
     /* */
     public ArrayList<ArrayList<Task>> calculateComposition(BusyInterval inBusyInterval)
     {
