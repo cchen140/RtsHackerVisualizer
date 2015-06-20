@@ -36,7 +36,7 @@ public class GeDecomposition {
     }
 
 
-    public Boolean RunGeDecomposition()
+    public Boolean RunDecomposition()
     {
         ArrayList<Task> appTaskArray;
 
