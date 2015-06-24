@@ -38,17 +38,31 @@ public class ProgMsg {
         colorPutLine(new Formatter().format(format, args).toString(), Color.black);
     }
 
-    public static void errPutline(String format, Object... args)
-    {
-        colorPutLine(new Formatter().format(format, args).toString(), Color.red);
-    }
-
-    public static void sysPutLine(String format, Object... args)
+    public static void debugPutline(String format, Object... args)
     {
         Throwable t = new Throwable();
         StackTraceElement ste = t.getStackTrace()[1];
         format = "[" + ste.getMethodName() + "] " + format;
+        System.err.format(format + "\r\n", args);
+    }
+
+    public static void errPutline(String format, Object... args)
+    {
+        colorPutLine(new Formatter().format(format, args).toString(), Color.red);
+
+        Throwable t = new Throwable();
+        StackTraceElement ste = t.getStackTrace()[1];
+        format = "[" + ste.getMethodName() + "] " + format;
+        System.err.format(format + "\r\n", args);
+    }
+
+    public static void sysPutLine(String format, Object... args)
+    {
         colorPutLine(new Formatter().format(format, args).toString(), Color.blue);
+        
+        Throwable t = new Throwable();
+        StackTraceElement ste = t.getStackTrace()[1];
+        format = "[" + ste.getMethodName() + "] " + format;
         System.out.format(format + "\r\n", args);
     }
 
