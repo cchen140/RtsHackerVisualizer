@@ -140,9 +140,9 @@ public class CombinedTraceGroup extends TraceGroup {
 
     }
 
-    public Object[] getTraceListArray()
+    public ArrayList<Trace> getTraceListArray()
     {
-        ArrayList resultArray = new ArrayList();
+        ArrayList<Trace> resultArray = new ArrayList();
         // summary trace
         if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true) {
             resultArray.add(combinedTrace);
@@ -157,7 +157,7 @@ public class CombinedTraceGroup extends TraceGroup {
             }
         }
 
-        return resultArray.toArray();
+        return resultArray;
     }
 
     @Override

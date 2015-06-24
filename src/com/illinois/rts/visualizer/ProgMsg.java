@@ -59,7 +59,7 @@ public class ProgMsg {
     public static void sysPutLine(String format, Object... args)
     {
         colorPutLine(new Formatter().format(format, args).toString(), Color.blue);
-        
+
         Throwable t = new Throwable();
         StackTraceElement ste = t.getStackTrace()[1];
         format = "[" + ste.getMethodName() + "] " + format;

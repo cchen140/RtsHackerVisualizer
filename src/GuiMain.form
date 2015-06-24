@@ -269,20 +269,6 @@
                 </properties>
                 <border type="none"/>
                 <children>
-                  <component id="2dab5" class="javax.swing.JList" binding="zPanelList">
-                    <constraints border-constraint="West"/>
-                    <properties>
-                      <autoscrolls value="true"/>
-                      <background color="-16777216"/>
-                      <enabled value="true"/>
-                      <foreground color="-1"/>
-                      <inheritsPopupMenu value="false"/>
-                      <model>
-                        <item value="Test"/>
-                      </model>
-                      <preferredSize width="150" height="0"/>
-                    </properties>
-                  </component>
                   <scrollpane id="11329" binding="zPanelScrollHorizontal">
                     <constraints border-constraint="Center"/>
                     <properties>
@@ -306,6 +292,13 @@
                       </component>
                     </children>
                   </scrollpane>
+                  <component id="d9c1" class="com.illinois.rts.visualizer.TraceHeadersPanel" binding="zPanelTraceHeaders">
+                    <constraints border-constraint="West"/>
+                    <properties>
+                      <background color="-16777216"/>
+                      <preferredSize width="150" height="10"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
             </children>

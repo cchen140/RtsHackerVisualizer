@@ -23,7 +23,6 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private JPanel taskListPanel;
     private JTextPane msgTextPane;
     private JButton buttonSettings;
-    private JList zPanelList;
     private JScrollBar zPanelScrollBarHorizontal;
     private JScrollPane zPanelScrollHorizontal;
     private JScrollPane zPanelScrollVertical;
@@ -31,6 +30,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private JScrollPane zPanelTimeLineScrollHorizontal;
     private JButton buttonExportLog;
     private JButton buttonCompute;
+    private TraceHeadersPanel zPanelTraceHeaders;
 
     /* Menu bar variables. */
     private JMenuBar menueBar;
@@ -134,12 +134,9 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         ListCellRenderer rendererTaskList = new TaskListRenderer();
         taskList.setCellRenderer(rendererTaskList);
 
-        ListCellRenderer rendererTraceList = new TraceListRenderer();
-        zPanelList.setCellRenderer(rendererTraceList);
-//        zPanelList.setFixedCellHeight(ProgConfig.TRACE_HEIGHT + ProgConfig.TRACE_GAP_Y);
 
 //        zPanelTimeLine
-        zPanel.setTraceList(zPanelList);
+        zPanel.setTraceHeadersPanel(zPanelTraceHeaders);
         zPanel.setTimeLinePanel(zPanelTimeLine);
         zPanel.setHorizontalScrollBar(zPanelScrollBarHorizontal);
 

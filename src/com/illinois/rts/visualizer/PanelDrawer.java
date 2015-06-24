@@ -17,7 +17,7 @@ public class PanelDrawer extends ZoomablePanel {
 
     private TimeLine topTimeLine = new TimeLine();
 
-    private JList traceList = null;
+    private TraceHeadersPanel traceHeadersPanel = null;
     private JScrollBar horizontalScrollBar = null;
     private TimeLinePanel timeLinePanel = null;
 
@@ -28,9 +28,9 @@ public class PanelDrawer extends ZoomablePanel {
 //        combinedTraceGroup = new CombinedTraceGroup(eventContainer, topTimeLine);
     }
 
-    public void setTraceList(JList inList)
+    public void setTraceHeadersPanel(TraceHeadersPanel inTraceHeadersPanel)
     {
-        traceList = inList;
+        traceHeadersPanel = inTraceHeadersPanel;
     }
     public void setTimeLinePanel(TimeLinePanel inTimeLinePanel)
     {
@@ -131,11 +131,11 @@ public class PanelDrawer extends ZoomablePanel {
             timeLinePanel.repaint();
         }
 
-        // Is trace list initialized? (Should the list be displayed and updated?)
-        if (traceList != null)
+        // Is trace header panel initialized? (Should the headers be displayed and updated?)
+        if (traceHeadersPanel != null)
         {// Update trace list.
-            traceList.setListData(combinedTraceGroup.getTraceListArray());
-            traceList.setBackground(ProgConfig.TRACE_PANEL_FOREGROUND);
+            traceHeadersPanel.setTrace(combinedTraceGroup.getTraceListArray());
+            traceHeadersPanel.setBackground(ProgConfig.TRACE_PANEL_FOREGROUND);
         }
 
         /* Scroll zPanelScrollHorizontal panel according to zPanelScrollBarHorizontal */
