@@ -15,16 +15,14 @@ import java.util.ArrayList;
 public class DataExporter extends DialogFileHandler{
     private EventContainer eventContainer = null;
 
-    public DataExporter(EventContainer inEventContainer)
-    {
-        eventContainer = inEventContainer;
-    }
+    // Constructor
+    public DataExporter() {}
 
-
-    public void exportMathematicalDataFromDialog() throws IOException {
+    // This method uses variable "fileWriter" from father's class.
+    public void exportBusyIntervalsToFileDialog(BusyIntervalContainer inBusyIntervalContainer) throws IOException {
 
         openWriteFileFromDialog();  // set up fileWriter.
-        if (generateBusyIntervalDataFromEvents(eventContainer, fileWriter) == true) {
+        if (writeBusyIntervalsToFile(inBusyIntervalContainer, fileWriter) == true) {
             ProgMsg.putLine("Successfully generate busy interval data file.");
             fileWriter.close();
         }
@@ -97,7 +95,6 @@ public class DataExporter extends DialogFileHandler{
     */
     protected Boolean generateBusyIntervalDataFromScheduler(EventContainer inEventContainer, BufferedWriter inFileWriter)
     {
-        Decomposition decomposition = new Decomposition(inEventContainer.getTaskContainer());
 
         ArrayList<SchedulerEvent> schedulerEvents = inEventContainer.getSchedulerEvents();
         int idleTaskId = 0;
@@ -145,10 +142,6 @@ public class DataExporter extends DialogFileHandler{
                     return false;
                 }
 
-                /* Test decomposition. */
-                BusyInterval busyInterval = new BusyInterval(beginTimeStamp, currentEvent.getOrgBeginTimestampNs());
-                decomposition.calculateComposition(busyInterval);
-                /**/
                 busyIntervalFound = false;
             }
             else
@@ -174,11 +167,11 @@ public class DataExporter extends DialogFileHandler{
         Decomposition decomposition = new Decomposition(inEventContainer.getTaskContainer());
         // Calculate composition with equations and put the result.
 
-// This is for Amir's algorithm
-//        decomposition.calculateCompositionToBusyIntervalContainer(busyIntervalContainer);
+        // This is for Amir's algorithm
+        decomposition.runAmirDecomposition(busyIntervalContainer);
 
         // This is for Ge's algorithm.
-        decomposition.runGeDecomposition(busyIntervalContainer);
+//        decomposition.runGeDecomposition(busyIntervalContainer);
 
         for (BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals())
         {
@@ -238,6 +231,79 @@ public class DataExporter extends DialogFileHandler{
             }
             inferenceString += "}";
 
+
+            try {
+                inFileWriter.write(beginTimeStampNs + ", " + intervalNs + ", " + groundTruthString + ", " + inferenceString + "\r\n");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                System.err.format("IOException @ generateMathematicalData: Failed to write the data to the file.\r\n");
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    protected Boolean writeBusyIntervalsToFile(BusyIntervalContainer inBusyIntervalContainer, BufferedWriter inFileWriter)
+    {
+
+        for (BusyInterval thisBusyInterval : inBusyIntervalContainer.getBusyIntervals())
+        {
+            int beginTimeStampNs = thisBusyInterval.getBeginTimeStampNs();
+            int intervalNs = thisBusyInterval.getIntervalNs();
+            ArrayList<Task> compositionGroundTruth = thisBusyInterval.getCompositionGroundTruth();
+            String groundTruthString = "";
+            String inferenceString = "";
+
+            /* Build ground truth string. */
+            groundTruthString = "[";
+            Boolean firstLoop = true;
+            for (Task thisTask: compositionGroundTruth)
+            {
+                if (firstLoop == true)
+                {
+                    firstLoop = false;
+                }
+                else
+                {
+                    groundTruthString += ", ";
+                }
+                groundTruthString += thisTask.getId();
+            }
+            groundTruthString += "]";
+
+            /* Build inferred composition string */
+            inferenceString = "{";
+//            Boolean firstLoop = true;
+            firstLoop = true;
+            for (ArrayList<Task> thisComposition : thisBusyInterval.getComposition())
+            {
+                if (firstLoop == true)
+                {
+                    firstLoop = false;
+                    inferenceString += "[";
+                }
+                else
+                {
+                    inferenceString += ", [";
+                }
+
+                Boolean firstLoopInside = true;
+                for (Task thisTask : thisComposition)
+                {
+                    if (firstLoopInside == true)
+                    {
+                        firstLoopInside = false;
+                    }
+                    else
+                    {
+                        inferenceString += ", ";
+                    }
+                    inferenceString += thisTask.getId();
+                }
+                inferenceString += "]";
+            }
+            inferenceString += "}";
 
             try {
                 inFileWriter.write(beginTimeStampNs + ", " + intervalNs + ", " + groundTruthString + ", " + inferenceString + "\r\n");

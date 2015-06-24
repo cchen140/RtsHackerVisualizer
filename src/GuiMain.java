@@ -1,6 +1,6 @@
 import javax.swing.*;
 
-import com.illinois.rts.analysis.busyintervals.BusyInterval;
+import com.illinois.rts.analysis.busyintervals.BusyIntervalContainer;
 import com.illinois.rts.analysis.busyintervals.Decomposition;
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.simulator.ConfigLoader;
@@ -10,7 +10,6 @@ import com.illinois.rts.visualizer.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Created by CY on 2/10/2015.
@@ -33,6 +32,12 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private JButton buttonExportLog;
     private JButton buttonCompute;
 
+    /* Menu bar variables. */
+    private JMenuBar menueBar;
+    private JMenuItem menuItemLoadLog;
+    private JMenuItem menuItemBusyIntervalsRunGe;
+    private JMenuItem menuItemBusyIntervalsRunAmir;
+
     JFrame frame = new JFrame("RTS Hacker Visualizer");
 
     private static GuiMain instance = null;
@@ -48,6 +53,9 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1200, 800);
         //frame.pack();   // pack() will adjust the frame size according to the components it has.
+
+        // menuBar is initialized in the constructor of GuiMain.
+        frame.setJMenuBar(menueBar);
 
         frame.setVisible(true);
 
@@ -65,6 +73,51 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 //        progMsger.setDocument(msgTextPane.getStyledDocument());
         ProgMsg.setDocument(msgTextPane.getStyledDocument());
         msgTextPane.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+
+
+        /* Create menu bar. */
+        Font menuFont = new Font("TimesRoman", Font.PLAIN, 16); // Menu Font
+        JMenu topMenuInstance;
+        JMenuItem menuItemInstance;
+        menueBar = new JMenuBar();
+
+        // Create "File" menu
+        topMenuInstance = new JMenu("File");
+        topMenuInstance.setFont(menuFont);
+        menueBar.add(topMenuInstance);
+
+        // - File -> Load Log
+        menuItemLoadLog = new JMenuItem("Load Log");
+        menuItemLoadLog.setFont(menuFont);
+        topMenuInstance.add( menuItemLoadLog);
+        menuItemLoadLog.addActionListener(this);
+
+
+        // - File -> Export Log
+
+        // Create "Analyze" menu
+        topMenuInstance = new JMenu("Analyze");
+        topMenuInstance.setFont(menuFont);
+        menueBar.add(topMenuInstance);
+
+        // - Analyze -> Busy Intervals
+        JMenu subMEnuInstance = new JMenu("Busy Intervals");
+        subMEnuInstance.setFont(menuFont);
+        topMenuInstance.add(subMEnuInstance);
+
+        // - Analyze -> Busy Intervals -> Run Ge's Analysis
+        menuItemBusyIntervalsRunGe = new JMenuItem("Run Ge's Analysis");
+        menuItemBusyIntervalsRunGe.setFont(menuFont);
+        subMEnuInstance.add(menuItemBusyIntervalsRunGe);
+        menuItemBusyIntervalsRunGe.addActionListener(this);
+
+        // - Analyze -> Busy Intervals -> Run Amir's Analysis
+        menuItemBusyIntervalsRunAmir = new JMenuItem("Run Amir's Analysis");
+        menuItemBusyIntervalsRunAmir.setFont(menuFont);
+        subMEnuInstance.add(menuItemBusyIntervalsRunAmir);
+        menuItemBusyIntervalsRunAmir.addActionListener(this);
+
+
 
 
         /* Action listener for buttons */
@@ -129,7 +182,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 btnHideTaskList.setText("Hide List");
             }
 
-        } else if (e.getSource() == buttonOpenFile) {
+        } else if (e.getSource()==buttonOpenFile || e.getSource()==menuItemLoadLog) {
 
             try {
                 eventContainer = logLoader.loadLogFromDialog();
@@ -160,12 +213,12 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         } else if (e.getSource() == buttonExportLog) {
             if (eventContainer != null)
             {
-                DataExporter dataExporter = new DataExporter(eventContainer);
-                try {
-                    dataExporter.exportMathematicalDataFromDialog();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+//                DataExporter dataExporter = new DataExporter(eventContainer);
+//                try {
+//                    dataExporter.exportBusyIntervalsToFileDialog();
+//                } catch (IOException ex) {
+//                    ex.printStackTrace();
+//                }
             }
         } else if (e.getSource() == buttonCompute) {
             try {
@@ -188,6 +241,35 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
             } catch (Exception ex) {
                 System.out.println("Error occurs while opening the config file.");
                 System.out.println(ex);
+            }
+        } else if (e.getSource()==menuItemBusyIntervalsRunGe || e.getSource()==menuItemBusyIntervalsRunAmir)
+        {
+            if (eventContainer != null) {
+                BusyIntervalContainer busyIntervalContainer = new BusyIntervalContainer();
+                busyIntervalContainer.createBusyIntervalsFromEvents(eventContainer);
+
+                /* Analyze busy intervals. The result will be written back to busy intervals. */
+                Decomposition decomposition = new Decomposition(eventContainer.getTaskContainer());
+                if (e.getSource() == menuItemBusyIntervalsRunGe)
+                {
+                    decomposition.runGeDecomposition(busyIntervalContainer);
+                }
+                else
+                {
+                    decomposition.runAmirDecomposition(busyIntervalContainer);
+                }
+
+                DataExporter dataExporter = new DataExporter();
+                try {
+                    dataExporter.exportBusyIntervalsToFileDialog(busyIntervalContainer);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            else
+            {
+                ProgMsg.errPutline("Analysis of busy intervals failed due to empty Event Container.");
+
             }
         }
 
