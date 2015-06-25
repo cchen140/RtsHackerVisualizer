@@ -118,8 +118,6 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         menuItemBusyIntervalsRunAmir.addActionListener(this);
 
 
-
-
         /* Action listener for buttons */
         btnHideTaskList.addActionListener(this);
         buttonOpenFile.addActionListener(this);
@@ -134,6 +132,9 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         ListCellRenderer rendererTaskList = new TaskListRenderer();
         taskList.setCellRenderer(rendererTaskList);
 
+
+        /* zPanel settings. */
+        zPanel.setBackground(ProgConfig.TRACE_PANEL_BACKGROUND);
 
 //        zPanelTimeLine
         zPanel.setTraceHeadersPanel(zPanelTraceHeaders);

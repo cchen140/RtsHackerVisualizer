@@ -1,14 +1,12 @@
 package com.illinois.rts.visualizer;
 
-import com.illinois.premsim.gui.ZoomablePanel;
-
 import javax.swing.*;
 import java.awt.*;
 
 /**
  * Created by CY on 2/12/2015.
  */
-public class PanelDrawer extends ZoomablePanel {
+public class PanelDrawer extends JPanel {
     public boolean doNotDraw = false;
     public EventContainer eventContainer = new EventContainer();
 
@@ -25,7 +23,6 @@ public class PanelDrawer extends ZoomablePanel {
     public PanelDrawer()
     {
         super();
-//        combinedTraceGroup = new CombinedTraceGroup(eventContainer, topTimeLine);
     }
 
     public void setTraceHeadersPanel(TraceHeadersPanel inTraceHeadersPanel)
@@ -42,9 +39,10 @@ public class PanelDrawer extends ZoomablePanel {
         horizontalScrollBar = inScrollBar;
     }
 
-
-   // @Override
-    protected void draw(Graphics2D g) {
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2D = (Graphics2D) g;
 
         // If nothing is initialized, then do nothing.
         if (eventContainer == null)
@@ -52,7 +50,7 @@ public class PanelDrawer extends ZoomablePanel {
 
         if (doNotDraw == false)
         {
-            combinedTraceGroup.draw(g, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y);
+            combinedTraceGroup.draw(g2D, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y);
         }
     }
 
@@ -68,21 +66,6 @@ public class PanelDrawer extends ZoomablePanel {
         }
         repaint();
     }
-
-    //@Override
-    protected void postDraw(Graphics2D g)
-    {
-
-    }
-
-//    @Override
-//    protected void paintComponent(Graphics g)
-//    {
-//        super.paintComponents(g);
-//        draw2((Graphics2D)g);
-//
-//
-//    }
 
     public void setEventContainer(EventContainer inputEventContainer)
     {
@@ -111,12 +94,12 @@ public class PanelDrawer extends ZoomablePanel {
         combinedTraceGroup.copyTimeLineValues(topTimeLine);
         timeLinePanel.getTimeLine().copyTimeValues(topTimeLine);
 
-                    /* Set panel dimension according to the content to be drawn. */
+        /* Set panel dimension according to the content to be drawn. */
         this.setPreferredSize(new Dimension(
                 combinedTraceGroup.getWidth()+ProgConfig.PANEL_DRAWER_PADDING_X*2,
                 combinedTraceGroup.getHeight()+ProgConfig.PANEL_DRAWER_PADDING_Y*2));
 
-            /* Set scroll panel height for enabling vertical scroll bar. */
+        /* Set scroll panel height for enabling vertical scroll bar. */
         this.getParent().getParent().setPreferredSize(new Dimension(
                 -1,//this.getParent().getParent().getWidth(),
                 combinedTraceGroup.getHeight() + ProgConfig.PANEL_DRAWER_PADDING_Y * 2));
