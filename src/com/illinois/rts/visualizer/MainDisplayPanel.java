@@ -4,9 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by CY on 2/12/2015.
+ * MainDisplayPanel which extends JPanel is where the magic happens.
+ * All information about traces, tasks, and events is stored and managed in this class.
  */
-public class PanelDrawer extends JPanel {
+public class MainDisplayPanel extends JPanel {
     public boolean doNotDraw = false;
     public EventContainer eventContainer = new EventContainer();
 
@@ -20,7 +21,7 @@ public class PanelDrawer extends JPanel {
     private TimeLinePanel timeLinePanel = null;
 
 
-    public PanelDrawer()
+    public MainDisplayPanel()
     {
         super();
     }
@@ -130,5 +131,4 @@ public class PanelDrawer extends JPanel {
         repaint();
     }
 
-/*TODO: default point? movng to center of the screen should be done by panel.*/
 }

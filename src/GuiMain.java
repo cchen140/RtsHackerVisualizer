@@ -18,7 +18,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private JPanel panel1;
     private JButton btnHideTaskList;
     private JButton buttonOpenFile;
-    private PanelDrawer zPanel;
+    private MainDisplayPanel zPanel;
     private JList taskList;
     private JPanel taskListPanel;
     private JTextPane msgTextPane;
