@@ -67,7 +67,7 @@ public class RmScheduling {
         simTaskContainer = inTaskContainer;
         allTasks = inTaskContainer.getTasksAsArray();
         numTasks = allTasks.size(); // It doesn't include the idle task.
-        inTaskContainer.addTask(99, "IDLE", 1, 0, 0, 0);
+        inTaskContainer.addTask(99, "IDLE", Task.TASK_TYPE_IDLE, 0, 0, 0);
 //        allTasks.add(new Task(99, "IDLE", 1, 0, 0, 0, 0));
         simEventContainer.setTaskContainer(simTaskContainer);
         assignPriority();

@@ -8,8 +8,8 @@ import java.awt.*;
 public class ProgConfig {
     static void ProgConfig() {}
 
-    public static int PANEL_DRAWER_PADDING_Y = 0;//10;
-    public static int PANEL_DRAWER_PADDING_X = 0;//10;
+    public static int MAIN_DISPLAY_PANEL_PADDING_Y = 0;//10;
+    public static int MAIN_DISPLAY_PANEL_PADDING_X = 0;//10;
 
     public static int VIRTUAL_PANEL_MARGIN_Y = 0;
     public static int VIRTUAL_PANEL_MARGIN_X = 20;

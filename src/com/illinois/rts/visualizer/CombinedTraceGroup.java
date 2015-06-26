@@ -16,17 +16,7 @@ public class CombinedTraceGroup extends TraceGroup {
     private TaskContainer taskContainer = null;
     private ArrayList<SchedulerEvent> schedulerEvents = null;
 
-    private int width = 0;
-    private int height = 0;
-
-    private DrawRect background = new DrawRect();
-//    private DrawTimeLine timeLine = null;
-    private DrawTraceGap traceGap = null;
-
-    private TimeLine timeLine = null;
-
     private Trace combinedTrace = null;
-    private ArrayList<Trace> traces = new ArrayList<Trace>();
 
     public CombinedTraceGroup(EventContainer inEventContainer, TimeLine inTimeLine)
     {
@@ -42,9 +32,6 @@ public class CombinedTraceGroup extends TraceGroup {
         width = calculateWidth();
         height = calculateHeight();
 
-        background.setFillColor(ProgConfig.TRACE_PANEL_FOREGROUND);
-        background.setSize(width, height);
-
 //        timeLine = new DrawTimeLine(eventContainer.getScaledEndTimestamp(), (int) ((ProgConfig.TIME_LINE_PERIOD_NS/ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER)/ProgConfig.TIMESTAMP_UNIT_NS));
 
         traceGap = new DrawTraceGap();
@@ -56,9 +43,11 @@ public class CombinedTraceGroup extends TraceGroup {
     {
         /* Initialize the combined trace. */
         combinedTrace = new Trace("Combined", eventContainer.getAppAndSchedulerEvents(), new TimeLine(timeLine));
+        combinedTrace.setTraceType(Trace.TRACE_TYPE_OTHER);
 
         /* Initialize traces for each task */
         traces.clear();
+//        traces.add(combinedTrace);
         for (Object currentObj : taskContainer.getTasksAsArray()) {
             Task currentTask = (Task) currentObj;
 
@@ -79,9 +68,25 @@ public class CombinedTraceGroup extends TraceGroup {
                     taskEvents.add(currentHackerEvent);
             }
 
-            traces.add( new Trace(currentTask.getTitle(), currentTask, taskEvents, new TimeLine(timeLine)) );
+            int thisTraceType = Trace.TRACE_TYPE_TASK;
+            if (currentTask.getTaskType()==Task.TASK_TYPE_IDLE || currentTask.getTaskType()==Task.TASK_TYPE_SYS)
+                thisTraceType = Trace.TRACE_TYPE_SYSTEM;
+
+            traces.add( new Trace(currentTask.getTitle(), currentTask, taskEvents, new TimeLine(timeLine), thisTraceType) );
         }
 
+    }
+
+    @Override
+    public void triggerUpdate()
+    {
+        for (Trace thisTrace: traces)
+        {
+            if (thisTrace.getTask().isDisplayBoxChecked() == true)
+                thisTrace.setDoNotShow(false);
+            else
+                thisTrace.setDoNotShow(true);
+        }
     }
 
     @Override
@@ -96,15 +101,11 @@ public class CombinedTraceGroup extends TraceGroup {
         // Draw background
         width = calculateWidth();
         height = calculateHeight();
-        background.setSize(width+1, height+5);
-        background.draw(g, offsetX-1, offsetY-5);
-//        System.out.println(offsetX);
-//        System.out.println(offsetY);
+        drawBackground(g, offsetX, offsetY);
 
         // Make some boarder space.
         currentOffsetY += marginY;
         currentOffsetX += marginX;
-
 
         //traceGap.draw(g, width+currentOffsetX, 0, currentOffsetY);
 
@@ -140,35 +141,25 @@ public class CombinedTraceGroup extends TraceGroup {
 
     }
 
-    public ArrayList<Trace> getTraceListArray()
-    {
-        ArrayList<Trace> resultArray = new ArrayList();
-        // summary trace
-        if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true) {
-            resultArray.add(combinedTrace);
-        }
-        // Draw individuals
-        if (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES == true) {
-            for (Trace currentTrace : traces) {
-                if (currentTrace.getTask().isDisplayBoxChecked() == true)
-                {
-                    resultArray.add(currentTrace);
-                }
-            }
-        }
-
-        return resultArray;
-    }
-
-    @Override
-    public int getHeight() {
-        return calculateHeight();
-    }
-
-    @Override
-    public int getWidth() {
-        return calculateWidth();
-    }
+//    public ArrayList<Trace> getTraceListArray()
+//    {
+//        ArrayList<Trace> resultArray = new ArrayList();
+//        // summary trace
+//        if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true) {
+//            resultArray.add(combinedTrace);
+//        }
+//        // Draw individuals
+//        if (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES == true) {
+//            for (Trace currentTrace : traces) {
+//                if (currentTrace.getTask().isDisplayBoxChecked() == true)
+//                {
+//                    resultArray.add(currentTrace);
+//                }
+//            }
+//        }
+//
+//        return resultArray;
+//    }
 
     @Override
     public void updateTraceMarginY(int inTraceMarginY) {
@@ -184,16 +175,17 @@ public class CombinedTraceGroup extends TraceGroup {
         }
     }
 
-    private int calculateWidth()
+    @Override
+    protected int calculateWidth()
     {
         int resultWidth = 0;
         resultWidth += marginX*2;    // Left and right borders.
-        //resultWidth += eventContainer.getSchedulerEvents().get(eventContainer.getSchedulerEvents().size()-2).getScaledEndTimestamp(); // Length of event records.
         resultWidth += eventContainer.getScaledEndTimestamp();
         return resultWidth;
     }
 
-    private int calculateHeight()
+    @Override
+    protected int calculateHeight()
     {
         int resultHeight = 0;
 
@@ -219,7 +211,8 @@ public class CombinedTraceGroup extends TraceGroup {
         return resultHeight;
     }
 
-    void copyTimeLineValues(TimeLine inTimeLine)
+    @Override
+    public void copyTimeLineValues(TimeLine inTimeLine)
     {
         timeLine.copyTimeValues(inTimeLine);
 
@@ -231,6 +224,14 @@ public class CombinedTraceGroup extends TraceGroup {
         {
             currentTrace.getTimeLine().copyTimeValues(inTimeLine);
         }
+    }
+
+    @Override
+    public ArrayList<Trace> getTraces() {
+        ArrayList<Trace> resultTraces = new ArrayList<>();
+        resultTraces.add(combinedTrace);
+        resultTraces.addAll(traces);
+        return resultTraces;
     }
 
 }

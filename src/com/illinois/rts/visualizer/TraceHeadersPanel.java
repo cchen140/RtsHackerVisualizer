@@ -31,11 +31,14 @@ public class TraceHeadersPanel extends JPanel {
         int paintingCursorY = 0;
         for (Trace thisTrace : traces)
         {
+            if (thisTrace.getDoNotShow() == true)
+                continue;
+
             int orgPaintingCursor = paintingCursorY;
             paintingCursorY += thisTrace.getTraceHeight() / 2;
             paintingCursorY = drawTraceNameAndIcon(g, ProgConfig.TRACE_HEADER_LEFT_MARGIN, paintingCursorY, thisTrace, true);
 
-            if (thisTrace.getTask()!=null) {
+            if (thisTrace.getTask()!=null && thisTrace.getTraceType()==Trace.TRACE_TYPE_TASK) {
                 paintingCursorY += ProgConfig.TRACE_HEADER_TITLE_SUBTITLE_GAP;
                 drawTaskAttributes(g, ProgConfig.TRACE_HEADER_LEFT_MARGIN, paintingCursorY, thisTrace.getTask());
             }

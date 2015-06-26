@@ -11,8 +11,10 @@ public class MainDisplayPanel extends JPanel {
     public boolean doNotDraw = false;
     public EventContainer eventContainer = new EventContainer();
 
-    private CombinedTraceGroup combinedTraceGroup = null;
-    private TraceGroup hackerEventsDrawPanel = null;
+    private TraceGroupContainer traceGroupContainer = new TraceGroupContainer();
+
+//    private CombinedTraceGroup combinedTraceGroup = null;
+//    private TraceGroup hackerEventsDrawPanel = null;
 
     private TimeLine topTimeLine = new TimeLine();
 
@@ -51,7 +53,8 @@ public class MainDisplayPanel extends JPanel {
 
         if (doNotDraw == false)
         {
-            combinedTraceGroup.draw(g2D, ProgConfig.PANEL_DRAWER_PADDING_X, ProgConfig.PANEL_DRAWER_PADDING_Y);
+            traceGroupContainer.draw(g2D, ProgConfig.MAIN_DISPLAY_PANEL_PADDING_X, ProgConfig.MAIN_DISPLAY_PANEL_PADDING_Y);
+//            combinedTraceGroup.draw(g2D, ProgConfig.MAIN_DISPLAY_PANEL_PADDING_X, ProgConfig.MAIN_DISPLAY_PANEL_PADDING_Y);
         }
     }
 
@@ -68,10 +71,20 @@ public class MainDisplayPanel extends JPanel {
         repaint();
     }
 
+    /**
+     * Set event container and initialize the display (reset traceGroupContainer).
+     * @param inputEventContainer
+     */
     public void setEventContainer(EventContainer inputEventContainer)
     {
         eventContainer = inputEventContainer;
         topTimeLine.setEndTimestampNs(eventContainer.getOrgEndTimestampNs());
+
+        /* Update trace group container. */
+        traceGroupContainer.clear();
+
+        // By default the combined trace group is initialized.
+        traceGroupContainer.addTraceGroup(new CombinedTraceGroup(eventContainer, new TimeLine(topTimeLine)));
 
         applyNewSettings(); // This will also update the scaledBeginTimestamp in each event.
 
@@ -79,37 +92,40 @@ public class MainDisplayPanel extends JPanel {
 
     public void applyNewSettings()
     {
-        combinedTraceGroup = new CombinedTraceGroup(eventContainer, new TimeLine(topTimeLine));
+//        combinedTraceGroup = new CombinedTraceGroup(eventContainer, new TimeLine(topTimeLine));
+        traceGroupContainer.triggerUpdate();
 
         /* Setup virtual drawing panel */
-        combinedTraceGroup.setMarginX(ProgConfig.VIRTUAL_PANEL_MARGIN_X);
-        combinedTraceGroup.setMarginY(ProgConfig.VIRTUAL_PANEL_MARGIN_Y);
-//            combinedTraceGroup.setScaleX(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
+        traceGroupContainer.setMargin(ProgConfig.VIRTUAL_PANEL_MARGIN_X, ProgConfig.VIRTUAL_PANEL_MARGIN_Y);
+//        combinedTraceGroup.setMarginX(ProgConfig.VIRTUAL_PANEL_MARGIN_X);
+//        combinedTraceGroup.setMarginY(ProgConfig.VIRTUAL_PANEL_MARGIN_Y);
+////            combinedTraceGroup.setScaleX(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
 
-        combinedTraceGroup.updateTraceMarginY(ProgConfig.TRACE_MARGIN_Y);
+        traceGroupContainer.setTraceMarginY(ProgConfig.TRACE_MARGIN_Y);
+//        combinedTraceGroup.updateTraceMarginY(ProgConfig.TRACE_MARGIN_Y);
 
         eventContainer.applyHorizontalScale(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
 
         /* Update time line. */
         topTimeLine.setTimeValues(eventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
-        combinedTraceGroup.copyTimeLineValues(topTimeLine);
+        traceGroupContainer.setTimeLine(topTimeLine);
         timeLinePanel.getTimeLine().copyTimeValues(topTimeLine);
 
         /* Set panel dimension according to the content to be drawn. */
         this.setPreferredSize(new Dimension(
-                combinedTraceGroup.getWidth()+ProgConfig.PANEL_DRAWER_PADDING_X*2,
-                combinedTraceGroup.getHeight()+ProgConfig.PANEL_DRAWER_PADDING_Y*2));
+                traceGroupContainer.getWidth()+ProgConfig.MAIN_DISPLAY_PANEL_PADDING_X *2,
+                traceGroupContainer.getHeight()+ProgConfig.MAIN_DISPLAY_PANEL_PADDING_Y *2));
 
         /* Set scroll panel height for enabling vertical scroll bar. */
         this.getParent().getParent().setPreferredSize(new Dimension(
                 -1,//this.getParent().getParent().getWidth(),
-                combinedTraceGroup.getHeight() + ProgConfig.PANEL_DRAWER_PADDING_Y * 2));
+                traceGroupContainer.getHeight() + ProgConfig.MAIN_DISPLAY_PANEL_PADDING_Y * 2));
 
         // Is time line panel initialized?
         if (timeLinePanel != null) {
             /* Set the width of time line panel */
             timeLinePanel.setPreferredSize(new Dimension(
-                    combinedTraceGroup.getWidth() + ProgConfig.PANEL_DRAWER_PADDING_X * 2,
+                    traceGroupContainer.getWidth() + ProgConfig.MAIN_DISPLAY_PANEL_PADDING_X * 2,
                     -1
             ));
             timeLinePanel.repaint();
@@ -118,13 +134,14 @@ public class MainDisplayPanel extends JPanel {
         // Is trace header panel initialized? (Should the headers be displayed and updated?)
         if (traceHeadersPanel != null)
         {// Update trace list.
-            traceHeadersPanel.setTrace(combinedTraceGroup.getTraceListArray());
+//            traceHeadersPanel.setTrace(combinedTraceGroup.getTraceListArray());
+            traceHeadersPanel.setTrace(traceGroupContainer.getAllTraces());
             traceHeadersPanel.setBackground(ProgConfig.TRACE_PANEL_FOREGROUND);
         }
 
         /* Scroll zPanelScrollHorizontal panel according to zPanelScrollBarHorizontal */
         if (horizontalScrollBar != null) {
-            horizontalScrollBar.setMaximum(combinedTraceGroup.getWidth() + ProgConfig.PANEL_DRAWER_PADDING_X * 2);
+            horizontalScrollBar.setMaximum(traceGroupContainer.getWidth() + ProgConfig.MAIN_DISPLAY_PANEL_PADDING_X * 2);
             horizontalScrollBar.setUnitIncrement(1);
         }
 

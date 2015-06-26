@@ -1,6 +1,7 @@
 package com.illinois.rts.visualizer;
 
 import com.illinois.rts.framework.*;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -9,8 +10,18 @@ import java.util.ArrayList;
  * Created by CY on 3/13/2015.
  */
 public class Trace {
+    public static int TRACE_TYPE_UNKNOWN = 0;
+    public static int TRACE_TYPE_SYSTEM = 1;
+    public static int TRACE_TYPE_TASK = 2;
+    public static int TRACE_TYPE_OTHER = 3;
+
     private ArrayList eventArray = null;
     private TimeLine timeLine = null;
+
+    public int getEndTimestampNs() {
+        return endTimestampNs;
+    }
+
     private int endTimestampNs = 0;
     private int marginY = 0;
     private TraceSpace traceSpace = null;
@@ -21,9 +32,28 @@ public class Trace {
     private String traceName = null;
     private Task traceTask = null; // If it is a trace for a specific task, then this value should be set.
 
+    public void setTraceType(int traceType) {
+        this.traceType = traceType;
+    }
+
+    public int getTraceType() {
+        return traceType;
+    }
+
+    private int traceType = TRACE_TYPE_UNKNOWN;
 //    protected int scaleX = 1;
 
-    private boolean timeLineEnabled = true;
+    private Boolean timeLineEnabled = true;
+
+    public Boolean getDoNotShow() {
+        return doNotShow;
+    }
+
+    public void setDoNotShow(Boolean doNotShow) {
+        this.doNotShow = doNotShow;
+    }
+
+    private Boolean doNotShow = false;
 
     public Trace(ArrayList inEventArray, TimeLine inTimeLine)
     {
@@ -43,10 +73,11 @@ public class Trace {
         traceTask = null;
     }
 
-    public Trace(String inTraceName, Task inTask, ArrayList inEventArray, TimeLine inTimeLine)
+    public Trace(String inTraceName, Task inTask, ArrayList inEventArray, TimeLine inTimeLine, int inTraceType)
     {
         this(inTraceName, inEventArray, inTimeLine);
         traceTask = inTask;
+        traceType = inTraceType;
     }
 
 //    public void setOffset(int inOffsetX, int inOffsetY)
@@ -140,4 +171,5 @@ public class Trace {
     {
         return traceSpace.getHeight() + marginY*2;
     }
+
 }
