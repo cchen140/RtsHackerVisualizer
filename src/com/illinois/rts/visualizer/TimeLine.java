@@ -46,7 +46,8 @@ public class TimeLine extends DrawUnit {
     @Override
     protected void draw(Graphics2D g) {
         g.setColor(Color.black);
-        g.drawLine(offsetX, offsetY, offsetX+ endTimestampNs, offsetY);
+        g.drawLine(offsetX, offsetY, offsetX+ endTimestampNs/nsPerUnit, offsetY);
+        g.fillOval(offsetX + 1 + endTimestampNs/nsPerUnit, offsetY-5, 10, 10);
 
         /* Draw markers and labels */
         for (int i=0, j=0; i<= endTimestampNs/ nsPerUnit; i+=numOfUnitInPeriod, j++)
