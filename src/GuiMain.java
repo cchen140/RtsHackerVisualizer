@@ -48,7 +48,8 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 
     public void initGui() {
 
-        frame.setContentPane(new GuiMain().panel1);
+//        frame.setContentPane(new GuiMain().panel1);
+        frame.setContentPane(panel1);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1200, 800);
