@@ -13,6 +13,10 @@ public class MainDisplayPanel extends JPanel {
 
     private TraceGroupContainer traceGroupContainer = new TraceGroupContainer();
 
+    public TraceGroupContainer getTraceGroupContainer() {
+        return traceGroupContainer;
+    }
+
 //    private CombinedTraceGroup combinedTraceGroup = null;
 //    private TraceGroup hackerEventsDrawPanel = null;
 
@@ -104,10 +108,12 @@ public class MainDisplayPanel extends JPanel {
         traceGroupContainer.setTraceMarginY(ProgConfig.TRACE_MARGIN_Y);
 //        combinedTraceGroup.updateTraceMarginY(ProgConfig.TRACE_MARGIN_Y);
 
-        eventContainer.applyHorizontalScale(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
+//        eventContainer.applyHorizontalScale(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
+        traceGroupContainer.applyHorizontalScale(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
 
         /* Update time line. */
-        topTimeLine.setTimeValues(eventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
+//        topTimeLine.setTimeValues(eventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
+        topTimeLine.setTimeValues(traceGroupContainer.findOrgEndTimeStamp(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
         traceGroupContainer.setTimeLine(topTimeLine);
         timeLinePanel.getTimeLine().copyTimeValues(topTimeLine);
 
@@ -135,7 +141,8 @@ public class MainDisplayPanel extends JPanel {
         if (traceHeadersPanel != null)
         {// Update trace list.
 //            traceHeadersPanel.setTrace(combinedTraceGroup.getTraceListArray());
-            traceHeadersPanel.setTrace(traceGroupContainer.getAllTraces());
+//            traceHeadersPanel.setTrace(traceGroupContainer.getAllTraces());
+            traceHeadersPanel.setTraceGroupContainer(traceGroupContainer);
             traceHeadersPanel.setBackground(ProgConfig.TRACE_PANEL_FOREGROUND);
         }
 

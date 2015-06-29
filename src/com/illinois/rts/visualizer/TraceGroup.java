@@ -1,18 +1,15 @@
 package com.illinois.rts.visualizer;
 
-import com.sun.javafx.scene.layout.region.Margins;
-import javafx.print.Printer;
-
-import javax.swing.plaf.basic.BasicBorders;
 import java.awt.*;
 import java.util.ArrayList;
 
 /**
  * Created by CY on 3/13/2015.
  */
-public abstract class TraceGroup {
+public class TraceGroup {
     // scaleX Refer to how many nano seconds one drawing unit is since by default one drawing unit is one nano second.
 //    protected int scaleX = 1;
+    protected String title = "";
 
     protected int width = 0;
     protected int height = 0;
@@ -36,12 +33,22 @@ public abstract class TraceGroup {
     public TraceGroup()
     {
         background.setFillColor(ProgConfig.TRACE_PANEL_FOREGROUND);
+        background.setEdgeColor(ProgConfig.TRACE_PANEL_BACKGROUND_BORDER);
+    }
+
+    public void AddTrace(Trace inTrace)
+    {
+        traces.add(inTrace);
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     // Override if necessary.
     public void triggerUpdate(){}
 
-    public void draw(Graphics2D g, int offsetX, int offsetY)
+    public int draw(Graphics2D g, int offsetX, int offsetY)
     {
 
         int currentOffsetX = offsetX;
@@ -70,6 +77,8 @@ public abstract class TraceGroup {
             traceGap.draw(g, 0, currentOffsetY, width+currentOffsetX);
         }
 
+        // Return the last painting cursor position.,
+        return currentOffsetY;
     }
 
     public int getHeight() {
@@ -116,14 +125,17 @@ public abstract class TraceGroup {
 //        width = calculateWidth();
 //        height = calculateHeight();
 
-        background.setSize(width+1, height+5);
-        background.draw(g, offsetX-1, offsetY-5);
+//        background.setSize(width+1, height+5);
+//        background.draw(g, offsetX-1, offsetY-5);
+        background.setSize(width+1, height+1);
+        background.draw(g, offsetX-1, offsetY-1);
     }
 
+    // Width should be calculated through scaled time stamps.
     protected int calculateWidth()
     {
         int resultWidth = 0;
-        int maxEndTimeStampNs = 0;
+        int maxScaledEndTimeStamp = 0;
 
         resultWidth += marginX*2;    // Left and right borders.
 
@@ -132,11 +144,11 @@ public abstract class TraceGroup {
             if (thisTrace.getDoNotShow() == true)
                 continue;
 
-            int thisEndTimeStampNs = thisTrace.getEndTimestampNs();
-            if (thisEndTimeStampNs > maxEndTimeStampNs)
-                maxEndTimeStampNs = thisEndTimeStampNs;
+            int thisScaledEndTimeStampNs = thisTrace.findScaledEndTimestamp();//findOrgEndTimestampNs();
+            if (thisScaledEndTimeStampNs > maxScaledEndTimeStamp)
+                maxScaledEndTimeStamp = thisScaledEndTimeStampNs;
         }
-        resultWidth += maxEndTimeStampNs;
+        resultWidth += maxScaledEndTimeStamp;
         return resultWidth;
     }
 
@@ -166,5 +178,37 @@ public abstract class TraceGroup {
         {
             currentTrace.getTimeLine().copyTimeValues(inTimeLine);
         }
+    }
+
+    public void applyHorizontalScale(int inScale)
+    {
+        for (Trace currentTrace : traces)
+        {
+            currentTrace.applyHorizontalScale(inScale);
+        }
+    }
+
+    public int findOrgEndTimeStampNs()
+    {
+        int resultEndTimestampNs = 0;
+        for (Trace thisTrace : traces)
+        {
+            if (thisTrace.findOrgEndTimestampNs() > resultEndTimestampNs)
+            {
+                resultEndTimestampNs = thisTrace.findOrgEndTimestampNs();
+            }
+        }
+        return resultEndTimestampNs;
+    }
+
+    public int findScaledEndTimeStamp()
+    {
+        int resultScaledEndTimeStamp = 0;
+        for (Trace thisTrace : traces)
+        {
+            int thisScaledEndTimeStamp = thisTrace.findScaledEndTimestamp();
+            resultScaledEndTimeStamp = (thisScaledEndTimeStamp>resultScaledEndTimeStamp) ? thisScaledEndTimeStamp : resultScaledEndTimeStamp;
+        }
+        return resultScaledEndTimeStamp;
     }
 }

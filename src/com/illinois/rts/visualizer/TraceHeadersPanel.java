@@ -1,6 +1,7 @@
 package com.illinois.rts.visualizer;
 
 import com.illinois.rts.framework.Task;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,13 +11,19 @@ import java.util.ArrayList;
  * Created by CY on 6/24/2015.
  */
 public class TraceHeadersPanel extends JPanel {
-    ArrayList<Trace> traces = null;
+    //    ArrayList<Trace> traces = null;
+    TraceGroupContainer traceGroupContainer = null;
 
     public TraceHeadersPanel(){}
 
-    public void setTrace(ArrayList<Trace> inTraces)
-    {
-        traces = inTraces;
+//    public void setTrace(ArrayList<Trace> inTraces)
+//    {
+//        traces = inTraces;
+//        this.repaint();
+//    }
+
+    public void setTraceGroupContainer(TraceGroupContainer traceGroupContainer) {
+        this.traceGroupContainer = traceGroupContainer;
         this.repaint();
     }
 
@@ -29,26 +36,47 @@ public class TraceHeadersPanel extends JPanel {
         g.drawLine(this.getWidth()-1, 0, this.getWidth()-1, this.getHeight());
 
         int paintingCursorY = 0;
-        for (Trace thisTrace : traces)
-        {
-            if (thisTrace.getDoNotShow() == true)
-                continue;
+        Boolean firstGroup = true;
+        for (TraceGroup thisTraceGroup : traceGroupContainer.getTraceGroups()) {
+            if (firstGroup == true)
+            {
+                firstGroup = false;
+            } else {
+                /* Fill the gap between two trace groups. */
+                g.setColor(ProgConfig.TRACE_PANEL_BACKGROUND);
+                g.fillRect(0, paintingCursorY, this.getWidth(), ProgConfig.TRACE_GROUP_MARGIN_Y);
 
-            int orgPaintingCursor = paintingCursorY;
-            paintingCursorY += thisTrace.getTraceHeight() / 2;
-            paintingCursorY = drawTraceNameAndIcon(g, ProgConfig.TRACE_HEADER_LEFT_MARGIN, paintingCursorY, thisTrace, true);
+                /* Draw upper and lower border of the filled gap. */
+                g.setColor(ProgConfig.TRACE_PANEL_BACKGROUND_BORDER);
+                g.drawLine(0, paintingCursorY, this.getWidth(), paintingCursorY);
+                paintingCursorY += ProgConfig.TRACE_GROUP_MARGIN_Y;
+                g.drawLine(0, paintingCursorY-1, this.getWidth(), paintingCursorY-1);
 
-            if (thisTrace.getTask()!=null && thisTrace.getTraceType()==Trace.TRACE_TYPE_TASK) {
-                paintingCursorY += ProgConfig.TRACE_HEADER_TITLE_SUBTITLE_GAP;
-                drawTaskAttributes(g, ProgConfig.TRACE_HEADER_LEFT_MARGIN, paintingCursorY, thisTrace.getTask());
+                // Draw split line
+                g.setColor(ProgConfig.TRACE_PANEL_BORDER_COLOR);
+                g.drawLine(0, paintingCursorY - 1, this.getWidth(), paintingCursorY - 1);
             }
 
-            // Move the painting cursor
-            paintingCursorY = orgPaintingCursor + thisTrace.getTraceHeight();
+            for (Trace thisTrace : thisTraceGroup.getTraces()) {
+                if (thisTrace.getDoNotShow() == true)
+                    continue;
 
-            // Draw split line
-            g.setColor(ProgConfig.TRACE_PANEL_BORDER_COLOR);
-            g.drawLine(0, paintingCursorY - 1, this.getWidth(), paintingCursorY - 1);
+                int orgPaintingCursor = paintingCursorY;
+                paintingCursorY += thisTrace.getTraceHeight() / 2;
+                paintingCursorY = drawTraceNameAndIcon(g, ProgConfig.TRACE_HEADER_LEFT_MARGIN, paintingCursorY, thisTrace, true);
+
+                if (thisTrace.getTask() != null && thisTrace.getTraceType() == Trace.TRACE_TYPE_TASK) {
+                    paintingCursorY += ProgConfig.TRACE_HEADER_TITLE_SUBTITLE_GAP;
+                    drawTaskAttributes(g, ProgConfig.TRACE_HEADER_LEFT_MARGIN, paintingCursorY, thisTrace.getTask());
+                }
+
+                // Move the painting cursor
+                paintingCursorY = orgPaintingCursor + thisTrace.getTraceHeight();
+
+                // Draw split line
+                g.setColor(ProgConfig.TRACE_PANEL_BORDER_COLOR);
+                g.drawLine(0, paintingCursorY - 1, this.getWidth(), paintingCursorY - 1);
+            }
         }
     }
 

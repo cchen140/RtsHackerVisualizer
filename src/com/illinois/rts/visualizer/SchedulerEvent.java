@@ -26,6 +26,13 @@ public class SchedulerEvent extends Event {
         drawObject.setFillColor(task.getTaskColor());
     }
 
+    public SchedulerEvent(int inBeginTimeStamp, int inEndTimeStamp, Task inTask, String inNote)
+    {
+        this(inBeginTimeStamp, inTask, inNote);
+        orgEndTimestampNs = inEndTimeStamp;
+        scaledEndTimestamp = inEndTimeStamp;
+    }
+
     public void drawEvent(Graphics2D g, int offsetX, int offsetY)
     {
 
@@ -46,8 +53,9 @@ public class SchedulerEvent extends Event {
         }
         else
         {
+            // TODO: Need to handle the scheduler events which have time stamp less than 0.
             //((DrawPhase) drawObject).draw(g, scaledBeginTimestamp, 20);
-            System.err.println("Drawing ScheduleEvent error: TimeStamp <= 0");
+//            System.err.println("Drawing ScheduleEvent error: TimeStamp <= 0");
         }
         //System.out.println(scaledBeginTimestamp);
     }

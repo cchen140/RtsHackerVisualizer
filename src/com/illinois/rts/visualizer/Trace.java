@@ -1,7 +1,6 @@
 package com.illinois.rts.visualizer;
 
 import com.illinois.rts.framework.*;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -18,9 +17,9 @@ public class Trace {
     private ArrayList eventArray = null;
     private TimeLine timeLine = null;
 
-    public int getEndTimestampNs() {
-        return endTimestampNs;
-    }
+//    public int getEndTimestampNs() {
+//        return endTimestampNs;
+//    }
 
     private int endTimestampNs = 0;
     private int marginY = 0;
@@ -60,7 +59,7 @@ public class Trace {
         eventArray = inEventArray;
         timeLine = inTimeLine;
 
-        endTimestampNs = findEndTimestampNs();
+        endTimestampNs = findOrgEndTimestampNs();
         timeLine.setEndTimestampNs(endTimestampNs);
 
         traceSpace = calculateTraceSpace();
@@ -86,7 +85,7 @@ public class Trace {
 //        offsetY = inOffsetY;
 //    }
 
-    private int findEndTimestampNs()
+    public int findOrgEndTimestampNs()
     {
         int resultEndTimestampNs = 0;
         for (Object currentObj : eventArray)
@@ -98,6 +97,17 @@ public class Trace {
             }
         }
         return resultEndTimestampNs;
+    }
+
+    public int findScaledEndTimestamp()
+    {
+        int resultScaledEndTimeStamp = 0;
+        for (Event currentEvent : (ArrayList<Event>)eventArray)
+        {
+            int thisScaledEndTimeStamp = currentEvent.getScaledEndTimestamp();
+            resultScaledEndTimeStamp = (thisScaledEndTimeStamp>resultScaledEndTimeStamp) ? thisScaledEndTimeStamp : resultScaledEndTimeStamp;
+        }
+        return resultScaledEndTimeStamp;
     }
 
     private TraceSpace calculateTraceSpace()
@@ -170,6 +180,14 @@ public class Trace {
     public int getTraceHeight()
     {
         return traceSpace.getHeight() + marginY*2;
+    }
+
+    public void applyHorizontalScale(int inScale)
+    {
+        for (Object thisEvent : eventArray) {
+            ((Event)thisEvent).applyScaleX(inScale);
+        }
+//        scaledEndTimestamp = orgEndTimestampNs /inScale;
     }
 
 }

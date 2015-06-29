@@ -37,6 +37,7 @@ public class CombinedTraceGroup extends TraceGroup {
         traceGap = new DrawTraceGap();
         traceGap.setFillColor(ProgConfig.TRACE_PANEL_BORDER_COLOR);
 
+        title = "Scheduler";
     }
 
     private void initializeTraces()
@@ -90,13 +91,13 @@ public class CombinedTraceGroup extends TraceGroup {
     }
 
     @Override
-    public void draw(Graphics2D g, int offsetX, int offsetY) {
+    public int draw(Graphics2D g, int offsetX, int offsetY) {
 
         int currentOffsetX = offsetX;
         int currentOffsetY = offsetY;
 
         if ((ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE==false) && (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES==false))
-            return;
+            return offsetY;
 
         // Draw background
         width = calculateWidth();
@@ -139,6 +140,8 @@ public class CombinedTraceGroup extends TraceGroup {
             }
         }
 
+        return currentOffsetY;
+
     }
 
 //    public ArrayList<Trace> getTraceListArray()
@@ -180,7 +183,8 @@ public class CombinedTraceGroup extends TraceGroup {
     {
         int resultWidth = 0;
         resultWidth += marginX*2;    // Left and right borders.
-        resultWidth += eventContainer.getScaledEndTimestamp();
+//        resultWidth += eventContainer.getScaledEndTimestamp();
+        resultWidth += this.findScaledEndTimeStamp();
         return resultWidth;
     }
 

@@ -264,6 +264,15 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
+
+                /* Build a trace to show result of busy interval analysis. */
+                TraceGroup decompositionTraceGroup = new TraceGroup();
+                decompositionTraceGroup.setTitle("Decomposition");
+                Trace decompositionInferenceTrace = decomposition.BuildInferenceTrace(busyIntervalContainer);
+                decompositionTraceGroup.AddTrace(decompositionInferenceTrace);
+                zPanel.getTraceGroupContainer().addTraceGroup(decompositionTraceGroup);
+                zPanel.applyNewSettings();
+
             }
             else
             {

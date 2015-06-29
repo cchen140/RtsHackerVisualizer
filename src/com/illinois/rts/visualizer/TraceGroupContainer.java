@@ -1,7 +1,5 @@
 package com.illinois.rts.visualizer;
 
-import org.omg.CORBA.PRIVATE_MEMBER;
-
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -9,6 +7,14 @@ import java.util.ArrayList;
  * Created by CY on 6/24/2015.
  */
 public class TraceGroupContainer {
+
+    private int scaledEndTimestamp = 0;
+    private int orgEndTimestampNs = 0;
+
+    public ArrayList<TraceGroup> getTraceGroups() {
+        return traceGroups;
+    }
+
     private ArrayList<TraceGroup> traceGroups = new ArrayList<TraceGroup>();
     private TimeLine timeLine = null;   // Note that the timeLine object in each trace should be independent.
 
@@ -32,9 +38,11 @@ public class TraceGroupContainer {
     }
 
     public void draw(Graphics2D g, int offsetX, int offsetY) {
+        int currentCursorY = offsetY;
         for (TraceGroup thisTraceGroup : traceGroups)
         {
-            thisTraceGroup.draw(g, offsetX, offsetY);
+            currentCursorY = thisTraceGroup.draw(g, offsetX, currentCursorY);
+            currentCursorY += ProgConfig.TRACE_GROUP_MARGIN_Y;
         }
     }
 
@@ -75,13 +83,19 @@ public class TraceGroupContainer {
     }
 
     public int getHeight() {
-        int maxHeight = 0;
+        int resultHeight = 0;
+        Boolean firstTraceGroup = true;
         for (TraceGroup thisTraceGroup : traceGroups)
         {
-            int thisHeight = thisTraceGroup.getHeight();
-            maxHeight = (thisHeight > maxHeight) ? thisHeight : maxHeight;
+            if (firstTraceGroup == true) {
+                firstTraceGroup = false;
+            } else {
+                // There is a gap between each trace group.
+                resultHeight += ProgConfig.TRACE_GROUP_MARGIN_Y;
+            }
+            resultHeight += thisTraceGroup.getHeight();
         }
-        return maxHeight;
+        return resultHeight;
     }
 
     public ArrayList<Trace> getAllTraces()
@@ -100,5 +114,35 @@ public class TraceGroupContainer {
         {
             thisTraceGroup.triggerUpdate();
         }
+    }
+
+    public void applyHorizontalScale(int inScale)
+    {
+        for (TraceGroup thisTraceGroup : traceGroups)
+        {
+            thisTraceGroup.applyHorizontalScale(inScale);
+        }
+    }
+
+    public int findOrgEndTimeStamp()
+    {
+        int resultEndTimeStamp = 0;
+        for (TraceGroup thisTraceGroup : traceGroups)
+        {
+            int thisEndTimeStamp = thisTraceGroup.findOrgEndTimeStampNs();
+            resultEndTimeStamp = (thisEndTimeStamp>resultEndTimeStamp) ? thisEndTimeStamp : resultEndTimeStamp;
+        }
+        return resultEndTimeStamp;
+    }
+
+    public int findScaledEndTimeStamp()
+    {
+        int resultScaledEndTimeStamp = 0;
+        for (TraceGroup thisTraceGroup : traceGroups)
+        {
+            int thisScaledEndTimeStamp = thisTraceGroup.findScaledEndTimeStamp();
+            resultScaledEndTimeStamp = (thisScaledEndTimeStamp>resultScaledEndTimeStamp) ? thisScaledEndTimeStamp : resultScaledEndTimeStamp;
+        }
+        return resultScaledEndTimeStamp;
     }
 }

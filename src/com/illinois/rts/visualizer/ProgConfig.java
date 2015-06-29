@@ -18,6 +18,9 @@ public class ProgConfig {
     /* Configuration from log */
     public static double TIMESTAMP_UNIT_NS = 1; // 1 tick represents 1ns
 
+    /* Trace group settings */
+    public static int TRACE_GROUP_MARGIN_Y = 10;
+
     /* Trace Settings */
     public static int TRACE_HORIZONTAL_SCALE_DIVIDER = 30000;
     public static int TIME_LINE_PERIOD_NS = 10000000; // 10ms
@@ -25,6 +28,7 @@ public class ProgConfig {
     public static int TRACE_MARGIN_Y = 30;
     public static int TRACE_PANEL_BORDER_WIDTH = 1;
     public static Color TRACE_PANEL_BACKGROUND = Color.GRAY;
+    public static Color TRACE_PANEL_BACKGROUND_BORDER = Color.BLACK;
     public static Color TRACE_PANEL_FOREGROUND = Color.WHITE;
     public static Color TRACE_PANEL_BORDER_COLOR = Color.LIGHT_GRAY;
     public static Color TRACE_PANEL_TEXT_COLOR = Color.BLACK;
