@@ -191,7 +191,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 }
             } catch (Exception ex) {
                 System.out.println("Error occurs while opening the file.");
-                System.out.println(ex);
+                ex.printStackTrace();
             }
         } else if (e.getSource() == buttonSettings) {
 //            ProgramLogMessenger.getInstance().putLine("settings button clicked.");
