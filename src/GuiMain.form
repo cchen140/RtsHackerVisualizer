@@ -320,7 +320,7 @@
             </properties>
             <border type="none"/>
             <children>
-              <grid id="4e4cc" layout-manager="BorderLayout" hgap="0" vgap="0">
+              <grid id="4e4cc" binding="zPanelTimeLineLeftPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
                 <constraints border-constraint="West"/>
                 <properties>
                   <preferredSize width="150" height="0"/>

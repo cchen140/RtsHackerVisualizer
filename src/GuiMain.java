@@ -31,6 +31,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private JButton buttonExportLog;
     private JButton buttonCompute;
     private TraceHeadersPanel zPanelTraceHeaders;
+    private JPanel zPanelTimeLineLeftPanel;
 
     /* Menu bar variables. */
     private JMenuBar menueBar;
@@ -139,6 +140,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 
         /* Trace header panel dimension */
         zPanelTraceHeaders.setPreferredSize(new Dimension(ProgConfig.TRACE_HEADER_PANEL_DEFAULT_WIDTH, -1));
+        zPanelTimeLineLeftPanel.setPreferredSize(new Dimension(ProgConfig.TRACE_HEADER_PANEL_DEFAULT_WIDTH, -1));
 
 //        zPanelTimeLine
         zPanel.setTraceHeadersPanel(zPanelTraceHeaders);
