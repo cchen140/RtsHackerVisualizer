@@ -34,13 +34,19 @@ public class ProgConfig {
     public static Color TRACE_PANEL_TEXT_COLOR = Color.BLACK;
 
     /* Trace header appearance */
-    public static int TRACE_HEADER_LEFT_MARGIN = 10;
+    public static int TRACE_HEADER_PANEL_DEFAULT_WIDTH = 200;
+    public static int TRACE_HEADER_LEFT_MARGIN = 50;
     public static int TRACE_HEADER_ICON_TITLE_GAP = 10;
     public static int TRACE_HEADER_TITLE_SUBTITLE_GAP = 20;
     public static Font TRACE_HEADER_TITLE_FONT = new Font("TimesRoman", Font.PLAIN, 20);
     public static Color TRACE_HEADER_TITLE_COLOR = Color.BLACK;
     public static Font TRACE_HEADER_SUBTITLE_FONT = new Font("TimesRoman", Font.PLAIN, 16);
     public static Color TRACE_HEADER_SUBTITLE_COLOR = Color.BLACK;
+
+    public static int TRACE_HEADER_GROUP_HEAD_HEIGHT = 30;
+    public static Color TRACE_HEADER_GROUP_HEAD_BACKGROUND = Color.BLUE;
+    public static Font TRACE_HEADER_GROUP_HEAD_TITLE_FONT = new Font("TimesRoman", Font.PLAIN, 16);
+    public static Color TRACE_HEADER_GROUP_HEAD_TITLE_COLOR = Color.WHITE;
 
     // Scheduler Traces
     public static boolean DISPLAY_SCHEDULER_SUMMARY_TRACE = true;

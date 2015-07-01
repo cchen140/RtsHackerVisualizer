@@ -137,6 +137,9 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         /* zPanel settings. */
         zPanel.setBackground(ProgConfig.TRACE_PANEL_BACKGROUND);
 
+        /* Trace header panel dimension */
+        zPanelTraceHeaders.setPreferredSize(new Dimension(ProgConfig.TRACE_HEADER_PANEL_DEFAULT_WIDTH, -1));
+
 //        zPanelTimeLine
         zPanel.setTraceHeadersPanel(zPanelTraceHeaders);
         zPanel.setTimeLinePanel(zPanelTimeLine);

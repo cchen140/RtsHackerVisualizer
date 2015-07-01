@@ -57,6 +57,7 @@ public class TraceHeadersPanel extends JPanel {
                 g.drawLine(0, paintingCursorY - 1, this.getWidth(), paintingCursorY - 1);
             }
 
+            int topPaintingPointOfThisTraceGroupY = paintingCursorY;
             for (Trace thisTrace : thisTraceGroup.getTraces()) {
                 if (thisTrace.getDoNotShow() == true)
                     continue;
@@ -77,6 +78,7 @@ public class TraceHeadersPanel extends JPanel {
                 g.setColor(ProgConfig.TRACE_PANEL_BORDER_COLOR);
                 g.drawLine(0, paintingCursorY - 1, this.getWidth(), paintingCursorY - 1);
             }
+            drawTraceGroupHeader(g, 0, topPaintingPointOfThisTraceGroupY, thisTraceGroup);
         }
     }
 
@@ -152,6 +154,25 @@ public class TraceHeadersPanel extends JPanel {
         paintingCursorY += g.getFontMetrics().getHeight();
 
         return paintingCursorY;
+    }
+
+    private void drawTraceGroupHeader(Graphics g, int x, int y, TraceGroup inTraceGroup)
+    {
+        int headHeight = ProgConfig.TRACE_HEADER_GROUP_HEAD_HEIGHT;
+        int leftBarWidth = headHeight/2;
+
+        /* Draw trace group head background*/
+        g.setColor(ProgConfig.TRACE_HEADER_GROUP_HEAD_BACKGROUND);
+        g.fillArc( x+this.getWidth()-headHeight*2, y-headHeight, headHeight*2, headHeight*2, 270, 90);
+        g.fillRect( x, y, x+this.getWidth()-headHeight, headHeight);
+
+        /* Draw left side bar. */
+        g.fillRect(x, y, leftBarWidth, inTraceGroup.getHeight());
+
+        /* Draw trace group title */
+        g.setColor(ProgConfig.TRACE_HEADER_GROUP_HEAD_TITLE_COLOR);
+        g.setFont(ProgConfig.TRACE_HEADER_TITLE_FONT);
+        g.drawString(inTraceGroup.title, x+ProgConfig.TRACE_HEADER_LEFT_MARGIN, y+20);
     }
 
 }
