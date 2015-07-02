@@ -3,6 +3,7 @@ import javax.swing.*;
 import com.illinois.rts.analysis.busyintervals.BusyIntervalContainer;
 import com.illinois.rts.analysis.busyintervals.Decomposition;
 import com.illinois.rts.framework.Task;
+import com.illinois.rts.hack.HackManager;
 import com.illinois.rts.simulator.ConfigLoader;
 import com.illinois.rts.simulator.RmScheduling;
 import com.illinois.rts.visualizer.*;
@@ -38,6 +39,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private JMenuItem menuItemLoadLog;
     private JMenuItem menuItemBusyIntervalsRunGe;
     private JMenuItem menuItemBusyIntervalsRunAmir;
+    private JMenuItem menuItemHackPlotCapturedBusyIntervals;
 
     JFrame frame = new JFrame("RTS Hacker Visualizer");
 
@@ -78,8 +80,9 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 
 
         /* Create menu bar. */
-        Font menuFont = new Font("TimesRoman", Font.PLAIN, 16); // Menu Font
+        Font menuFont = new Font("TimesRoman", Font.PLAIN, 18); // Menu Font
         JMenu topMenuInstance;
+        JMenu subMEnuInstance;
         JMenuItem menuItemInstance;
         menueBar = new JMenuBar();
 
@@ -103,7 +106,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         menueBar.add(topMenuInstance);
 
         // - Analyze -> Busy Intervals
-        JMenu subMEnuInstance = new JMenu("Busy Intervals");
+        subMEnuInstance = new JMenu("Busy Intervals");
         subMEnuInstance.setFont(menuFont);
         topMenuInstance.add(subMEnuInstance);
 
@@ -118,6 +121,17 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         menuItemBusyIntervalsRunAmir.setFont(menuFont);
         subMEnuInstance.add(menuItemBusyIntervalsRunAmir);
         menuItemBusyIntervalsRunAmir.addActionListener(this);
+
+        // Create "Hack" menu
+        topMenuInstance = new JMenu("Hack");
+        topMenuInstance.setFont(menuFont);
+        menueBar.add(topMenuInstance);
+
+        // - Hack -> Plot Busy Intervals
+        menuItemHackPlotCapturedBusyIntervals = new JMenuItem("Plot Busy Intervals");
+        menuItemHackPlotCapturedBusyIntervals.setFont(menuFont);
+        topMenuInstance.add(menuItemHackPlotCapturedBusyIntervals);
+        menuItemHackPlotCapturedBusyIntervals.addActionListener(this);
 
 
         /* Action listener for buttons */
@@ -284,6 +298,15 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 ProgMsg.errPutline("Analysis of busy intervals failed due to empty Event Container.");
 
             }
+        } else if (e.getSource() == menuItemHackPlotCapturedBusyIntervals) {
+            /* Build a trace to show captured busy intervals by hack tasks. */
+            HackManager hackManager = new HackManager(eventContainer);
+            TraceGroup hackTraceGroup = new TraceGroup();
+            hackTraceGroup.setTitle("Hack");
+            Trace hackBusyIntervalTrace = hackManager.buildCapturedBusyIntervalTrace();
+            hackTraceGroup.AddTrace(hackBusyIntervalTrace);
+            zPanel.getTraceGroupContainer().addTraceGroup(hackTraceGroup);
+            zPanel.applyNewSettings();
         }
 
     }

@@ -16,6 +16,9 @@ public abstract class Event {
     protected int scaledBeginTimestamp = 0;
     protected int scaledEndTimestamp = 0;
 
+    protected String note = "";
+    protected Boolean noteVisible = false;
+
     public Event(){}
 
     public int getOrgBeginTimestampNs() { return orgBeginTimestampNs; }
@@ -62,5 +65,21 @@ public abstract class Event {
     protected int getGraphicStringWidth(Graphics2D g, String inString) {
         FontMetrics fm = g.getFontMetrics();
         return fm.stringWidth(inString);
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public Boolean getNoteVisible() {
+        return noteVisible;
+    }
+
+    public void setNoteVisible(Boolean noteVisible) {
+        this.noteVisible = noteVisible;
     }
 }
