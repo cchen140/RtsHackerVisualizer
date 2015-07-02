@@ -88,6 +88,19 @@ public class CombinedTraceGroup extends TraceGroup {
             else
                 thisTrace.setDoNotShow(true);
         }
+
+        if (ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE == true) {
+            combinedTrace.setDoNotShow(false);
+        } else {
+            combinedTrace.setDoNotShow(true);
+        }
+
+        if (ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES == false) {
+            for (Trace thisTrace: traces)
+            {
+                thisTrace.setDoNotShow(true);
+            }
+        }
     }
 
     @Override
