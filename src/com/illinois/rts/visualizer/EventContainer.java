@@ -15,7 +15,7 @@ public class EventContainer {
     private static final double SCALE_X = 1.0;
     private static final double SCALE_Y = 1.0;
 
-    private ArrayList<SchedulerEvent> schedulerEvents = new ArrayList<SchedulerEvent>();
+    private ArrayList<TaskIntervalEvent> schedulerEvents = new ArrayList<TaskIntervalEvent>();
     private ArrayList<AppEvent> appEvents = new ArrayList<AppEvent>();
     private ArrayList<HackerEvent> hackerEvents = new ArrayList<HackerEvent>();
     private TaskContainer taskContainer = new TaskContainer();
@@ -32,7 +32,7 @@ public class EventContainer {
             if (schedulerEvents.size() > 0) {
                 schedulerEvents.get(schedulerEvents.size() - 1).setOrgEndTimestampNs(inTimestampNs);
             }
-            schedulerEvents.add(new SchedulerEvent(inTimestampNs, taskContainer.getTaskById(inData), inEventString));
+            schedulerEvents.add(new TaskIntervalEvent(inTimestampNs, taskContainer.getTaskById(inData), inEventString));
 
             // Assume that the added scheduler event is in order, the latest one should be the latest.
             // if (scaledEndTimestamp < inTimestampNs)
@@ -67,7 +67,7 @@ public class EventContainer {
         return taskContainer;
     }
 
-    public ArrayList<SchedulerEvent> getSchedulerEvents() { return schedulerEvents; }
+    public ArrayList<TaskIntervalEvent> getSchedulerEvents() { return schedulerEvents; }
     public ArrayList<AppEvent> getAppEvents() { return appEvents; }
     public  ArrayList<HackerEvent> getHackerEvents() { return hackerEvents; }
 
@@ -109,7 +109,7 @@ public class EventContainer {
 
     public void applyHorizontalScale(int inScale)
     {
-        for (SchedulerEvent currentEvent : schedulerEvents) {
+        for (TaskIntervalEvent currentEvent : schedulerEvents) {
             currentEvent.applyScaleX(inScale);
         }
 

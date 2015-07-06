@@ -18,14 +18,16 @@ public class HackManager {
         return new Trace("Busy Intervals", capturedBusyIntervalsToEvents(), new TimeLine());
     }
 
-    protected ArrayList<PhaseEvent> capturedBusyIntervalsToEvents() {
-        ArrayList<PhaseEvent> resultEvents = new ArrayList<>();
+    protected ArrayList<IntervalEvent> capturedBusyIntervalsToEvents() {
+        ArrayList<IntervalEvent> resultEvents = new ArrayList<>();
         for (HackerEvent currentEvent : eventContainer.getLowHackerEvents()) {
             int beginTimeStamp = currentEvent.getOrgBeginTimestampNs();
             // TODO: The captured value from Zedboard has to be in nano seconds for consistency.
             int measuredValue = currentEvent.getRecordData()*3; // times 3 to make it in nano seconds.
-            resultEvents.add(new PhaseEvent(beginTimeStamp - measuredValue, beginTimeStamp, Integer.toString(measuredValue)));
+            resultEvents.add(new IntervalEvent(beginTimeStamp - measuredValue, beginTimeStamp, Integer.toString(measuredValue)));
         }
         return resultEvents;
     }
+
+
 }

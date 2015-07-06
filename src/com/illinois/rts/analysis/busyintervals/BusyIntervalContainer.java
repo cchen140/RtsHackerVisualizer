@@ -3,7 +3,8 @@ package com.illinois.rts.analysis.busyintervals;
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.visualizer.AppEvent;
 import com.illinois.rts.visualizer.EventContainer;
-import com.illinois.rts.visualizer.SchedulerEvent;
+import com.illinois.rts.visualizer.IntervalEvent;
+import com.illinois.rts.visualizer.TaskIntervalEvent;
 
 import java.util.ArrayList;
 
@@ -15,7 +16,7 @@ public class BusyIntervalContainer {
 
     public Boolean createBusyIntervalsFromEvents(EventContainer inEventContainer)
     {
-        ArrayList<SchedulerEvent> schedulerEvents = inEventContainer.getSchedulerEvents();
+        ArrayList<TaskIntervalEvent> schedulerEvents = inEventContainer.getSchedulerEvents();
         ArrayList<AppEvent> appEvents = inEventContainer.getAppEvents();
         int idleTaskId = 0;
 
@@ -34,7 +35,7 @@ public class BusyIntervalContainer {
 
         Boolean busyIntervalFound = false;
         int beginTimeStamp = 0;
-        for (SchedulerEvent currentEvent: schedulerEvents)
+        for (TaskIntervalEvent currentEvent: schedulerEvents)
         {
             if (busyIntervalFound == false)
             {
@@ -77,6 +78,21 @@ public class BusyIntervalContainer {
             }
 
         } // End of scheduler events iteration loop.
+        return true;
+    }
+
+    public Boolean createBusyIntervalsFromIntervalEvents(ArrayList<IntervalEvent> inEvents)
+    {
+        // Reset the variable.
+        busyIntervals.clear();
+
+        for (IntervalEvent thisEvent : inEvents)
+        {
+            int thisBeginTimeStamp = thisEvent.getOrgBeginTimestampNs();
+            int thisEndTimeStamp = thisEvent.getOrgEndTimestampNs();
+            BusyInterval thisBusyInterval = new BusyInterval(thisBeginTimeStamp, thisEndTimeStamp);
+            busyIntervals.add(thisBusyInterval);
+        }
         return true;
     }
 

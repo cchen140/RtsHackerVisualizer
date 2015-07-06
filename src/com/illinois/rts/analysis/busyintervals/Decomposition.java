@@ -40,18 +40,25 @@ public class Decomposition {
         ArrayList<Event> resultEvents = new ArrayList<>();
         for (BusyInterval thisBusyInterval : inBusyIntervalContainer.getBusyIntervals())
         {
-            // TODO: 2nd potential answers to be handled.
+            int numOfInferences = thisBusyInterval.getComposition().size();
+            int countOfInferences = 1;  // It indicates the position of the inference when there are multiple inferences.
             for (ArrayList<Task> thisCompositionArray : thisBusyInterval.getComposition())
             {
                 int currentTimeStamp = thisBusyInterval.getBeginTimeStampNs();
                 for (Task thisTask : thisCompositionArray)
                 {
-                    DecompositionEvent thisEvent = new DecompositionEvent(currentTimeStamp, currentTimeStamp+thisTask.getComputationTimeNs(), thisTask, "a");
+                    TaskIntervalEvent thisEvent = new TaskIntervalEvent(currentTimeStamp, currentTimeStamp+thisTask.getComputationTimeNs(), thisTask, "a");
+
+                    // Set the number of inferences in this busy interval for graphic display.
+                    thisEvent.getDrawInterval().setLayerPosition(numOfInferences, countOfInferences);
+
                     resultEvents.add(thisEvent);
                     currentTimeStamp += thisTask.getComputationTimeNs();
                 }
-                break;
+
+                countOfInferences++;
             }
+            ProgMsg.debugPutline(String.valueOf(countOfInferences));
 
         }
         return resultEvents;

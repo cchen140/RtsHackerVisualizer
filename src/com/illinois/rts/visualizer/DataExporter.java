@@ -96,7 +96,7 @@ public class DataExporter extends DialogFileHandler{
     protected Boolean generateBusyIntervalDataFromScheduler(EventContainer inEventContainer, BufferedWriter inFileWriter)
     {
 
-        ArrayList<SchedulerEvent> schedulerEvents = inEventContainer.getSchedulerEvents();
+        ArrayList<TaskIntervalEvent> schedulerEvents = inEventContainer.getSchedulerEvents();
         int idleTaskId = 0;
 
         // Find IDLE task ID
@@ -112,7 +112,7 @@ public class DataExporter extends DialogFileHandler{
         Boolean busyIntervalFound = false;
         int beginTimeStamp = 0;
         String groundTruthString = "";
-        for (SchedulerEvent currentEvent: schedulerEvents)
+        for (TaskIntervalEvent currentEvent: schedulerEvents)
         {
             if (busyIntervalFound == false)
             {

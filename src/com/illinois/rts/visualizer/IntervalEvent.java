@@ -1,29 +1,24 @@
 package com.illinois.rts.visualizer;
 
-import com.illinois.rts.framework.Task;
-
 import java.awt.*;
 
 /**
  * Created by CY on 7/2/2015.
  */
-public class PhaseEvent extends Event{
+public class IntervalEvent extends Event{
 
-    protected DrawPhase drawPhase = new DrawPhase();
+    protected DrawInterval drawInterval = new DrawInterval();
 
-    public PhaseEvent(int inBeginTimeStamp, int inEndTimeStamp)
+    public IntervalEvent(int inBeginTimeStamp, int inEndTimeStamp)
     {
         orgBeginTimestampNs = inBeginTimeStamp;
         scaledBeginTimestamp = inBeginTimeStamp;
 
         orgEndTimestampNs = inEndTimeStamp;
         scaledEndTimestamp = inEndTimeStamp;
-
-//            drawPhase.setLabel("");
-//            drawPhase.setFillColor();
     }
 
-    public PhaseEvent(int inBeginTimeStamp, int inEndTimeStamp, String inNote)
+    public IntervalEvent(int inBeginTimeStamp, int inEndTimeStamp, String inNote)
     {
         this(inBeginTimeStamp, inEndTimeStamp);
         note = inNote;
@@ -35,8 +30,8 @@ public class PhaseEvent extends Event{
         int eventWidth = scaledEndTimestamp - scaledBeginTimestamp;
         int currentOffsetX = offsetX + scaledBeginTimestamp;
 
-        drawPhase.setWidth(eventWidth);
-        drawPhase.draw(g, currentOffsetX, offsetY - drawPhase.getHeight());
+        drawInterval.setWidth(eventWidth);
+        drawInterval.draw(g, currentOffsetX, offsetY - drawInterval.getHeight());
 
         /* Draw note if enabled. */
         if (noteVisible == true)
@@ -50,7 +45,7 @@ public class PhaseEvent extends Event{
 
     @Override
     public TraceSpace getGraphSpace() {
-        return new TraceSpace(drawPhase.getHeight(), 0);
+        return new TraceSpace(drawInterval.getHeight(), 0);
     }
 
 

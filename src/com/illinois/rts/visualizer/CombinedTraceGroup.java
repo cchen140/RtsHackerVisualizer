@@ -14,7 +14,7 @@ public class CombinedTraceGroup extends TraceGroup {
 
     private EventContainer eventContainer = null;
     private TaskContainer taskContainer = null;
-    private ArrayList<SchedulerEvent> schedulerEvents = null;
+    private ArrayList<TaskIntervalEvent> schedulerEvents = null;
 
     private Trace combinedTrace = null;
 
@@ -53,7 +53,7 @@ public class CombinedTraceGroup extends TraceGroup {
             Task currentTask = (Task) currentObj;
 
             ArrayList taskEvents = new ArrayList();
-            for (SchedulerEvent currentSchEvent : schedulerEvents) {
+            for (TaskIntervalEvent currentSchEvent : schedulerEvents) {
                 if (currentSchEvent.getTask().getId() == currentTask.getId())
                     taskEvents.add(currentSchEvent);
             }

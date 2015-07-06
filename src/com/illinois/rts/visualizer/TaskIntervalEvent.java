@@ -7,26 +7,26 @@ import java.awt.*;
 /**
  * Created by CY on 2/16/2015.
  */
-public class SchedulerEvent extends Event {
+public class TaskIntervalEvent extends Event {
 //    public static final int EVENT_SCHEDULER = 0;
 //    public static final int DRAW_HEIGHT = 150;
 
     private Task task = null;
-    private DrawPhase drawObject = new DrawPhase();
+    private DrawInterval drawInterval = new DrawInterval();
     private String note = "";
 
-    public SchedulerEvent(int inTimeStamp, Task inTask, String inNote)
+    public TaskIntervalEvent(int inTimeStamp, Task inTask, String inNote)
     {
         orgBeginTimestampNs = inTimeStamp;
         scaledBeginTimestamp = inTimeStamp;
         task = inTask;
         note = inNote;
 
-        drawObject.setLabel(task.getTitle());
-        drawObject.setFillColor(task.getTaskColor());
+        drawInterval.setLabel(task.getTitle());
+        drawInterval.setFillColor(task.getTaskColor());
     }
 
-    public SchedulerEvent(int inBeginTimeStamp, int inEndTimeStamp, Task inTask, String inNote)
+    public TaskIntervalEvent(int inBeginTimeStamp, int inEndTimeStamp, Task inTask, String inNote)
     {
         this(inBeginTimeStamp, inTask, inNote);
         orgEndTimestampNs = inEndTimeStamp;
@@ -41,20 +41,20 @@ public class SchedulerEvent extends Event {
             int eventWidth = scaledEndTimestamp - scaledBeginTimestamp;
             int currentOffsetX = offsetX + scaledBeginTimestamp;
             if (task.isDisplayBoxChecked() == true) {
-//                drawObject.setHeightScale(scaleY);
-                drawObject.setWidth(eventWidth);
-                drawObject.draw(g, currentOffsetX, offsetY-drawObject.getHeight());
+//                drawPhase.setHeightScale(scaleY);
+                drawInterval.setWidth(eventWidth);
+                drawInterval.draw(g, currentOffsetX, offsetY - drawInterval.getHeight());
             }
             else
             {
-//                drawObject.drawUnderLine(g, currentOffsetX, offsetY);
+//                drawPhase.drawUnderLine(g, currentOffsetX, offsetY);
             }
 
         }
         else
         {
             // TODO: Need to handle the scheduler events which have time stamp less than 0.
-            //((DrawPhase) drawObject).draw(g, scaledBeginTimestamp, 20);
+            //((DrawPhase) drawPhase).draw(g, scaledBeginTimestamp, 20);
 //            System.err.println("Drawing ScheduleEvent error: TimeStamp <= 0");
         }
         //System.out.println(scaledBeginTimestamp);
@@ -62,7 +62,7 @@ public class SchedulerEvent extends Event {
 
     @Override
     public TraceSpace getGraphSpace() {
-        return new TraceSpace(drawObject.getHeight(), 0);
+        return new TraceSpace(drawInterval.getHeight(), 0);
     }
 
     public Task getTask() { return task; }
@@ -70,5 +70,9 @@ public class SchedulerEvent extends Event {
     public String getNote()
     {
         return note;
+    }
+
+    public DrawInterval getDrawInterval() {
+        return drawInterval;
     }
 }
