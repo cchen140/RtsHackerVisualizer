@@ -306,6 +306,21 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
             Trace hackBusyIntervalTrace = hackManager.buildCapturedBusyIntervalTrace();
             hackTraceGroup.AddTrace(hackBusyIntervalTrace);
             zPanel.getTraceGroupContainer().addTraceGroup(hackTraceGroup);
+//            zPanel.applyNewSettings();
+
+            /* Build a trace to show result of busy interval analysis. */
+            BusyIntervalContainer hackBusyIntervalContainer = new BusyIntervalContainer();
+            hackBusyIntervalContainer.createBusyIntervalsFromIntervalEvents(hackManager.capturedBusyIntervalsToEvents());
+
+            Decomposition hackDecomposition = new Decomposition(eventContainer.getTaskContainer());
+            hackDecomposition.runAmirDecompositionWithErrors(hackBusyIntervalContainer);
+
+            TraceGroup hackDecompositionTraceGroup = new TraceGroup();
+            hackDecompositionTraceGroup.setTitle("Hack Decomp.");
+
+            Trace hackDecompositionInferenceTrace = hackDecomposition.BuildInferenceTrace(hackBusyIntervalContainer);
+            hackDecompositionTraceGroup.AddTrace(hackDecompositionInferenceTrace);
+            zPanel.getTraceGroupContainer().addTraceGroup(hackDecompositionTraceGroup);
             zPanel.applyNewSettings();
         }
 

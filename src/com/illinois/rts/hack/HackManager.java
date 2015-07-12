@@ -18,7 +18,7 @@ public class HackManager {
         return new Trace("Busy Intervals", capturedBusyIntervalsToEvents(), new TimeLine());
     }
 
-    protected ArrayList<IntervalEvent> capturedBusyIntervalsToEvents() {
+    public ArrayList<IntervalEvent> capturedBusyIntervalsToEvents() {
         ArrayList<IntervalEvent> resultEvents = new ArrayList<>();
         for (HackerEvent currentEvent : eventContainer.getLowHackerEvents()) {
             int beginTimeStamp = currentEvent.getOrgBeginTimestampNs();

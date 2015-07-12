@@ -24,6 +24,8 @@ public class Task {
     protected int periodNs = 0;
 
     protected int computationTimeNs = 0;
+    protected int computationTimeErrorNs = 500000;  // The error should be positive.
+
     protected int priority = 0;
     protected int deadlineNs = 0;
 
@@ -124,6 +126,10 @@ public class Task {
         deadlineNs = inDeadlineNs;
     }
 
+
+    public int getComputationTimeErrorNs() {
+        return computationTimeErrorNs;
+    }
 
 
     /* The following section is from Man-Ki's RM scheduling simulator. */

@@ -23,6 +23,12 @@ public class Decomposition {
         return amirDecomposition.runDecomposition();
     }
 
+    public Boolean runAmirDecompositionWithErrors(BusyIntervalContainer inBusyIntervalContainer)
+    {
+        AmirDecomposition amirDecomposition = new AmirDecomposition(taskContainer, inBusyIntervalContainer);
+        return amirDecomposition.runDecompositionWithErrors();
+    }
+
     public Boolean runGeDecomposition(BusyIntervalContainer inBusyIntervalContainer)
     {
         GeDecomposition geDecomposition = new GeDecomposition(taskContainer, inBusyIntervalContainer);
@@ -58,8 +64,6 @@ public class Decomposition {
 
                 countOfInferences++;
             }
-            ProgMsg.debugPutline(String.valueOf(countOfInferences));
-
         }
         return resultEvents;
     }
