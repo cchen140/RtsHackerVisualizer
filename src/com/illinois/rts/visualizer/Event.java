@@ -82,4 +82,22 @@ public abstract class Event {
     public void setNoteVisible(Boolean noteVisible) {
         this.noteVisible = noteVisible;
     }
+
+    public Boolean contains(int inTimeStamp)
+    {
+        if ((orgBeginTimestampNs <= inTimeStamp)
+                && (orgEndTimestampNs >= inTimeStamp))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public int getDurationNs()
+    {
+        return orgEndTimestampNs - orgBeginTimestampNs;
+    }
 }

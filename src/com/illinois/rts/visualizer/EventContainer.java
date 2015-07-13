@@ -1,5 +1,7 @@
 package com.illinois.rts.visualizer;
 
+import com.illinois.rts.framework.Task;
+
 import java.util.ArrayList;
 
 /**
@@ -71,6 +73,30 @@ public class EventContainer {
     public ArrayList<AppEvent> getAppEvents() { return appEvents; }
     public  ArrayList<HackerEvent> getHackerEvents() { return hackerEvents; }
 
+    public ArrayList<TaskIntervalEvent> getSchedulerEventsOfATask(Task inTask)
+    {
+        ArrayList resultArrayList = new ArrayList();
+        for (TaskIntervalEvent thisEvent : schedulerEvents)
+        {
+            if (thisEvent.getTask() == inTask)
+                resultArrayList.add(thisEvent);
+        }
+        return resultArrayList;
+    }
+
+    public ArrayList<AppEvent> getAppEventsOfATask(Task inTask)
+    {
+        ArrayList<AppEvent> resultArrayList = new ArrayList();
+        for (AppEvent thisEvent : appEvents)
+        {
+            if (thisEvent.getTask() == inTask)
+            {
+                resultArrayList.add(thisEvent);
+            }
+        }
+        return resultArrayList;
+    }
+
     public ArrayList<HackerEvent> getLowHackerEvents()
     {
         ArrayList resultArrayList = new ArrayList();
@@ -124,6 +150,38 @@ public class EventContainer {
         }
 
         scaledEndTimestamp = orgEndTimestampNs /inScale;
+    }
+
+    // This method returns the first matched event.
+    public TaskIntervalEvent findSchedulerEventByTime(int inTimeStamp)
+    {
+        for (TaskIntervalEvent thisEvent : schedulerEvents)
+        {
+            if (thisEvent.contains(inTimeStamp))
+                return thisEvent;
+        }
+
+        // If no event contains the designated time stamp, then return null.
+        return null;
+    }
+
+    public ArrayList<TaskIntervalEvent> findSchedulerEventsByTimeWindow(int inBeginTimeStamp, int inEndTimeStamp)
+    {
+        ArrayList resultArrayList = new ArrayList();
+        for (TaskIntervalEvent thisEvent : schedulerEvents)
+        {
+            if (isValueWithinRange(thisEvent.getOrgBeginTimestampNs(), inBeginTimeStamp, inEndTimeStamp) ||
+                isValueWithinRange(thisEvent.getOrgEndTimestampNs(), inBeginTimeStamp, inEndTimeStamp))
+            {
+                resultArrayList.add(thisEvent);
+            }
+        }
+        return resultArrayList;
+    }
+
+    public Boolean isValueWithinRange(int inTargetValue, int inBegin, int inEnd)
+    {
+        return (inTargetValue>=inBegin && inTargetValue<=inEnd) ? true : false;
     }
 
 }

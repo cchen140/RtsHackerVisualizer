@@ -158,4 +158,21 @@ public class Task {
     public LinkedList<Long> responseTimeHistory = new LinkedList<Long>();
     public LinkedList<Long> interarrivalTImeHistory = new LinkedList<Long>();
     public LinkedList<Long> execTimeHistory = new LinkedList<Long>();
+
+
+    /* Added by CY. */
+    public Boolean validateAttributes()
+    {
+        if (periodNs <= 0)
+            return false;
+
+        if (computationTimeNs<=0 || computationTimeNs>=periodNs)
+            return false;
+
+        // Deadline
+        // The deadline is not yet used.
+
+        // Everything is fine.
+        return true;
+    }
 }
