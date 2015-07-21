@@ -274,7 +274,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 }
                 else
                 {
-                    decomposition.runAmirDecomposition(busyIntervalContainer);
+                    decomposition.runAmirDecompositionStep1(busyIntervalContainer);
                 }
 
                 DataExporter dataExporter = new DataExporter();
@@ -287,8 +287,10 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 /* Build a trace to show result of busy interval analysis. */
                 TraceGroup decompositionTraceGroup = new TraceGroup();
                 decompositionTraceGroup.setTitle("Decomposition");
-                Trace decompositionInferenceTrace = decomposition.BuildInferenceTrace(busyIntervalContainer);
-                decompositionTraceGroup.AddTrace(decompositionInferenceTrace);
+//                Trace decompositionInferenceTrace = decomposition.BuildInferenceTrace(busyIntervalContainer);
+                decompositionTraceGroup.addTrace(decomposition.buildAmirDecompositionStep1ResultTrace());
+                decomposition.runAmirDecompositionStep2();
+                decompositionTraceGroup.addTraces(decomposition.buildAmirDecompositionResultTraces());
                 zPanel.getTraceGroupContainer().addTraceGroup(decompositionTraceGroup);
                 zPanel.applyNewSettings();
 
@@ -304,7 +306,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
             TraceGroup hackTraceGroup = new TraceGroup();
             hackTraceGroup.setTitle("Hack");
             Trace hackBusyIntervalTrace = hackManager.buildCapturedBusyIntervalTrace();
-            hackTraceGroup.AddTrace(hackBusyIntervalTrace);
+            hackTraceGroup.addTrace(hackBusyIntervalTrace);
             zPanel.getTraceGroupContainer().addTraceGroup(hackTraceGroup);
 //            zPanel.applyNewSettings();
 
@@ -318,8 +320,8 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
             TraceGroup hackDecompositionTraceGroup = new TraceGroup();
             hackDecompositionTraceGroup.setTitle("Hack Decomp.");
 
-            Trace hackDecompositionInferenceTrace = hackDecomposition.BuildInferenceTrace(hackBusyIntervalContainer);
-            hackDecompositionTraceGroup.AddTrace(hackDecompositionInferenceTrace);
+//            Trace hackDecompositionInferenceTrace = hackDecomposition.BuildInferenceTrace(hackBusyIntervalContainer);
+            hackDecompositionTraceGroup.addTraces(hackDecomposition.buildAmirDecompositionResultTraces());
             zPanel.getTraceGroupContainer().addTraceGroup(hackDecompositionTraceGroup);
             zPanel.applyNewSettings();
         }

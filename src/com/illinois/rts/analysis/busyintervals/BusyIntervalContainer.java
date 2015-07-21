@@ -1,10 +1,7 @@
 package com.illinois.rts.analysis.busyintervals;
 
 import com.illinois.rts.framework.Task;
-import com.illinois.rts.visualizer.AppEvent;
-import com.illinois.rts.visualizer.EventContainer;
-import com.illinois.rts.visualizer.IntervalEvent;
-import com.illinois.rts.visualizer.TaskIntervalEvent;
+import com.illinois.rts.visualizer.*;
 
 import java.util.ArrayList;
 
@@ -113,5 +110,28 @@ public class BusyIntervalContainer {
 
         // If the program reaches here, that means no interval contains the input time stamp.
         return null;
+    }
+
+    public ArrayList<BusyInterval> findBusyIntervalsByTask(Task inTask)
+    {
+        ArrayList<BusyInterval> resultArrayList = new ArrayList<>();
+        for (BusyInterval thisBusyInterval : busyIntervals)
+        {
+            if (thisBusyInterval.containsComposition(inTask) == true)
+            {
+                resultArrayList.add(thisBusyInterval);
+            }
+        }
+
+        return  resultArrayList;
+    }
+
+    public ArrayList<Event> compositionInferencesToEvents() {
+        ArrayList<Event> resultEvents = new ArrayList<>();
+        for (BusyInterval thisBusyInterval : busyIntervals)
+        {
+            resultEvents.addAll(thisBusyInterval.compositionInferenceToEvents());
+        }
+        return resultEvents;
     }
 }

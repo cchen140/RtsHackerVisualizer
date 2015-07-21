@@ -48,5 +48,15 @@ public class IntervalEvent extends Event{
         return new TraceSpace(drawInterval.getHeight(), 0);
     }
 
+    public void setColor(Color inColor)
+    {
+        drawInterval.setFillColor(inColor);
+    }
+
+    public void enableTexture()
+    {
+        drawInterval.setFillWithTexture(true);
+    }
+
 
 }

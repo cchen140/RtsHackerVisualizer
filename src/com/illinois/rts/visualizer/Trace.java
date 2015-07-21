@@ -177,6 +177,11 @@ public class Trace {
         return traceName;
     }
 
+    public void setTraceName(String inTraceName)
+    {
+        traceName = inTraceName;
+    }
+
     public int getTraceHeight()
     {
         return traceSpace.getHeight() + marginY*2;

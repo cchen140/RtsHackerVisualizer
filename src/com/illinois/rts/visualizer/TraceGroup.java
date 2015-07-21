@@ -34,11 +34,21 @@ public class TraceGroup {
     {
         background.setFillColor(ProgConfig.TRACE_PANEL_FOREGROUND);
         background.setEdgeColor(ProgConfig.TRACE_PANEL_BACKGROUND_BORDER);
+
+        traceGap.setFillColor(ProgConfig.TRACE_PANEL_BORDER_COLOR);
     }
 
-    public void AddTrace(Trace inTrace)
+    public void addTrace(Trace inTrace)
     {
         traces.add(inTrace);
+    }
+
+    public void addTraces(ArrayList<Trace> inTraces)
+    {
+        for (Trace thisTrace : inTraces)
+        {
+            addTrace(thisTrace);
+        }
     }
 
     public void setTitle(String title) {

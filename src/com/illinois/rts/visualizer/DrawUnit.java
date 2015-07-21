@@ -3,6 +3,7 @@ package com.illinois.rts.visualizer;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
 /**
  * Created by CY on 2/16/2015.

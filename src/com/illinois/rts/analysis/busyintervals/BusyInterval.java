@@ -1,6 +1,9 @@
 package com.illinois.rts.analysis.busyintervals;
 
 import com.illinois.rts.framework.Task;
+import com.illinois.rts.visualizer.Event;
+import com.illinois.rts.visualizer.TaskIntervalEvent;
+
 import java.util.ArrayList;
 
 /**
@@ -67,6 +70,17 @@ public class BusyInterval {
         }
     }
 
+    public Boolean containsComposition(Task inTask)
+    {
+        // If any inferred compositions contain inTask, then return true.
+        for (ArrayList<Task> thisComposition : composition)
+        {
+            if (thisComposition.contains(inTask) == true)
+                return true;
+        }
+        return false;
+    }
+
     /* Get the first element in the composition array.
      * This method is used when there is only one inference in each busy interval.
      */
@@ -78,6 +92,30 @@ public class BusyInterval {
         }
 
         return composition.get(0);
+    }
+
+    public ArrayList<Event> compositionInferenceToEvents()
+    {
+        ArrayList<Event> resultEvents = new ArrayList<>();
+        int numOfInferences = getComposition().size();
+        int countOfInferences = 1;  // It indicates the position of the inference when there are multiple inferences.
+        for (ArrayList<Task> thisCompositionArray : getComposition())
+        {
+            int currentTimeStamp = getBeginTimeStampNs();
+            for (Task thisTask : thisCompositionArray)
+            {
+                TaskIntervalEvent thisEvent = new TaskIntervalEvent(currentTimeStamp, currentTimeStamp+thisTask.getComputationTimeNs(), thisTask, "a");
+
+                // Set the number of inferences in this busy interval for graphic display.
+                thisEvent.getDrawInterval().setLayerPosition(numOfInferences, countOfInferences);
+
+                resultEvents.add(thisEvent);
+                currentTimeStamp += thisTask.getComputationTimeNs();
+            }
+
+            countOfInferences++;
+        }
+        return resultEvents;
     }
 
 }
