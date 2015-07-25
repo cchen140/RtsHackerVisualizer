@@ -58,6 +58,10 @@ public class Task {
         priority = inPriority;
     }
 
+    public Task(Task inTask) {
+        cloneSettings(inTask);
+    }
+
     public int getId()
     {
         return id;
@@ -65,6 +69,10 @@ public class Task {
 
     public int getComputationTimeNs() {
         return computationTimeNs;
+    }
+
+    public void setComputationTimeNs(int computationTimeNs) {
+        this.computationTimeNs = computationTimeNs;
     }
 
     public void setSymbol(String inSymbol)
@@ -78,6 +86,10 @@ public class Task {
 
     public int getPeriodNs() {
         return periodNs;
+    }
+
+    public void setPeriodNs(int inPeriod) {
+        periodNs = inPeriod;
     }
 
     public void setColor(Color inputColor)
@@ -170,9 +182,40 @@ public class Task {
             return false;
 
         // Deadline
-        // The deadline is not yet used.
+        // The deadline is not yet used yet.
 
         // Everything is fine.
         return true;
+    }
+
+    public void cloneSettings(Task inTask) {
+        id = inTask.id;
+        title = inTask.title;
+        symbol = inTask.symbol;
+        color = inTask.color;
+        displayBoxChecked = inTask.displayBoxChecked;
+        taskType = inTask.taskType;
+        periodNs = inTask.periodNs;
+        computationTimeNs = inTask.computationTimeNs;
+        computationTimeErrorNs = inTask.computationTimeErrorNs;
+        priority = inTask.priority;
+        deadlineNs = inTask.deadlineNs;
+        initialOffset = inTask.initialOffset;
+
+        /*
+        The following variables are not cloned.
+
+        public long WCRT;
+        public long jobSeqNo;
+        public long lastReleaseTime;
+        public long lastFinishTime;
+        public long nextReleaseTime;
+        */
+    }
+
+    public Task clone() {
+        Task cloneTask = new Task();
+        cloneTask.cloneSettings(this);
+        return cloneTask;
     }
 }

@@ -8,6 +8,10 @@ import java.awt.*;
 public class ProgConfig {
     static void ProgConfig() {}
 
+    public static Font DEFAULT_HEADING_FONT = new Font("TimesRoman", Font.PLAIN, 20);
+    public static Font DEFAULT_CONTENT_FONT = new Font("TimesRoman", Font.PLAIN, 18);
+    public static Font DEFAULT_BTN_FONT = new Font("TimesRoman", Font.PLAIN, 16);
+
     public static int MAIN_DISPLAY_PANEL_PADDING_Y = 0;//10;
     public static int MAIN_DISPLAY_PANEL_PADDING_X = 0;//10;
 
@@ -51,7 +55,6 @@ public class ProgConfig {
     // Scheduler Traces
     public static boolean DISPLAY_SCHEDULER_SUMMARY_TRACE = true;
     public static boolean DISPLAY_SCHEDULER_TASK_TRACES = true;
-
 
 
 }

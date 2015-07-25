@@ -80,14 +80,14 @@
                       <text value="Compute"/>
                     </properties>
                   </component>
-                  <component id="f4ed3" class="javax.swing.JButton" binding="buttonExportLog">
+                  <component id="f4ed3" class="javax.swing.JButton" binding="buttonTaskSetter">
                     <constraints/>
                     <properties>
                       <enabled value="false"/>
                       <font size="16"/>
-                      <preferredSize width="120" height="30"/>
+                      <preferredSize width="130" height="30"/>
                       <selected value="false"/>
-                      <text value="Export Log"/>
+                      <text value="Task Config"/>
                     </properties>
                   </component>
                   <component id="5b7a7" class="javax.swing.JButton" binding="buttonOpenFile">
@@ -296,7 +296,9 @@
                     <constraints border-constraint="West"/>
                     <properties>
                       <background color="-16777216"/>
+                      <enabled value="true"/>
                       <preferredSize width="150" height="10"/>
+                      <visible value="false"/>
                     </properties>
                   </component>
                 </children>

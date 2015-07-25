@@ -14,7 +14,9 @@ public class TraceHeadersPanel extends JPanel {
     //    ArrayList<Trace> traces = null;
     TraceGroupContainer traceGroupContainer = null;
 
-    public TraceHeadersPanel(){}
+    public TraceHeadersPanel(){
+        super();
+    }
 
 //    public void setTrace(ArrayList<Trace> inTraces)
 //    {

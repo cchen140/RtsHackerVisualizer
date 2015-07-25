@@ -7,6 +7,7 @@ import com.illinois.rts.hack.HackManager;
 import com.illinois.rts.simulator.ConfigLoader;
 import com.illinois.rts.simulator.RmScheduling;
 import com.illinois.rts.visualizer.*;
+import com.illinois.rts.visualizer.tasksetter.DialogTaskSetter;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -29,7 +30,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private JScrollPane zPanelScrollVertical;
     private TimeLinePanel zPanelTimeLine;
     private JScrollPane zPanelTimeLineScrollHorizontal;
-    private JButton buttonExportLog;
+    private JButton buttonTaskSetter;
     private JButton buttonCompute;
     private TraceHeadersPanel zPanelTraceHeaders;
     private JPanel zPanelTimeLineLeftPanel;
@@ -122,6 +123,13 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         subMEnuInstance.add(menuItemBusyIntervalsRunAmir);
         menuItemBusyIntervalsRunAmir.addActionListener(this);
 
+        // - Analyze -> Task Statistics
+        menuItemTaskStatistics = new JMenuItem("Task Statistics");
+        menuItemTaskStatistics.setFont(menuFont);
+        topMenuInstance.add(menuItemTaskStatistics);
+        menuItemTaskStatistics.addActionListener(this);
+
+
         // Create "Hack" menu
         topMenuInstance = new JMenu("Hack");
         topMenuInstance.setFont(menuFont);
@@ -138,7 +146,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         btnHideTaskList.addActionListener(this);
         buttonOpenFile.addActionListener(this);
         buttonSettings.addActionListener(this);
-        buttonExportLog.addActionListener(this);
+        buttonTaskSetter.addActionListener(this);
         buttonCompute.addActionListener(this);
 
         taskList.addMouseListener(this);
@@ -164,7 +172,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         /* Load default demo log file. */
         try {
             eventContainer = logLoader.loadDemoLog();
-            buttonExportLog.setEnabled(true);
+            buttonTaskSetter.setEnabled(true);
         } catch (Exception ex) {
             System.err.println(ex);
             //ex.printStackTrace();
@@ -178,6 +186,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
          * make the display normal in the form designer. */
 //        zPanel.applyNewSettings();
         zPanel.setVisible(true);
+        zPanelTraceHeaders.setVisible(true);
 
         zPanelScrollVertical.getHorizontalScrollBar().setPreferredSize(new Dimension(20, -1));
 
@@ -206,7 +215,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 eventContainer = logLoader.loadLogFromDialog();
                 if (eventContainer != null) {
                     drawPlotFromEventContainer();
-                    buttonExportLog.setEnabled(true);
+                    buttonTaskSetter.setEnabled(true);
                 }
             } catch (Exception ex) {
                 System.out.println("Error occurs while opening the file.");
@@ -228,7 +237,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 zPanel.repaint();
             }
 
-        } else if (e.getSource() == buttonExportLog) {
+        } else if (e.getSource() == buttonTaskSetter) {
             if (eventContainer != null)
             {
 //                DataExporter dataExporter = new DataExporter(eventContainer);
@@ -237,6 +246,19 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 //                } catch (IOException ex) {
 //                    ex.printStackTrace();
 //                }
+
+                DialogTaskSetter dialogTaskSetter = DialogTaskSetter.getInstance();
+
+                dialogTaskSetter.loadTaskContainer(eventContainer.getTaskContainer());
+                Boolean returnOfDialogTaskSetter = dialogTaskSetter.showDialog(frame);
+
+                if (returnOfDialogTaskSetter == true) {
+                    // Ok button clicked on task setter dialog, thus update task settings.
+                    zPanel.eventContainer.setTaskContainer(dialogTaskSetter.getTaskContainer());
+
+                    applyNewSettingsAndRePaint();
+                }
+
             }
         } else if (e.getSource() == buttonCompute) {
             try {
@@ -251,7 +273,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                         eventContainer = rmScheduling.getSimEventContainer();
                         if (eventContainer != null) {
                             drawPlotFromEventContainer();
-                            buttonExportLog.setEnabled(true);
+                            buttonTaskSetter.setEnabled(true);
                         }
                     }
 
@@ -388,6 +410,11 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 // (TaskListRenderer)clickedList.getCellRenderer()
             }
         }
+    }
+
+    public void applyNewSettingsAndRePaint() {
+        zPanel.applyNewSettings();
+        drawPlotFromEventContainer();
     }
 
     @Override

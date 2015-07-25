@@ -52,6 +52,34 @@ public class TaskContainer {
         return addTask(taskId, taskTitle, taskType, taskPeriod, taskPeriod, taskComputationTime, taskPriority);
     }
 
+    public void addTask(Task inTask) {
+
+    }
+
+    public Task addBlankTask() {
+        int maxId = 0;
+
+        /* Search for the largest ID number. */
+        for (int thisId : tasks.keySet()) {
+            maxId = (maxId>thisId) ? maxId : thisId;
+        }
+        maxId++;
+
+        addTask(maxId, "Task" + maxId, Task.TASK_TYPE_APP, 10000000, 10000000, 100000, 0);
+        return getTaskById(maxId);
+    }
+
+    public Boolean removeTask(Task inTask) {
+        int thisTaskId = inTask.getId();
+        if (getTaskById(thisTaskId) == null) {
+            return false;
+        }
+        else {
+            tasks.remove(thisTaskId);
+            return true;
+        }
+    }
+
     public Task getTaskById(int searchId)
     {
         return tasks.get(searchId);
@@ -77,8 +105,7 @@ public class TaskContainer {
         return SortTasksByComputationTime(getAppTasksAsArray());
     }
 
-    public ArrayList<Task> getAppTaskAsArraySortedByPeriod()
-    {
+    public ArrayList<Task> getAppTaskAsArraySortedByPeriod() {
         // This method will return a new task array.
         return SortTasksByPeriod(getAppTasksAsArray());
     }
@@ -216,4 +243,11 @@ public class TaskContainer {
     }
 
     public int size() { return tasks.size(); }
+
+    public TaskContainer clone() {
+        TaskContainer cloneTaskContainer = new TaskContainer();
+        cloneTaskContainer.tasks = (HashMap<Integer, Task>) this.tasks.clone();
+        cloneTaskContainer.colorList = (ArrayList<Color>) this.colorList.clone();
+        return cloneTaskContainer;
+    }
 }
