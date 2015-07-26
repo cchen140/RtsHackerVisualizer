@@ -70,6 +70,9 @@ public class TaskContainer {
     }
 
     public Boolean removeTask(Task inTask) {
+        if (inTask == null)
+            return false;
+
         int thisTaskId = inTask.getId();
         if (getTaskById(thisTaskId) == null) {
             return false;
@@ -244,10 +247,43 @@ public class TaskContainer {
 
     public int size() { return tasks.size(); }
 
+    /**
+     * Caution!!
+     * This clone method does not do deep copy.
+     * It only creates new hash map and new array list for tasks and colors.
+     * Task instances in both original and new hash maps are the same instances.
+     * In other words, modifying variables in any task instance would change the original instance.
+     *
+     * @return TaskContainer a new instance of TaskContainer that has new task HashMap with the same task instances.
+     */
     public TaskContainer clone() {
         TaskContainer cloneTaskContainer = new TaskContainer();
         cloneTaskContainer.tasks = (HashMap<Integer, Task>) this.tasks.clone();
         cloneTaskContainer.colorList = (ArrayList<Color>) this.colorList.clone();
         return cloneTaskContainer;
+    }
+
+    public Task getTaskByName( String inName ) {
+        for (Task thisTask : getTasksAsArray()) {
+            if ( thisTask.getTitle().equalsIgnoreCase(inName) == true ) {
+                return thisTask;
+            }
+        }
+
+        // No task has been found.
+        return null;
+    }
+
+    public void removeIdleTask() {
+        Task idleTask = getTaskByName("IDLE");
+        if (idleTask != null) {
+            removeTask(idleTask);
+        }
+    }
+
+    public void clearSimData() {
+        for (Task thisTask : getTasksAsArray()) {
+            thisTask.clearSimData();
+        }
     }
 }

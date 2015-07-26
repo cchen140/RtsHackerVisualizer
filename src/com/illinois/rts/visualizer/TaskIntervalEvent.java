@@ -42,6 +42,7 @@ public class TaskIntervalEvent extends Event {
             int currentOffsetX = offsetX + scaledBeginTimestamp;
             if (task.isDisplayBoxChecked() == true) {
 //                drawPhase.setHeightScale(scaleY);
+                drawInterval.setFillColor(task.getTaskColor());
                 drawInterval.setWidth(eventWidth);
                 drawInterval.draw(g, currentOffsetX, offsetY - drawInterval.getHeight());
             }

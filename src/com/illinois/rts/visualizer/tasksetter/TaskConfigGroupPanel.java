@@ -18,15 +18,22 @@ import java.util.HashMap;
 public class TaskConfigGroupPanel extends JPanel implements ActionListener {
 
     HashMap<Task, TaskConfigSingleRowPanel> taskConfigPanels = new HashMap<>();
-    TaskContainer taskContainer;
+    TaskContainer taskContainer = new TaskContainer();
+
+    Boolean removeBtnEnabled = false;   // The remove button is disabled by default.
 
     public TaskConfigGroupPanel() {
         super();
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
+        /* Add 3 blank tasks as default task set. */
+        this.addOneBlankTask();
+        this.addOneBlankTask();
+        this.addOneBlankTask();
     }
 
     public void addOneRow(Task inTask) {
-        TaskConfigSingleRowPanel thisTaskConfigRow = new TaskConfigSingleRowPanel(inTask);
+        TaskConfigSingleRowPanel thisTaskConfigRow = new TaskConfigSingleRowPanel(inTask, removeBtnEnabled);
         taskConfigPanels.put(inTask, thisTaskConfigRow);
 
         this.add(thisTaskConfigRow);
@@ -35,13 +42,15 @@ public class TaskConfigGroupPanel extends JPanel implements ActionListener {
         dispatchActionEventToParent();
     }
 
-    public void loadTaskContainer(TaskContainer inTaskContainer) {
+    public void setTaskContainer(TaskContainer inTaskContainer) {
 
         /* Clear all existed components. */
         this.removeAll();
         taskConfigPanels.clear();
 
-        taskContainer = inTaskContainer.clone();
+//        taskContainer = inTaskContainer.clone();
+        taskContainer = inTaskContainer;
+
         ArrayList<Task> appTasks = taskContainer.getAppTasksAsArray();
 
         for (Task thisTask : appTasks) {
@@ -96,7 +105,7 @@ public class TaskConfigGroupPanel extends JPanel implements ActionListener {
     // The parent can capture this event to update the display (ie. pack();).
     public void dispatchActionEventToParent() {
         Component source = getParent();
-        while (source.getParent() != null) {
+        while ( (source!=null) && (source.getParent()!=null) ) {
             if (source instanceof ActionListener) {
                 ((ActionListener) source).actionPerformed(new ActionEvent(this, 0, "hello"));
                 break;
@@ -104,6 +113,20 @@ public class TaskConfigGroupPanel extends JPanel implements ActionListener {
             else {
                 source = source.getParent();
             }
+        }
+    }
+
+    public void enableRemoveTaskBtn() {
+        this.removeBtnEnabled = true;
+        for (TaskConfigSingleRowPanel thisTaskRowPanel : taskConfigPanels.values()) {
+            thisTaskRowPanel.enableRemoveTaskBtn();
+        }
+    }
+
+    public void disableRemoveTaskBtn() {
+        this.removeBtnEnabled = false;
+        for (TaskConfigSingleRowPanel thisTaskRowPanel : taskConfigPanels.values()) {
+            thisTaskRowPanel.disableRemoveTaskBtn();
         }
     }
 }

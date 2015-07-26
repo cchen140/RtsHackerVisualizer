@@ -210,6 +210,10 @@ public class Task {
         public long lastReleaseTime;
         public long lastFinishTime;
         public long nextReleaseTime;
+
+        public LinkedList<Long> responseTimeHistory = new LinkedList<Long>();
+        public LinkedList<Long> interarrivalTImeHistory = new LinkedList<Long>();
+        public LinkedList<Long> execTimeHistory = new LinkedList<Long>();
         */
     }
 
@@ -217,5 +221,17 @@ public class Task {
         Task cloneTask = new Task();
         cloneTask.cloneSettings(this);
         return cloneTask;
+    }
+
+    public void clearSimData() {
+        WCRT = 0;
+        jobSeqNo = 0;
+        lastReleaseTime = 0;
+        lastFinishTime = 0;
+        nextReleaseTime = 0;
+
+        responseTimeHistory.clear();
+        interarrivalTImeHistory.clear();
+        execTimeHistory.clear();
     }
 }

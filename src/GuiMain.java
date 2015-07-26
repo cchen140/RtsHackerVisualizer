@@ -4,8 +4,8 @@ import com.illinois.rts.analysis.busyintervals.BusyIntervalContainer;
 import com.illinois.rts.analysis.busyintervals.Decomposition;
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.hack.HackManager;
-import com.illinois.rts.simulator.ConfigLoader;
-import com.illinois.rts.simulator.RmScheduling;
+import com.illinois.rts.simulator.DialogSimulationLauncher;
+import com.illinois.rts.utility.GuiUtility;
 import com.illinois.rts.visualizer.*;
 import com.illinois.rts.visualizer.tasksetter.DialogTaskSetter;
 
@@ -31,7 +31,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private TimeLinePanel zPanelTimeLine;
     private JScrollPane zPanelTimeLineScrollHorizontal;
     private JButton buttonTaskSetter;
-    private JButton buttonCompute;
+    private JButton btnLaunchSimulator;
     private TraceHeadersPanel zPanelTraceHeaders;
     private JPanel zPanelTimeLineLeftPanel;
 
@@ -95,7 +95,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         // - File -> Load Log
         menuItemLoadLog = new JMenuItem("Load Log");
         menuItemLoadLog.setFont(menuFont);
-        topMenuInstance.add( menuItemLoadLog);
+        topMenuInstance.add(menuItemLoadLog);
         menuItemLoadLog.addActionListener(this);
 
 
@@ -142,12 +142,18 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         menuItemHackPlotCapturedBusyIntervals.addActionListener(this);
 
 
+        // Resize the button to fit the displayed string.
+        GuiUtility.resizeJButtonByString(btnLaunchSimulator);
+        GuiUtility.resizeJButtonByString(buttonTaskSetter);
+        GuiUtility.resizeJButtonByString(buttonOpenFile);
+
+
         /* Action listener for buttons */
         btnHideTaskList.addActionListener(this);
         buttonOpenFile.addActionListener(this);
         buttonSettings.addActionListener(this);
         buttonTaskSetter.addActionListener(this);
-        buttonCompute.addActionListener(this);
+        btnLaunchSimulator.addActionListener(this);
 
         taskList.addMouseListener(this);
 
@@ -212,8 +218,10 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         } else if (e.getSource()==buttonOpenFile || e.getSource()==menuItemLoadLog) {
 
             try {
-                eventContainer = logLoader.loadLogFromDialog();
-                if (eventContainer != null) {
+                EventContainer loadingEventContainer;
+                loadingEventContainer = logLoader.loadLogFromDialog();
+                if (loadingEventContainer != null) {
+                    eventContainer = loadingEventContainer;
                     drawPlotFromEventContainer();
                     buttonTaskSetter.setEnabled(true);
                 }
@@ -233,19 +241,12 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 
             if (dialogSettings.isSettingsUpdated() == true)
             {
-                zPanel.applyNewSettings();
-                zPanel.repaint();
+                applyNewSettingsAndRePaint();
             }
 
         } else if (e.getSource() == buttonTaskSetter) {
             if (eventContainer != null)
             {
-//                DataExporter dataExporter = new DataExporter(eventContainer);
-//                try {
-//                    dataExporter.exportBusyIntervalsToFileDialog();
-//                } catch (IOException ex) {
-//                    ex.printStackTrace();
-//                }
 
                 DialogTaskSetter dialogTaskSetter = DialogTaskSetter.getInstance();
 
@@ -260,28 +261,19 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 }
 
             }
-        } else if (e.getSource() == buttonCompute) {
-            try {
-                ConfigLoader configLoader = new ConfigLoader();
-                TaskContainer simTaskContainer = configLoader.loadConfigFromDialog();
-//                System.out.println(simTaskContainer.tasks);
-                if (simTaskContainer.size() > 0) {
-                    RmScheduling rmScheduling = new RmScheduling();
-                    rmScheduling.setTaskContainer(simTaskContainer);
-                    if (rmScheduling.runSimWithProgressDialog(100000000, frame) == true)
-                    {
-                        eventContainer = rmScheduling.getSimEventContainer();
-                        if (eventContainer != null) {
-                            drawPlotFromEventContainer();
-                            buttonTaskSetter.setEnabled(true);
-                        }
-                    }
+        } else if (e.getSource() == btnLaunchSimulator) {
 
+                DialogSimulationLauncher dialogSimulationLauncher = DialogSimulationLauncher.getInstance();
+                dialogSimulationLauncher.setTaskContainer(eventContainer.getTaskContainer().clone());
+                Boolean simReturnValue = dialogSimulationLauncher.runLauncher(frame);
+
+                if ( simReturnValue == true ) {
+                    // Simulation is completed, draw the result.
+                    eventContainer = dialogSimulationLauncher.getSimulationResultEventContainer();
+                    drawPlotFromEventContainer();
+                    buttonTaskSetter.setEnabled(true);
                 }
-            } catch (Exception ex) {
-                System.out.println("Error occurs while opening the config file.");
-                System.out.println(ex);
-            }
+
         } else if (e.getSource()==menuItemBusyIntervalsRunGe || e.getSource()==menuItemBusyIntervalsRunAmir)
         {
             if (eventContainer != null) {
@@ -314,7 +306,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                 decomposition.runAmirDecompositionStep2();
                 decompositionTraceGroup.addTraces(decomposition.buildAmirDecompositionResultTraces());
                 zPanel.getTraceGroupContainer().addTraceGroup(decompositionTraceGroup);
-                zPanel.applyNewSettings();
+                applyNewSettingsAndRePaint();
 
             }
             else
@@ -345,7 +337,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 //            Trace hackDecompositionInferenceTrace = hackDecomposition.BuildInferenceTrace(hackBusyIntervalContainer);
             hackDecompositionTraceGroup.addTraces(hackDecomposition.buildAmirDecompositionResultTraces());
             zPanel.getTraceGroupContainer().addTraceGroup(hackDecompositionTraceGroup);
-            zPanel.applyNewSettings();
+            applyNewSettingsAndRePaint();
         }
 
     }
@@ -398,10 +390,9 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
                     clickedTask.setDisplayBoxChecked(!clickedTask.isDisplayBoxChecked());
 //                    System.out.format("Icon clicked.\n");
                 }
+
                 /* Force drawing panel and list to update the appearance*/
-                zPanel.applyNewSettings();
-                zPanel.repaint();
-                taskList.repaint();
+                applyNewSettingsAndRePaint();
             }
             else if (e.getClickCount() == 2) {
                 System.out.format("Double clicked on %d\n", index);
@@ -414,7 +405,8 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 
     public void applyNewSettingsAndRePaint() {
         zPanel.applyNewSettings();
-        drawPlotFromEventContainer();
+        taskListPanel.repaint();
+//        drawPlotFromEventContainer();
     }
 
     @Override

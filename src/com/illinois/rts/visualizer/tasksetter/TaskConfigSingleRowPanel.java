@@ -1,6 +1,7 @@
 package com.illinois.rts.visualizer.tasksetter;
 
 import com.illinois.rts.framework.Task;
+import com.illinois.rts.utility.GuiUtility;
 import com.illinois.rts.visualizer.ProgConfig;
 import sun.rmi.server.InactiveGroupException;
 
@@ -31,7 +32,7 @@ public class TaskConfigSingleRowPanel extends JPanel implements ActionListener {
         super();
     }
 
-    public TaskConfigSingleRowPanel(Task inTask) {
+    public TaskConfigSingleRowPanel(Task inTask, Boolean inEnableRemoveBtn) {
         super();
 
         task = inTask;
@@ -85,9 +86,10 @@ public class TaskConfigSingleRowPanel extends JPanel implements ActionListener {
         removeBtn.setBackground(Color.GRAY);
         this.add(removeBtn);
         removeBtn.addActionListener(this);
+        removeBtnEnabled = inEnableRemoveBtn;
         removeBtn.setVisible(removeBtnEnabled);
 
-        changeFont(this, ProgConfig.DEFAULT_CONTENT_FONT);
+        GuiUtility.changeChildrenFont(this, ProgConfig.DEFAULT_CONTENT_FONT);
 
     }
 
@@ -98,22 +100,6 @@ public class TaskConfigSingleRowPanel extends JPanel implements ActionListener {
     private void addJLabelComponent(String inString) {
         JLabel label = new JLabel(inString);
         this.add(label);
-    }
-
-
-    /* This code is from StackOverFlow at the following link:
-     * http://stackoverflow.com/questions/12730230/set-the-same-font-for-all-component-java
-     */
-    public static void changeFont ( Component component, Font font )
-    {
-        component.setFont(font);
-        if ( component instanceof Container )
-        {
-            for ( Component child : ( ( Container ) component ).getComponents () )
-            {
-                changeFont ( child, font );
-            }
-        }
     }
 
     public void applySettings() {
@@ -139,5 +125,15 @@ public class TaskConfigSingleRowPanel extends JPanel implements ActionListener {
                 ((ActionListener) source).actionPerformed(new ActionEvent(this, 0, "hello"));
             }
         }
+    }
+
+    public void enableRemoveTaskBtn() {
+        this.removeBtnEnabled = true;
+        removeBtn.setVisible(true);
+    }
+
+    public void disableRemoveTaskBtn() {
+        this.removeBtnEnabled = false;
+        removeBtn.setVisible(false);
     }
 }

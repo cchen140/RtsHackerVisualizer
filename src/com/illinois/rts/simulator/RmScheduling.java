@@ -22,7 +22,7 @@ import java.util.Random;
 import java.util.StringTokenizer;
 
 public class RmScheduling {
-    private static int IDLE_TASK_ID = 99;
+    private static int IDLE_TASK_ID = -1;
 
     public ProgressUpdater progressUpdater = new ProgressUpdater();
 
@@ -65,9 +65,20 @@ public class RmScheduling {
     public void setTaskContainer(TaskContainer inTaskContainer)
     {
         simTaskContainer = inTaskContainer;
-        allTasks = inTaskContainer.getTasksAsArray();
+
+        // Remove current idle task if there is any because the simulator will create one later.
+        simTaskContainer.removeIdleTask();
+        simTaskContainer.clearSimData();
+        allTasks = simTaskContainer.getTasksAsArray();
+
+        /* Initialize initial offset. (By assigning it to release time.) */
+        for (Task thisTask : allTasks) {
+            thisTask.nextReleaseTime = thisTask.initialOffset;
+        }
+
+        allTasks = simTaskContainer.getTasksAsArray();
         numTasks = allTasks.size(); // It doesn't include the idle task.
-        inTaskContainer.addTask(99, "IDLE", Task.TASK_TYPE_IDLE, 0, 0, 0);
+        simTaskContainer.addTask(IDLE_TASK_ID, "IDLE", Task.TASK_TYPE_IDLE, 0, 0, 0);
 //        allTasks.add(new Task(99, "IDLE", 1, 0, 0, 0, 0));
         simEventContainer.setTaskContainer(simTaskContainer);
         assignPriority();
@@ -420,7 +431,7 @@ public class RmScheduling {
                 if (readyQueue.size() == 0) {
                     if (DEBUG_SCHLOG) {
                         System.out.println("@SchedulerLog");
-                        System.out.println(tick + ", 0, 99, \"IDLE\"");
+                        System.out.println(tick + ", 0, IDLE_TASK_ID, \"IDLE\"");
                     }
                     simEventContainer.add(EventContainer.SCHEDULER_EVENT, (int) tick, 0, IDLE_TASK_ID, "IDLE");
                     return true;

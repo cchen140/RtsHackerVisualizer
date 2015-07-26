@@ -1,13 +1,10 @@
 package com.illinois.rts.visualizer.tasksetter;
 
-import com.illinois.rts.framework.Task;
-import com.illinois.rts.visualizer.ProgMsg;
 import com.illinois.rts.visualizer.TaskContainer;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
 
 public class DialogTaskSetter extends JDialog implements ActionListener{
     private static DialogTaskSetter instance = null;
@@ -74,7 +71,7 @@ public class DialogTaskSetter extends JDialog implements ActionListener{
     }
 
     public void loadTaskContainer(TaskContainer inTaskContainer) {
-        mainPanel.loadTaskContainer(inTaskContainer);
+        mainPanel.setTaskContainer(inTaskContainer);
     }
 
     public static DialogTaskSetter getInstance()
@@ -90,8 +87,13 @@ public class DialogTaskSetter extends JDialog implements ActionListener{
     {
         isOkClicked = false;
         this.pack();
-        this.setLocationRelativeTo(locationReference);
         this.setResizable(false);
+
+        // If the parent frame is assigned, then set this dialog to show at the center.
+        if (locationReference != null) {
+            this.setLocationRelativeTo(locationReference);
+        }
+
         this.setVisible(true);
 
         return (isOkClicked==true) ? true : false;
