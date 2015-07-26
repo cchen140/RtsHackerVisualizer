@@ -70,6 +70,8 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
 
         // Set the font for entire dialog.
         GuiUtility.changeChildrenFont(this, ProgConfig.DEFAULT_CONTENT_FONT);
+
+        this.setTitle("Simulation Launcher");
     }
 
     public static DialogSimulationLauncher getInstance()

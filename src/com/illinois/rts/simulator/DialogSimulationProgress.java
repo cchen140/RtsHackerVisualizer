@@ -16,6 +16,7 @@ public class DialogSimulationProgress extends JDialog {
     private Thread watchedSimThread;
 
     private Boolean isSimCanceled = false;
+    private String dialogTitle = "Simulation Progress";
 
     public DialogSimulationProgress() {
         setContentPane(contentPane);
@@ -43,6 +44,8 @@ public class DialogSimulationProgress extends JDialog {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
+
+        this.setTitle(dialogTitle);
 
         /* Start a thread to update the progress bar. */
         simProgressThread = new SimulationProgressThread();
@@ -80,6 +83,11 @@ public class DialogSimulationProgress extends JDialog {
         return isSimCanceled;
     }
 
+    public void appendStringToDialogTitle(String inString)
+    {
+        this.setTitle(dialogTitle + " - " + inString);
+    }
+
     class SimulationProgressThread extends Thread
     {
         public void run()
@@ -88,6 +96,7 @@ public class DialogSimulationProgress extends JDialog {
                 while (true) {
 //                System.out.println(String.valueOf(progressUpdater.getProgressPercent()));
                     progressBar1.setValue((int) (progressUpdater.getProgressPercent() * 100));
+                    appendStringToDialogTitle( String.valueOf( (int) (progressUpdater.getProgressPercent() * 100)) + "%" );
 
                     if (progressUpdater.isFinished() == true) {
                         isSimCanceled = false;
