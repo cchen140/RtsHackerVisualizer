@@ -188,6 +188,14 @@ public class Task {
         return true;
     }
 
+    public int getInitialOffset() {
+        return initialOffset;
+    }
+
+    public void setInitialOffset(int initialOffset) {
+        this.initialOffset = initialOffset;
+    }
+
     public void cloneSettings(Task inTask) {
         id = inTask.id;
         title = inTask.title;

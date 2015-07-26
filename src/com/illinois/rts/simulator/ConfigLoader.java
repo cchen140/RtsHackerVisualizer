@@ -4,7 +4,9 @@ import com.illinois.rts.framework.Task;
 import com.illinois.rts.visualizer.*;
 
 import java.awt.*;
+import java.awt.print.Book;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -124,14 +126,16 @@ public class ConfigLoader extends DialogFileHandler {
     {
         /* Format: [taskId, taskType, taskName, taskPeriod, taskComputationTime, taskPriority] */
         String splitStrings[] = line.split(",");
-        if (splitStrings.length == 6) {
+        if (splitStrings.length >= 9) {
             int taskId = Integer.valueOf(splitStrings[0].trim()).intValue();
             int taskType = Integer.valueOf(splitStrings[1].trim()).intValue();
             String taskTitle = splitStrings[2].trim().substring(1, splitStrings[2].trim().length() - 1);
             int taskPeriod = Integer.valueOf(splitStrings[3].trim()).intValue();
-            int taskDeadline = taskPeriod;
-            int taskComputationTime = Integer.valueOf(splitStrings[4].trim()).intValue();
-            int taskPriority = Integer.valueOf(splitStrings[5].trim()).intValue();
+            int taskDeadline = Integer.valueOf(splitStrings[4].trim()).intValue();
+            int taskComputationTime = Integer.valueOf(splitStrings[5].trim()).intValue();
+            int taskPriority = Integer.valueOf(splitStrings[6].trim()).intValue();
+            int taskInitialOffset = Integer.valueOf(splitStrings[7].trim()).intValue();
+            Color taskColor = new Color( Integer.valueOf(splitStrings[8].trim()).intValue() ); //RGB
 
             simTaskContainer.addTask(taskId, taskTitle, taskType, taskPeriod, taskDeadline, taskComputationTime, taskPriority);
             Task thisSimTask = simTaskContainer.getTaskById(taskId);
@@ -145,6 +149,9 @@ public class ConfigLoader extends DialogFileHandler {
             thisSimTask.lastReleaseTime = -1;
             thisSimTask.lastFinishTime = 0;
 
+            thisSimTask.setInitialOffset( taskInitialOffset );
+            thisSimTask.setColor( taskColor );
+
             return true;
         }
         else {
@@ -152,6 +159,134 @@ public class ConfigLoader extends DialogFileHandler {
             System.out.println("Task List is wrong in the log file.");
             return false;
         }
+    }
+
+    public Boolean exportTaskConfigsByDialog(TaskContainer taskContainer) {
+
+        // TODO: Should check whether taskContainer is empty or contains no task?
+
+        /* Show dialog to assign and open a file for the output. */
+        try {
+            openWriteFileFromDialog();  // set up "fileWriter".
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        if ( fileWriter == null ) {
+            // Selection of the file path is canceled.
+            return false;
+        }
+
+        /* Generate and write task configs to the file. */
+        Boolean writeFileReturn;
+        writeFileReturn = writeTaskConfigsToFile(taskContainer, fileWriter);
+        if ( writeFileReturn == true ) {
+            // Writing config to file successfully.
+            try {
+                // Close the file for making the writing affect.
+                fileWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return true;
+        } else {
+            // Should never reach here.
+            ProgMsg.debugPutline("Something wrong.");
+            return false;
+        }
+
+    }
+
+    /**
+     * Generate a string line of task configuration for a specified task.
+     * The format is as follows:
+     * ID, Task Type, Name, Period, Deadline, Computation Time, Priority, Optional:( Initial Offset, Color )
+     * @param inTask the task to be read to generate the config string.
+     * @return
+     */
+    protected String generateTaskConfigLine(Task inTask)
+    {
+        if ( inTask == null ) {
+            return "";
+        }
+
+        String thisTaskLine = "";
+
+        // Task ID
+        thisTaskLine += String.valueOf(inTask.getId());
+        thisTaskLine += ", ";
+
+        // Task Type
+        thisTaskLine += String.valueOf(inTask.getTaskType());
+        thisTaskLine += ", ";
+
+        // Task Name
+        thisTaskLine += '\"' + inTask.getTitle() + '\"';
+        thisTaskLine += ", ";
+
+        // Task Period
+        thisTaskLine += String.valueOf(inTask.getPeriodNs());
+        thisTaskLine += ", ";
+
+        // Deadline
+        thisTaskLine += String.valueOf( inTask.getDeadlineNs() );
+        thisTaskLine += ", ";
+
+        // Task Computation Time
+        thisTaskLine += String.valueOf(inTask.getComputationTimeNs());
+        thisTaskLine += ", ";
+
+        // Task Priority
+        thisTaskLine += String.valueOf( inTask.getPriority() );
+        thisTaskLine += ", ";
+
+        // Task Initial Offset
+        thisTaskLine += String.valueOf(inTask.getInitialOffset());
+        thisTaskLine += ", ";
+
+        // Task Color
+        thisTaskLine += String.valueOf(inTask.getTaskColor().getRGB());
+        //thisTaskLine += ", ";
+
+        return thisTaskLine;
+    }
+
+    protected String generateAllTaskConfigLines(TaskContainer inTaskContainer)
+    {
+        String resultLines = "";
+        Boolean firstLoop = true;
+        for (Task thisTask : inTaskContainer.getTasksAsArray()) {
+            if ( firstLoop == true ) {
+                firstLoop = false;
+            } else {
+                resultLines += "\r\n";
+            }
+            resultLines += generateTaskConfigLine( thisTask );
+        }
+        return resultLines;
+    }
+
+    protected Boolean writeTaskConfigsToFile(TaskContainer inTaskContainer, BufferedWriter inFileWriter)
+    {
+        String taskConfigLines = "";
+        taskConfigLines += "# Format: ID, Type, Name, Period, Deadline, Computation Time, Priority, Initial Offset, RGB";
+        taskConfigLines += "\r\n";
+        taskConfigLines += "@TaskList";
+        taskConfigLines += "\r\n";
+
+        taskConfigLines += generateAllTaskConfigLines( inTaskContainer );
+        ProgMsg.debugPutline(taskConfigLines);
+
+        try {
+            inFileWriter.write( taskConfigLines );
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.err.format("IOException @ writeTaskConfigToFile: Failed to write the data to the file.\r\n");
+            return false;
+        }
+
+        return true;
     }
 
 }

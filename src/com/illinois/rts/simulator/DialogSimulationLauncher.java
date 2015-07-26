@@ -167,7 +167,8 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
                 setTaskContainer(simTaskContainer);
             }
         } else if ( e.getSource() == btnExportTaskConfig ) {
-
+            ConfigLoader taskConfigExporter = new ConfigLoader();
+            taskConfigExporter.exportTaskConfigsByDialog( taskSetterPanel.getTaskContainerWithLatestConfigs() );
         }
     }
 
