@@ -122,14 +122,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         menuItemBusyIntervalsRunAmir.setFont(menuFont);
         subMEnuInstance.add(menuItemBusyIntervalsRunAmir);
         menuItemBusyIntervalsRunAmir.addActionListener(this);
-
-        // - Analyze -> Task Statistics
-        menuItemTaskStatistics = new JMenuItem("Task Statistics");
-        menuItemTaskStatistics.setFont(menuFont);
-        topMenuInstance.add(menuItemTaskStatistics);
-        menuItemTaskStatistics.addActionListener(this);
-
-
+        
         // Create "Hack" menu
         topMenuInstance = new JMenu("Hack");
         topMenuInstance.setFont(menuFont);
