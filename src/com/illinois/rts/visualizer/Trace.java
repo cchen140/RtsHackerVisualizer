@@ -184,6 +184,7 @@ public class Trace {
 
     public int getTraceHeight()
     {
+        traceSpace = calculateTraceSpace();
         return traceSpace.getHeight() + marginY*2;
     }
 
