@@ -82,7 +82,7 @@ public class ProgMsg {
             StyleConstants.setForeground(style, inColor);
 
 //            outDoc.setParagraphAttributes(0, 1, errStyle, false);
-            outDoc.setCharacterAttributes(outDoc.getLength()-inStr.length()-1, inStr.length(), style, false);
+            outDoc.setCharacterAttributes(outDoc.getLength()-inStr.length()-2, inStr.length(), style, false);
 
         } catch (BadLocationException e) {
             e.printStackTrace();
