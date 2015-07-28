@@ -16,7 +16,7 @@ import java.io.IOException;
 /**
  * Created by CY on 2/10/2015.
  */
-public class GuiMain implements ActionListener, MouseListener, AdjustmentListener {
+public class GuiMain implements ActionListener, MouseListener {
     private JPanel panel1;
     private JButton btnHideTaskList;
     private JButton buttonOpenFile;
@@ -74,8 +74,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     private GuiMain() {
 
         // Set up program log messenger handler.
-//        progMsger = ProgMsg.getInstance();
-//        progMsger.setDocument(msgTextPane.getStyledDocument());
+        //progMsger = ProgMsg.getInstance();
         ProgMsg.setDocument(msgTextPane.getStyledDocument());
         msgTextPane.setFont(new Font("TimesRoman", Font.PLAIN, 16));
 
@@ -148,9 +147,10 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         buttonTaskSetter.addActionListener(this);
         btnLaunchSimulator.addActionListener(this);
 
+        /* Mouse motion listener for scrolling panels. */
+        zPanel.addMouseListener(zPanelMouseDragHandler);          // Handles press events to locate the position when mouse is pressed.
+        zPanel.addMouseMotionListener(zPanelMouseDragHandler);    // Handles drag events to scroll the zPanel with mouse.
         taskList.addMouseListener(this);
-
-        zPanelScrollBarHorizontal.addAdjustmentListener(this);
 
         ListCellRenderer rendererTaskList = new TaskListRenderer();
         taskList.setCellRenderer(rendererTaskList);
@@ -187,7 +187,12 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
         zPanel.setVisible(true);
         zPanelTraceHeaders.setVisible(true);
 
+        // Hide the horizontal scroll bar of vertical bar panel.
         zPanelScrollVertical.getHorizontalScrollBar().setPreferredSize(new Dimension(20, -1));
+
+        // Bind the horizontal scroll bar of the panel to a separate scroll bar. The scrolling event is handled automatically.
+        zPanelScrollHorizontal.getHorizontalScrollBar().setModel(zPanelScrollBarHorizontal.getModel());
+        zPanelTimeLineScrollHorizontal.getHorizontalScrollBar().setModel(zPanelScrollBarHorizontal.getModel());
 
     }
 
@@ -358,6 +363,7 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
     }
 
     public void mousePressed(MouseEvent e) {
+
     }
 
     public void mouseReleased(MouseEvent e) {
@@ -402,13 +408,36 @@ public class GuiMain implements ActionListener, MouseListener, AdjustmentListene
 //        drawPlotFromEventContainer();
     }
 
-    @Override
-    public void adjustmentValueChanged(AdjustmentEvent e) {
-        if (e.getSource() == zPanelScrollBarHorizontal)
-        {
-            /* Scroll zPanelScrollHorizontal panel and TimeLine panel according to zPanelScrollBarHorizontal */
-            zPanelScrollHorizontal.getHorizontalScrollBar().setValue(zPanelScrollBarHorizontal.getValue());
-            zPanelTimeLineScrollHorizontal.getHorizontalScrollBar().setValue(zPanelScrollBarHorizontal.getValue());
+
+    /**
+     * This MouseAdapter handles the mouse events from zPanel to enable the drag and scroll feature.
+     */
+    private MouseAdapter zPanelMouseDragHandler = new MouseAdapter() {
+        public Point lastMousePoint = new Point();
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            super.mousePressed(e);
+            lastMousePoint.setLocation(e.getLocationOnScreen());
         }
-    }
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            super.mouseDragged(e);
+            Point currentMousePoint = new Point(e.getLocationOnScreen());
+
+            /* Vertical Scrolling */
+            Point translatedVerticalViewPosition = new Point( zPanelScrollVertical.getViewport().getViewPosition() );
+            translatedVerticalViewPosition.translate( 0, lastMousePoint.y - currentMousePoint.y );
+            zPanelScrollHorizontal.scrollRectToVisible( new Rectangle( translatedVerticalViewPosition, zPanelScrollVertical.getSize() ) );
+
+            /* Horizontal Scrolling */
+            Point translatedHorizontalViewPosition = new Point( zPanelScrollHorizontal.getViewport().getViewPosition() );
+            translatedHorizontalViewPosition.translate( lastMousePoint.x - currentMousePoint.x, 0 );
+            zPanel.scrollRectToVisible( new Rectangle( translatedHorizontalViewPosition, zPanelScrollHorizontal.getSize() ) );
+
+            lastMousePoint.setLocation(currentMousePoint);
+        }
+
+    };
 }

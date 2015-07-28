@@ -257,6 +257,7 @@
           <scrollpane id="3a66d" binding="zPanelScrollVertical">
             <constraints border-constraint="Center"/>
             <properties>
+              <autoscrolls value="false"/>
               <horizontalScrollBarPolicy value="31"/>
               <verticalScrollBarPolicy value="22"/>
             </properties>
@@ -265,6 +266,7 @@
               <grid id="31d70" layout-manager="BorderLayout" hgap="0" vgap="0">
                 <constraints/>
                 <properties>
+                  <autoscrolls value="false"/>
                   <name value=""/>
                 </properties>
                 <border type="none"/>
@@ -272,7 +274,7 @@
                   <scrollpane id="11329" binding="zPanelScrollHorizontal">
                     <constraints border-constraint="Center"/>
                     <properties>
-                      <autoscrolls value="true"/>
+                      <autoscrolls value="false"/>
                       <horizontalScrollBar value=""/>
                       <horizontalScrollBarPolicy value="31"/>
                       <name value="zPanelScrollHorizontal"/>
@@ -284,6 +286,7 @@
                       <component id="8045f" class="com.illinois.rts.visualizer.MainDisplayPanel" binding="zPanel">
                         <constraints/>
                         <properties>
+                          <autoscrolls value="false"/>
                           <background color="-1558978"/>
                           <name value="zPanel"/>
                           <preferredSize width="1000" height="10"/>

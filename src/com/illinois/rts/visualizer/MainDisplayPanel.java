@@ -150,10 +150,10 @@ public class MainDisplayPanel extends JPanel {
         }
 
         /* Scroll zPanelScrollHorizontal panel according to zPanelScrollBarHorizontal */
-        if (horizontalScrollBar != null) {
-            horizontalScrollBar.setMaximum(traceGroupContainer.getWidth() + ProgConfig.MAIN_DISPLAY_PANEL_PADDING_X * 2);
-            horizontalScrollBar.setUnitIncrement(1);
-        }
+//        if (horizontalScrollBar != null) {
+//            horizontalScrollBar.setMaximum(traceGroupContainer.getWidth() + ProgConfig.MAIN_DISPLAY_PANEL_PADDING_X * 2);
+//            horizontalScrollBar.setUnitIncrement(1);
+//        }
 
         repaint();
     }
