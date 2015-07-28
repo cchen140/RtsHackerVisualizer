@@ -1,7 +1,8 @@
 package com.illinois.rts.visualizer;
 
+import com.illinois.rts.framework.*;
+
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 
 /**
  * Created by CY on 2/20/2015.
@@ -20,9 +21,10 @@ public class HackerEvent extends Event {
     private int scaledRecordData = 0;
     private String note = "";
 
-    HackerEvent(int inTimeStamp, Task inTask, int inData, String inNote)
+    HackerEvent(int inTimestampNs, Task inTask, int inData, String inNote)
     {
-        timeStamp = inTimeStamp;
+        orgBeginTimestampNs = inTimestampNs;
+        scaledBeginTimestamp = inTimestampNs;
         task = inTask;
         recordData = inData;
 
@@ -50,28 +52,35 @@ public class HackerEvent extends Event {
     }
 
     @Override
-    public void drawEvent(Graphics2D g, int offsetX, int offsetY, double scaleX, double scaleY)
+    public void drawEvent(Graphics2D g, int offsetX, int offsetY)
     {
-        int scaledOffsetX = offsetX + (int) (timeStamp*scaleX);
+//        int currentOffsetX = offsetX + (int) (scaledBeginTimestamp/scaleX);
+        int currentOffsetX = offsetX + scaledBeginTimestamp;
         int movedOffsetY = 0;
-        if (task.isBoxChecked()) {
-            g.setFont(new Font("TimesRoman", Font.BOLD, 18));
+        if (task.isDisplayBoxChecked()) {
+            g.setFont(new Font("TimesRoman", Font.BOLD, 16));
+
             if (task.getId() == highHackerId)
             {
                 /* Display in North */
                 g.setColor(Color.black);
-                //g.drawLine(scaledOffsetX, offsetY - 50, scaledOffsetX, offsetY);
+
+                String drawnString = String.valueOf(recordData);
+                int stringWidth = getGraphicStringWidth(g, drawnString);
+
+                //g.drawLine(currentOffsetX, offsetY - 50, currentOffsetX, offsetY);
                 //drawObject.setFillColor(task.getTaskColor());
-                g.fillRect(scaledOffsetX - BAR_WIDTH / 2, offsetY - scaledRecordData, BAR_WIDTH, scaledRecordData);
-                //g.drawString(note, scaledOffsetX, offsetY - 70);
-                //drawArrow(g, scaledOffsetX, offsetY - 50, scaledOffsetX, offsetY);
+//                g.fillRect(currentOffsetX - BAR_WIDTH / 2, offsetY - scaledRecordData, BAR_WIDTH, scaledRecordData);
+                g.drawString(drawnString, currentOffsetX-stringWidth/2, offsetY + 25);
+                //g.drawString(note, currentOffsetX, offsetY - 70); // H label
+                //drawArrow(g, currentOffsetX, offsetY - 50, currentOffsetX, offsetY);
             }
             else if (task.getId() == lowHackerId)
             {
                 /* Display in South */
                 g.setColor(task.getTaskColor());
-                g.drawString(note, scaledOffsetX-5, offsetY + SchedulerEvent.DRAW_HEIGHT + 40);
-                drawArrow(g, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT + 20, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT);
+                g.drawString(note, currentOffsetX-5, offsetY + 25);
+                drawArrow(g, currentOffsetX, offsetY + 5, currentOffsetX, offsetY);
             }
             else
             {
@@ -81,20 +90,23 @@ public class HackerEvent extends Event {
         }
     }
 
-    private  void drawArrow(Graphics g1, int x1, int y1, int x2, int y2) {
-        int ARR_SIZE = 7;
-        Graphics2D g = (Graphics2D) g1.create();
+    public int getTaskId(){
+        return task.getId();
+    }
 
-        double dx = x2 - x1, dy = y2 - y1;
-        double angle = Math.atan2(dy, dx);
-        int len = (int) Math.sqrt(dx*dx + dy*dy);
-        AffineTransform at = AffineTransform.getTranslateInstance(x1, y1);
-        at.concatenate(AffineTransform.getRotateInstance(angle));
-        g.transform(at);
+    @Override
+    public TraceSpace getGraphSpace() {
+        if (getTaskId() == highHackerId) {
+            return new TraceSpace(0, 25);
+        }
+        else //if (getTaskId() == lowHackerId)
+        {
+            return new TraceSpace(0, 25);
+        }
+    }
 
-        // Draw horizontal arrow starting in (0, 0)
-        g.drawLine(0, 0, len, 0);
-        g.fillPolygon(new int[] {len, len-ARR_SIZE, len-ARR_SIZE, len},
-                new int[] {0, -ARR_SIZE, ARR_SIZE, 0}, 4);
+    public int getRecordData()
+    {
+        return recordData;
     }
 }

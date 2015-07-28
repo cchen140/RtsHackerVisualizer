@@ -1,7 +1,8 @@
 package com.illinois.rts.visualizer;
 
+import com.illinois.rts.framework.*;
+
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 
 /**
  * Created by CY on 2/19/2015.
@@ -13,22 +14,25 @@ public class AppEvent extends Event {
 
     AppEvent(int inTimeStamp, Task inTask, int inData, String inNote)
     {
-        timeStamp = inTimeStamp;
+        orgBeginTimestampNs = inTimeStamp;
+        scaledBeginTimestamp = inTimeStamp;
         task = inTask;
         recordData = inData;
         note = inNote;
     }
 
-    public void drawEvent(Graphics2D g, int offsetX, int offsetY, double scaleX, double scaleY)
+    public void drawEvent(Graphics2D g, int offsetX, int offsetY)
     {
-        int scaledOffsetX = offsetX + (int) (timeStamp*scaleX);
+//        int scaledOffsetX = offsetX + (int) (scaledBeginTimestamp/scaleX);
+        int currentOffsetX = offsetX + scaledBeginTimestamp;
         int movedOffsetY = 0;
-        if (task.isBoxChecked()) {
-            g.setFont(new Font("TimesRoman", Font.BOLD, 18));
+        if (task.isDisplayBoxChecked()) {
+            g.setFont(new Font("TimesRoman", Font.BOLD, 16));
+            g.setColor(task.getTaskColor());
 
             /* Display in South */
-            g.drawString(note, scaledOffsetX-5, offsetY + SchedulerEvent.DRAW_HEIGHT + 80);
-            drawArrow(g, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT + 50, scaledOffsetX, offsetY + SchedulerEvent.DRAW_HEIGHT);
+            g.drawString(note, currentOffsetX-5, offsetY + 25);
+            drawArrow(g, currentOffsetX, offsetY + 5, currentOffsetX, offsetY);
 
             /* Display in North */
 //            g.drawString(note, scaledOffsetX, offsetY - 70);
@@ -36,20 +40,21 @@ public class AppEvent extends Event {
         }
     }
 
-    private  void drawArrow(Graphics g1, int x1, int y1, int x2, int y2) {
-        int ARR_SIZE = 7;
-        Graphics2D g = (Graphics2D) g1.create();
+    @Override
+    public TraceSpace getGraphSpace() {
+        return new TraceSpace(0, 25);
+    }
 
-        double dx = x2 - x1, dy = y2 - y1;
-        double angle = Math.atan2(dy, dx);
-        int len = (int) Math.sqrt(dx*dx + dy*dy);
-        AffineTransform at = AffineTransform.getTranslateInstance(x1, y1);
-        at.concatenate(AffineTransform.getRotateInstance(angle));
-        g.transform(at);
 
-        // Draw horizontal arrow starting in (0, 0)
-        g.drawLine(0, 0, len, 0);
-        g.fillPolygon(new int[] {len, len-ARR_SIZE, len-ARR_SIZE, len},
-                new int[] {0, -ARR_SIZE, ARR_SIZE, 0}, 4);
+
+    public int getTaskId(){
+        return task.getId();
+    }
+
+    public Task getTask() { return task; }
+
+    public String getNote()
+    {
+        return note;
     }
 }

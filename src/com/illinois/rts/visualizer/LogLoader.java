@@ -7,11 +7,14 @@ import java.security.InvalidParameterException;
 /**
  * Created by CY on 2/16/2015.
  */
-public class LogLoader extends DialogFileLoader {
+public class LogLoader extends DialogFileHandler {
     private static final int LOG_BLOCK_UNKNOWN = 0;
     private static final int LOG_BLOCK_TASK_LIST = 1;
-    private static final int LOG_BLOCK_MIXED_LOG = 2;
-    private static final int LOG_BLOCK_HACKER_LIST = 3;
+    private static final int LOG_BLOCK_SCHEDULER_LOG = 2;
+    private static final int LOG_BLOCK_APP_LOG = 3;
+    private static final int LOG_BLOCK_HACKER_LOG = 4;
+    private static final int LOG_BLOCK_MIXED_LOG = 5;   // Mixed log is combination of scheduler and app logs.
+    private static final int LOG_BLOCK_HACKER_LIST = 6;
 
     private EventContainer eventContainer = new EventContainer();
     private TaskContainer taskContainer = null;
@@ -38,7 +41,7 @@ public class LogLoader extends DialogFileLoader {
 
     public EventContainer loadDemoLog() throws IOException
     {
-        String demoLogFilePath = "./log/demoLog2.txt";
+        String demoLogFilePath = "./log/demoLog1.txt";
         if (loadLog(this.openFile(demoLogFilePath)) == false)
             throw new InvalidParameterException("Demo log file is incorrect.");
         else
@@ -53,6 +56,7 @@ public class LogLoader extends DialogFileLoader {
     private Boolean loadLog(BufferedReader fileReader)
     {
         int lineCounter = 1;
+        firstTimeStamp = -1;
 
         try {
             String line = null;
@@ -60,6 +64,8 @@ public class LogLoader extends DialogFileLoader {
             int currentLogBlock = LOG_BLOCK_UNKNOWN;
             while ((line = fileReader.readLine()) != null)
             {
+                lineCounter++;
+
                 if (line.trim().length()==0) // Empty line
                     continue;
                 else if (line.trim().substring(0, 1).equalsIgnoreCase("#")) // Comment line
@@ -73,14 +79,22 @@ public class LogLoader extends DialogFileLoader {
                     continue;
                 }
                 else if (line.trim().toLowerCase().equalsIgnoreCase("@SchedulerLog")) {
-                    currentLogBlock = LOG_BLOCK_MIXED_LOG;    // Reading log block
+                    currentLogBlock = LOG_BLOCK_SCHEDULER_LOG;    // Reading log block
+                    continue;
+                }
+                else if (line.trim().toLowerCase().equalsIgnoreCase("@AppLog")) {
+                    currentLogBlock = LOG_BLOCK_APP_LOG;    // Reading log block
+                    continue;
+                }
+                else if (line.trim().toLowerCase().equalsIgnoreCase("@HackerLog")) {
+                    currentLogBlock = LOG_BLOCK_HACKER_LOG;    // Reading log block
                     continue;
                 }
                 else if (line.trim().toLowerCase().equalsIgnoreCase("@HackerList")) {
                     currentLogBlock = LOG_BLOCK_HACKER_LIST;
                     continue;
                 }
-                else  if (currentLogBlock == LOG_BLOCK_UNKNOWN) // Unknown lines.
+                else if (currentLogBlock == LOG_BLOCK_UNKNOWN) // Unknown lines.
                     continue;
 
 
@@ -90,8 +104,11 @@ public class LogLoader extends DialogFileLoader {
                     case LOG_BLOCK_TASK_LIST:
                         parseResult = parseLogLineTaskList(line);
                         break;
+                    case LOG_BLOCK_SCHEDULER_LOG:
+                    case LOG_BLOCK_APP_LOG:
+                    case LOG_BLOCK_HACKER_LOG:
                     case LOG_BLOCK_MIXED_LOG:
-                        parseResult = parseLogLineMixedLog(line);
+                        parseResult = parseLogLineMixedLog(currentLogBlock, line);
                         break;
                     case LOG_BLOCK_HACKER_LIST:
                         parseResult = parseLogLineHackerList(line);
@@ -106,7 +123,6 @@ public class LogLoader extends DialogFileLoader {
                     return false;
                 }
 
-                lineCounter++;
             }
 
             if (currentLogBlock == 0) {
@@ -120,7 +136,10 @@ public class LogLoader extends DialogFileLoader {
             return false;
         }
 
+        ProgMsg.putLine("%d lines loaded from the log file.", lineCounter);
         System.out.format("%d lines loaded from the log file.\n", lineCounter);
+
+        ProgMsg.putLine("first time stamp: %d", firstTimeStamp);
         return true;
     }
 
@@ -143,23 +162,30 @@ public class LogLoader extends DialogFileLoader {
      * @param line One log line string to be parsed. Format: [taskId, TaskName]
      * @return 'true' for successfully parsing the line, whereas 'false' for not.
      */
+    // id, task type, task name, period, computation time, priority
     private Boolean parseLogLineTaskList(String line)
     {
-        /* Format: [taskId, TaskName] */
+        /* Format: [taskId, taskType, taskName, taskPeriod, taskComputationTime, taskPriority] */
         String splitStrings[] = line.split(",");
-        if (splitStrings.length == 2) {
+        if (splitStrings.length == 6) {
             int taskId = Integer.valueOf(splitStrings[0].trim()).intValue();
-            String taskTitle = splitStrings[1].trim().substring(1, splitStrings[1].trim().length() - 1);
-            taskContainer.addTask(taskId, taskTitle);
+            int taskType = Integer.valueOf(splitStrings[1].trim()).intValue();
+            String taskTitle = splitStrings[2].trim().substring(1, splitStrings[2].trim().length() - 1);
+            int taskPeriod = Integer.valueOf(splitStrings[3].trim()).intValue();
+            int taskComputationTime = Integer.valueOf(splitStrings[4].trim()).intValue();
+            int taskPriority = Integer.valueOf(splitStrings[5].trim()).intValue();
+
+            taskContainer.addTask( taskId, taskTitle, taskType, taskPeriod, taskComputationTime, taskPriority);
             return true;
         }
         else {
             // Incorrect task list log format.
+            System.out.println("Task List is wrong in the log file.");
             return false;
         }
     }
 
-    private Boolean parseLogLineMixedLog(String line)
+    private Boolean parseLogLineMixedLog(int inCurrentLogBlock, String line)
     {
         /* format: [timestamp, event_taskId, event_data, event_string]. (62039364, 0, 3, "IN") */
         String splitStrings[] = line.split(",");
@@ -170,13 +196,27 @@ public class LogLoader extends DialogFileLoader {
                 firstTimeStamp = timeStamp;
             }
             /* TODO: the scale of the timestamp should be flexible and configurable. */
-            timeStamp = (timeStamp - firstTimeStamp) / 10000;
+            int timestampNs = (int) ((timeStamp - firstTimeStamp) * ProgConfig.TIMESTAMP_UNIT_NS );/// ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
 
             int eventTaskId = Integer.valueOf(splitStrings[1].trim()).intValue();
             int eventData = Integer.valueOf(splitStrings[2].trim()).intValue();
             String eventString = splitStrings[3].trim().substring(1, splitStrings[3].trim().length() - 1);
 
-            eventContainer.add(timeStamp, eventTaskId, eventData, eventString);
+            switch (inCurrentLogBlock)
+            {
+                case LOG_BLOCK_SCHEDULER_LOG:
+                    eventContainer.add(EventContainer.SCHEDULER_EVENT, timestampNs, eventTaskId, eventData, eventString);
+                    break;
+                case LOG_BLOCK_APP_LOG:
+                    eventContainer.add(EventContainer.APP_EVENT, timestampNs, eventTaskId, eventData, eventString);
+                    break;
+                case LOG_BLOCK_HACKER_LOG:
+                    eventContainer.add(EventContainer.HACKER_EVENT, timestampNs, eventTaskId, eventData, eventString);
+                    break;
+                default:
+                    break;
+            }
+
             return true;
         }
         else {

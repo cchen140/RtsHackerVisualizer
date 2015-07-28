@@ -7,12 +7,6 @@
     <properties/>
     <border type="none"/>
     <children>
-      <component id="138ee" class="com.illinois.rts.visualizer.PanelDrawer" binding="zPanel">
-        <constraints border-constraint="Center"/>
-        <properties>
-          <background color="-1558978"/>
-        </properties>
-      </component>
       <grid id="bf452" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints border-constraint="North"/>
         <properties>
@@ -73,11 +67,29 @@
             </properties>
             <border type="none"/>
             <children>
-              <grid id="ee7bb" layout-manager="FlowLayout" hgap="5" vgap="2" flow-align="2">
+              <grid id="ee7bb" layout-manager="FlowLayout" hgap="10" vgap="2" flow-align="2">
                 <constraints border-constraint="East"/>
                 <properties/>
                 <border type="none"/>
                 <children>
+                  <component id="a70e" class="javax.swing.JButton" binding="btnLaunchSimulator">
+                    <constraints/>
+                    <properties>
+                      <font size="16"/>
+                      <preferredSize width="100" height="30"/>
+                      <text value="RM Simulator"/>
+                    </properties>
+                  </component>
+                  <component id="f4ed3" class="javax.swing.JButton" binding="buttonTaskSetter">
+                    <constraints/>
+                    <properties>
+                      <enabled value="false"/>
+                      <font size="16"/>
+                      <preferredSize width="130" height="30"/>
+                      <selected value="false"/>
+                      <text value="Task Config"/>
+                    </properties>
+                  </component>
                   <component id="5b7a7" class="javax.swing.JButton" binding="buttonOpenFile">
                     <constraints/>
                     <properties>
@@ -89,7 +101,7 @@
                   </component>
                 </children>
               </grid>
-              <grid id="e61c0" layout-manager="FlowLayout" hgap="5" vgap="2" flow-align="0">
+              <grid id="e61c0" layout-manager="FlowLayout" hgap="10" vgap="2" flow-align="0">
                 <constraints border-constraint="West"/>
                 <properties/>
                 <border type="none"/>
@@ -105,7 +117,24 @@
                       <text value="Hide List"/>
                     </properties>
                   </component>
+                  <component id="71672" class="javax.swing.JButton" binding="buttonSettings">
+                    <constraints/>
+                    <properties>
+                      <font size="16"/>
+                      <label value="Settings"/>
+                      <preferredSize width="120" height="30"/>
+                      <text value="Settings"/>
+                    </properties>
+                  </component>
                 </children>
+              </grid>
+              <grid id="ce9cb" layout-manager="FlowLayout" hgap="5" vgap="2" flow-align="2">
+                <constraints border-constraint="Center"/>
+                <properties>
+                  <preferredSize width="130" height="10"/>
+                </properties>
+                <border type="none"/>
+                <children/>
               </grid>
             </children>
           </grid>
@@ -175,6 +204,37 @@
                       </grid>
                     </children>
                   </scrollpane>
+                  <grid id="3dede" layout-manager="BorderLayout" hgap="0" vgap="0">
+                    <constraints border-constraint="South"/>
+                    <properties>
+                      <minimumSize width="17" height="150"/>
+                      <preferredSize width="6" height="150"/>
+                    </properties>
+                    <border type="none"/>
+                    <children>
+                      <scrollpane id="25d79">
+                        <constraints border-constraint="Center"/>
+                        <properties>
+                          <preferredSize width="6" height="100"/>
+                        </properties>
+                        <border type="none"/>
+                        <children>
+                          <component id="9d952" class="javax.swing.JTextPane" binding="msgTextPane">
+                            <constraints/>
+                            <properties/>
+                          </component>
+                        </children>
+                      </scrollpane>
+                      <grid id="3cc3c" layout-manager="BorderLayout" hgap="0" vgap="0">
+                        <constraints border-constraint="North"/>
+                        <properties>
+                          <preferredSize width="0" height="5"/>
+                        </properties>
+                        <border type="none"/>
+                        <children/>
+                      </grid>
+                    </children>
+                  </grid>
                 </children>
               </grid>
             </children>
@@ -186,6 +246,110 @@
             </properties>
             <border type="none"/>
             <children/>
+          </grid>
+        </children>
+      </grid>
+      <grid id="64696" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <scrollpane id="3a66d" binding="zPanelScrollVertical">
+            <constraints border-constraint="Center"/>
+            <properties>
+              <autoscrolls value="false"/>
+              <horizontalScrollBarPolicy value="31"/>
+              <verticalScrollBarPolicy value="22"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <grid id="31d70" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints/>
+                <properties>
+                  <autoscrolls value="false"/>
+                  <name value=""/>
+                </properties>
+                <border type="none"/>
+                <children>
+                  <scrollpane id="11329" binding="zPanelScrollHorizontal">
+                    <constraints border-constraint="Center"/>
+                    <properties>
+                      <autoscrolls value="false"/>
+                      <horizontalScrollBar value=""/>
+                      <horizontalScrollBarPolicy value="31"/>
+                      <name value="zPanelScrollHorizontal"/>
+                      <preferredSize width="-1" height="-1"/>
+                      <verticalScrollBarPolicy value="21"/>
+                    </properties>
+                    <border type="empty"/>
+                    <children>
+                      <component id="8045f" class="com.illinois.rts.visualizer.MainDisplayPanel" binding="zPanel">
+                        <constraints/>
+                        <properties>
+                          <autoscrolls value="false"/>
+                          <background color="-1558978"/>
+                          <name value="zPanel"/>
+                          <preferredSize width="1000" height="10"/>
+                          <visible value="false"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </scrollpane>
+                  <component id="d9c1" class="com.illinois.rts.visualizer.TraceHeadersPanel" binding="zPanelTraceHeaders">
+                    <constraints border-constraint="West"/>
+                    <properties>
+                      <background color="-16777216"/>
+                      <enabled value="true"/>
+                      <preferredSize width="150" height="10"/>
+                      <visible value="false"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+            </children>
+          </scrollpane>
+          <component id="5dae0" class="javax.swing.JScrollBar" binding="zPanelScrollBarHorizontal">
+            <constraints border-constraint="South"/>
+            <properties>
+              <autoscrolls value="true"/>
+              <opaque value="true"/>
+              <orientation value="0"/>
+              <preferredSize width="13" height="25"/>
+              <value value="0"/>
+            </properties>
+          </component>
+          <grid id="633f8" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="North"/>
+            <properties>
+              <preferredSize width="0" height="25"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <grid id="4e4cc" binding="zPanelTimeLineLeftPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints border-constraint="West"/>
+                <properties>
+                  <preferredSize width="150" height="0"/>
+                </properties>
+                <border type="none"/>
+                <children/>
+              </grid>
+              <scrollpane id="6b33a" binding="zPanelTimeLineScrollHorizontal">
+                <constraints border-constraint="Center"/>
+                <properties>
+                  <horizontalScrollBarPolicy value="31"/>
+                  <verticalScrollBarPolicy value="21"/>
+                </properties>
+                <border type="empty"/>
+                <children>
+                  <component id="b116a" class="com.illinois.rts.visualizer.TimeLinePanel" binding="zPanelTimeLine">
+                    <constraints/>
+                    <properties>
+                      <background color="-1"/>
+                    </properties>
+                  </component>
+                </children>
+              </scrollpane>
+            </children>
           </grid>
         </children>
       </grid>
