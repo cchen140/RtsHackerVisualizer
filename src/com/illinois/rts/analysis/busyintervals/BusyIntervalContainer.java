@@ -50,7 +50,7 @@ public class BusyIntervalContainer {
             if (currentEvent.getTask().getId() == idleTaskId)
             { // This is the end of a busy interval.
                 int endTimeStamp = currentEvent.getOrgBeginTimestampNs();
-                ArrayList<Task> thisBusyIntervalGroundTruth = new ArrayList<Task>();
+                TaskReleaseEventContainer thisBusyIntervalGroundTruth = new TaskReleaseEventContainer();
                 BusyInterval thisBusyInterval = new BusyInterval(beginTimeStamp, endTimeStamp);
 
                 /* Search for the composition of this busy interval. (ground truth) */
@@ -60,7 +60,7 @@ public class BusyIntervalContainer {
                             && (currentAppEvent.getOrgBeginTimestampNs() <= endTimeStamp))
                     { // This app event is within the busy interval.
                         if (currentAppEvent.getNote().equalsIgnoreCase("BEGIN"))
-                            thisBusyIntervalGroundTruth.add(currentAppEvent.getTask());
+                            thisBusyIntervalGroundTruth.add( currentAppEvent );
                     }
                 }
                 thisBusyInterval.setCompositionGroundTruth(thisBusyIntervalGroundTruth);

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class BusyInterval {
     private int beginTimeStampNs = 0;
     private int endTimeStampNs = 0;
-    private ArrayList<Task> compositionGroundTruth;
+    TaskReleaseEventContainer compositionGroundTruth;
 
     // There may have multiple inferences, so two-layer array is used here.
     private ArrayList<ArrayList<Task>> composition = new ArrayList<>();
@@ -23,7 +23,7 @@ public class BusyInterval {
         endTimeStampNs = inEndTimeStamp;
     }
 
-    public void setCompositionGroundTruth(ArrayList<Task> inGroundTruth)
+    public void setCompositionGroundTruth(TaskReleaseEventContainer inGroundTruth)
     {
         compositionGroundTruth = inGroundTruth;
     }
@@ -43,7 +43,7 @@ public class BusyInterval {
         return beginTimeStampNs;
     }
 
-    public ArrayList<Task> getCompositionGroundTruth()
+    public TaskReleaseEventContainer getCompositionGroundTruth()
     {
         return  compositionGroundTruth;
     }
