@@ -11,25 +11,32 @@ import java.util.ArrayList;
 public class TaskReleaseEventContainer {
     ArrayList<AppEvent> taskReleaseEvents = new ArrayList<>();
 
-    public TaskReleaseEventContainer()
+    public TaskReleaseEventContainer() {}
+
+    public TaskReleaseEventContainer( TaskReleaseEventContainer inContainer )
     {
-
-    }
-
-    public AppEvent add(int releaseTime, Task inTask)
-    {
-        AppEvent thisEvent = new AppEvent( releaseTime, inTask, 0, "" );
-
-        taskReleaseEvents.add(thisEvent);
-        sortTaskReleaseEventsByTime();
-
-        return thisEvent;
+        // replicate the event array.
+        taskReleaseEvents.addAll( inContainer.taskReleaseEvents );
     }
 
     public void add( AppEvent inEvent )
     {
         taskReleaseEvents.add( inEvent );
         sortTaskReleaseEventsByTime();
+    }
+
+    public AppEvent add(int releaseTime, Task inTask)
+    {
+        AppEvent thisEvent = new AppEvent( releaseTime, inTask, 0, "" );
+
+        this.add(thisEvent);
+
+        return thisEvent;
+    }
+
+    public void addAll( ArrayList<AppEvent> inEvents )
+    {
+        taskReleaseEvents.addAll(inEvents);
     }
 
     public void sortTaskReleaseEventsByTime()
@@ -67,4 +74,33 @@ public class TaskReleaseEventContainer {
         }
         return resultTasks;
     }
+
+    public AppEvent get(int index)
+    {
+        return taskReleaseEvents.get( index );
+    }
+
+    public void clear()
+    {
+        taskReleaseEvents.clear();
+    }
+
+
+    /* Find the first event after the designated time stamp. */
+    public AppEvent getNextEvent( int inTimeStamp )
+    {
+        for ( AppEvent thisEvent : taskReleaseEvents ) {
+            if ( thisEvent.getOrgBeginTimestampNs() >= inTimeStamp )
+                return thisEvent;
+        }
+
+        // If no event is after the designated time, then return null.
+        return null;
+    }
+
+    public ArrayList<AppEvent> getEvents()
+    {
+        return taskReleaseEvents;
+    }
+
 }

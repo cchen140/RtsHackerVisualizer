@@ -12,4 +12,13 @@ public class SimJob {
     public long remainingExecTime;
     public long releaseTime;
     public long responseTime;
+
+    public SimJob(){}
+
+    public SimJob( Task inTask, long inReleaseTime, long inRemainingExecTime )
+    {
+        task = inTask;
+        releaseTime = inReleaseTime;
+        remainingExecTime = inRemainingExecTime;
+    }
 }

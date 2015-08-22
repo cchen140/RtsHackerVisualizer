@@ -43,6 +43,13 @@ public class AmirDecomposition {
         return true;
     }
 
+    public Boolean runDecompositionStep3()
+    {
+        reconstructCompositionOfBusyIntervalByArrivalTimeWindows();
+
+        return true;
+    }
+
     public Boolean runDecomposition()
     {
 
@@ -51,6 +58,9 @@ public class AmirDecomposition {
 
         // Step two: creating arrival time window for each task by processing the result from step one.
         runDecompositionStep2();
+
+        // Step three: arrival time to scheduling.
+        runDecompositionStep3();
 
         return true;
     }
@@ -65,6 +75,9 @@ public class AmirDecomposition {
 
         // Step two: creating arrival time window for each task by processing the result from step one.
         runDecompositionStep2();
+
+        // Step three: arrival time to scheduling.
+        runDecompositionStep3();
 
         return true;
     }
@@ -533,7 +546,16 @@ public class AmirDecomposition {
 
     public Trace buildCompositionTrace()
     {
-        return new Trace("Inferences", busyIntervalContainer.compositionInferencesToEvents(), new TimeLine());
+        return new Trace("Step2 Inf.", busyIntervalContainer.compositionInferencesToEvents(), new TimeLine());
+    }
+
+    public Trace buildSchedulingInferenceTrace()
+    {
+        ArrayList resultEvents = new ArrayList();
+        for ( BusyInterval thisBI : busyIntervalContainer.getBusyIntervals() ) {
+            resultEvents.addAll( thisBI.schedulingInference );
+        }
+        return new Trace("Scheduling", resultEvents, new TimeLine());
     }
 
     public ArrayList<Trace> buildResultTraces()
@@ -545,6 +567,9 @@ public class AmirDecomposition {
 
         // Arrival time window traces
         resultTraces.addAll(buildTaskArrivalTimeWindowTracesForAllTasks());
+
+        // Scheduling inference
+        resultTraces.add(buildSchedulingInferenceTrace());
 
         return resultTraces;
     }
@@ -602,6 +627,10 @@ public class AmirDecomposition {
             if (thisBusyInterval.getIntervalNs() < shortestBusyInterval.getIntervalNs())
                 shortestBusyInterval = thisBusyInterval;
 
+        }
+
+        if (shortestBusyInterval == null) {
+            ProgMsg.debugPutline("shortestBusyInterval is null.");
         }
 
         return shortestBusyInterval;
@@ -694,5 +723,92 @@ public class AmirDecomposition {
         }
 
         return countIntersectedTaskPeriod;
+    }
+
+    public Boolean reconstructCompositionOfBusyIntervalByArrivalTimeWindows()
+    {
+        for ( BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals() ) {
+            // Here we assume that the number of possible inferences is reduced to one, thus process the only one inference.
+            ArrayList<Task> thisInference = thisBusyInterval.getFirstComposition();
+            TaskArrivalEventContainer thisArrivalInference = thisBusyInterval.arrivalInference;
+            thisArrivalInference.clear();
+
+            /* Start constructing arrival time sequence of all tasks in this busy interval. */
+            for ( Task thisTask : taskContainer.getAppTasksAsArray() ) {
+                if ( thisBusyInterval.containsComposition(thisTask) == false ) {
+                    continue;
+                }
+
+                int numOfThisTask = Collections.frequency(thisInference, thisTask);
+                Interval thisArrivalWindow = findClosestArrivalTimeOfTask( thisBusyInterval.getBeginTimeStampNs(), thisTask );
+
+                for (int loop=0; loop<numOfThisTask; loop++) {
+                    /* Note that after added element will be sorted by time. */
+                    thisArrivalInference.add( thisArrivalWindow.getBegin(), thisTask );
+                    thisArrivalWindow.shift( thisTask.getPeriodNs() );
+                }
+
+            } /* Arrival time arrangement for this busy interval finished. */
+
+            /* Reconstruct the busy interval according to the arrival time of each task in this busy interval. */
+            QuickRmScheduling.constructSchedulingOfBusyIntervalByArrivalWindow( thisBusyInterval );
+
+        }
+
+        return true;
+
+    }
+
+//    public Task findEarliestArrivalTimeTask( int referenceTimePoint, ArrayList<Task> inTasks )
+//    {
+//        Interval earliestArrivalWindow = null;
+//        Task earliestArrivalTask = null;
+//
+//        Boolean firstLoop = true;
+//        for ( Task thisTask : inTasks ) {
+//            if ( firstLoop == true ) {
+//                firstLoop = false;
+//                earliestArrivalWindow = findClosestArrivalTimeOfTask( referenceTimePoint, thisTask );
+//                earliestArrivalTask = thisTask;
+//                continue;
+//            }
+//
+//            Interval thisEarliestArrivalWindow;
+//            thisEarliestArrivalWindow = findClosestArrivalTimeOfTask( referenceTimePoint, thisTask );
+//
+//            // Check whether this task has earliest arrival time and higher priority.
+//            // Note that, in priority, a smaller number stands for a higher priority.
+//            if ( ( thisEarliestArrivalWindow.getBegin() <= earliestArrivalWindow.getBegin() )
+//                    && ( thisTask.getPriority() < earliestArrivalTask.getPriority() ) ) {
+//                earliestArrivalWindow = thisEarliestArrivalWindow;
+//                earliestArrivalTask = thisTask;
+//            }
+//        }
+//
+//        return earliestArrivalTask;
+//
+//    }
+
+
+    // This will find the first arrival time after the reference point.
+    public Interval findClosestArrivalTimeOfTask( int referenceTimePoint, Task inTask )
+    {
+        // Create a new Interval instance based on input value.
+        Interval taskWindow = new Interval( taskArrivalTimeWindows.get( inTask ) );
+
+        int difference = referenceTimePoint - taskWindow.getBegin();
+        int shiftFactor = difference / inTask.getPeriodNs();
+        if ( difference % inTask.getPeriodNs() == 0 ) {
+            // shiftFactor remains unchanged.
+        } else if ( difference > 0 ) {
+            // referencePoint is bigger
+            shiftFactor++;
+        } else {
+            // reference Point is smaller
+            // shiftFactor is negative and will remain the unchanged.
+        }
+
+        taskWindow.shift( shiftFactor * inTask.getPeriodNs() );
+        return taskWindow;
     }
 }

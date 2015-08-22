@@ -300,8 +300,9 @@ public class GuiMain implements ActionListener, MouseListener {
                 TraceGroup decompositionTraceGroup = new TraceGroup();
                 decompositionTraceGroup.setTitle("Decomposition");
 //                Trace decompositionInferenceTrace = decomposition.BuildInferenceTrace(busyIntervalContainer);
-                decompositionTraceGroup.addTrace(decomposition.buildAmirDecompositionStep1ResultTrace());
+//                decompositionTraceGroup.addTrace(decomposition.buildAmirDecompositionStep1ResultTrace());
                 decomposition.runAmirDecompositionStep2();
+                decomposition.runAmirDecompositionStep3();
                 decompositionTraceGroup.addTraces(decomposition.buildAmirDecompositionResultTraces());
                 zPanel.getTraceGroupContainer().addTraceGroup(decompositionTraceGroup);
                 applyNewSettingsAndRePaint();

@@ -160,89 +160,89 @@ public class DataExporter extends DialogFileHandler{
     /* This method uses the BusyInterval class to build intervals. It uses note attribute of the app events to
      * determine whether it is "BEGIN" of a task or "IDLE" status.
      */
-    protected Boolean generateBusyIntervalDataFromEvents(EventContainer inEventContainer, BufferedWriter inFileWriter)
-    {
-        BusyIntervalContainer busyIntervalContainer = new BusyIntervalContainer();
-        busyIntervalContainer.createBusyIntervalsFromEvents(inEventContainer);
-
-        Decomposition decomposition = new Decomposition(inEventContainer.getTaskContainer());
-        // Calculate composition with equations and put the result.
-
-        // This is for Amir's algorithm
-        decomposition.runAmirDecomposition(busyIntervalContainer);
-
-        // This is for Ge's algorithm.
-//        decomposition.runGeDecomposition(busyIntervalContainer);
-
-        for (BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals())
-        {
-            int beginTimeStampNs = thisBusyInterval.getBeginTimeStampNs();
-            int intervalNs = thisBusyInterval.getIntervalNs();
-            ArrayList<Task> compositionGroundTruth = thisBusyInterval.getCompositionGroundTruth();
-            String groundTruthString = "";
-            String inferenceString = "";
-
-            /* Build ground truth string. */
-            groundTruthString = "[";
-            Boolean firstLoop = true;
-            for (Task thisTask: compositionGroundTruth)
-            {
-                if (firstLoop == true)
-                {
-                    firstLoop = false;
-                }
-                else
-                {
-                    groundTruthString += ", ";
-                }
-                groundTruthString += thisTask.getId();
-            }
-            groundTruthString += "]";
-
-            /* Build inferred composition string */
-            inferenceString = "{";
+//    protected Boolean generateBusyIntervalDataFromEvents(EventContainer inEventContainer, BufferedWriter inFileWriter)
+//    {
+//        BusyIntervalContainer busyIntervalContainer = new BusyIntervalContainer();
+//        busyIntervalContainer.createBusyIntervalsFromEvents(inEventContainer);
+//
+//        Decomposition decomposition = new Decomposition(inEventContainer.getTaskContainer());
+//        // Calculate composition with equations and put the result.
+//
+//        // This is for Amir's algorithm
+//        decomposition.runAmirDecomposition(busyIntervalContainer);
+//
+//        // This is for Ge's algorithm.
+////        decomposition.runGeDecomposition(busyIntervalContainer);
+//
+//        for (BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals())
+//        {
+//            int beginTimeStampNs = thisBusyInterval.getBeginTimeStampNs();
+//            int intervalNs = thisBusyInterval.getIntervalNs();
+//            ArrayList<Task> compositionGroundTruth = thisBusyInterval.getCompositionGroundTruth();
+//            String groundTruthString = "";
+//            String inferenceString = "";
+//
+//            /* Build ground truth string. */
+//            groundTruthString = "[";
 //            Boolean firstLoop = true;
-            firstLoop = true;
-            for (ArrayList<Task> thisComposition : thisBusyInterval.getComposition())
-            {
-                if (firstLoop == true)
-                {
-                    firstLoop = false;
-                    inferenceString += "[";
-                }
-                else
-                {
-                    inferenceString += ", [";
-                }
-
-                Boolean firstLoopInside = true;
-                for (Task thisTask : thisComposition)
-                {
-                    if (firstLoopInside == true)
-                    {
-                        firstLoopInside = false;
-                    }
-                    else
-                    {
-                        inferenceString += ", ";
-                    }
-                    inferenceString += thisTask.getId();
-                }
-                inferenceString += "]";
-            }
-            inferenceString += "}";
-
-
-            try {
-                inFileWriter.write(beginTimeStampNs + ", " + intervalNs + ", " + groundTruthString + ", " + inferenceString + "\r\n");
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                System.err.format("IOException @ generateMathematicalData: Failed to write the data to the file.\r\n");
-                return false;
-            }
-        }
-        return true;
-    }
+//            for (Task thisTask: compositionGroundTruth)
+//            {
+//                if (firstLoop == true)
+//                {
+//                    firstLoop = false;
+//                }
+//                else
+//                {
+//                    groundTruthString += ", ";
+//                }
+//                groundTruthString += thisTask.getId();
+//            }
+//            groundTruthString += "]";
+//
+//            /* Build inferred composition string */
+//            inferenceString = "{";
+////            Boolean firstLoop = true;
+//            firstLoop = true;
+//            for (ArrayList<Task> thisComposition : thisBusyInterval.getComposition())
+//            {
+//                if (firstLoop == true)
+//                {
+//                    firstLoop = false;
+//                    inferenceString += "[";
+//                }
+//                else
+//                {
+//                    inferenceString += ", [";
+//                }
+//
+//                Boolean firstLoopInside = true;
+//                for (Task thisTask : thisComposition)
+//                {
+//                    if (firstLoopInside == true)
+//                    {
+//                        firstLoopInside = false;
+//                    }
+//                    else
+//                    {
+//                        inferenceString += ", ";
+//                    }
+//                    inferenceString += thisTask.getId();
+//                }
+//                inferenceString += "]";
+//            }
+//            inferenceString += "}";
+//
+//
+//            try {
+//                inFileWriter.write(beginTimeStampNs + ", " + intervalNs + ", " + groundTruthString + ", " + inferenceString + "\r\n");
+//            } catch (IOException ex) {
+//                ex.printStackTrace();
+//                System.err.format("IOException @ generateMathematicalData: Failed to write the data to the file.\r\n");
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
 
 
     protected Boolean writeBusyIntervalsToFile(BusyIntervalContainer inBusyIntervalContainer, BufferedWriter inFileWriter)

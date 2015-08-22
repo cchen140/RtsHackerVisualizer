@@ -12,7 +12,7 @@ public class AppEvent extends Event {
     private int recordData = 0;
     private String note = "";
 
-    AppEvent(int inTimeStamp, Task inTask, int inData, String inNote)
+    public AppEvent(int inTimeStamp, Task inTask, int inData, String inNote)
     {
         orgBeginTimestampNs = inTimeStamp;
         scaledBeginTimestamp = inTimeStamp;

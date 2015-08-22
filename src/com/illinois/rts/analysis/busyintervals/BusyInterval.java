@@ -13,6 +13,9 @@ public class BusyInterval {
     private int beginTimeStampNs = 0;
     private int endTimeStampNs = 0;
     TaskReleaseEventContainer compositionGroundTruth;
+    TaskReleaseEventContainer compositionInference = new TaskReleaseEventContainer();
+    TaskArrivalEventContainer arrivalInference = new TaskArrivalEventContainer();
+    ArrayList schedulingInference = new ArrayList<>();
 
     // There may have multiple inferences, so two-layer array is used here.
     private ArrayList<ArrayList<Task>> composition = new ArrayList<>();

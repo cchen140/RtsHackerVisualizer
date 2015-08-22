@@ -37,6 +37,8 @@ public class Decomposition {
         return amirDecomposition.runDecompositionStep2();
     }
 
+    public Boolean runAmirDecompositionStep3() { return amirDecomposition.runDecompositionStep3(); }
+
     public Boolean runAmirDecompositionWithErrors(BusyIntervalContainer inBusyIntervalContainer)
     {
         amirDecomposition = new AmirDecomposition(taskContainer, inBusyIntervalContainer);

@@ -669,6 +669,7 @@ public class RmScheduling {
         return distribution;
     }
 
+    // The bigger the number the less the priority
     protected void assignPriority()
     {
         /* Assign priorities (RM) */

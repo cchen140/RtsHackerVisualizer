@@ -85,5 +85,17 @@ public class Interval {
         end += inOffset;
     }
 
+    public Boolean contains(int inPoint)
+    {
+        if ((begin <= inPoint)
+                && (end >= inPoint))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
 }
