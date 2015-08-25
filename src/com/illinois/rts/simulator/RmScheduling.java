@@ -76,7 +76,6 @@ public class RmScheduling {
             thisTask.nextReleaseTime = thisTask.initialOffset;
         }
 
-        allTasks = simTaskContainer.getTasksAsArray();
         numTasks = allTasks.size(); // It doesn't include the idle task.
         simTaskContainer.addTask(IDLE_TASK_ID, "IDLE", Task.TASK_TYPE_IDLE, 0, 0, 0);
 //        allTasks.add(new Task(99, "IDLE", 1, 0, 0, 0, 0));

@@ -127,6 +127,9 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
             // Get task container from the panel with latest configurations.
             TaskContainer simTaskContainer = taskSetterPanel.getTaskContainerWithLatestConfigs();
 
+            // Remove everything except app tasks.
+            simTaskContainer.removeNotAppTasks();
+
             if (simTaskContainer.size() > 0) {
                 RmScheduling rmScheduling = new RmScheduling();
                 rmScheduling.setTaskContainer(simTaskContainer);

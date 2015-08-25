@@ -286,4 +286,18 @@ public class TaskContainer {
             thisTask.clearSimData();
         }
     }
+
+    public void removeNotAppTasks()
+    {
+        int taskCount = tasks.size();
+        int loop;
+        for (loop=0; loop<taskCount; loop++) {
+            for (Task thisTask : getTasksAsArray()) {
+                if (thisTask.getTaskType() != Task.TASK_TYPE_APP) {
+                    removeTask(thisTask);
+                    break;
+                }
+            }
+        }
+    }
 }
