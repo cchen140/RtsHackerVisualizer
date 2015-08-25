@@ -26,6 +26,7 @@ public class ProgConfig {
     public static int TRACE_GROUP_MARGIN_Y = 10;
 
     /* Trace Settings */
+    public static Color IDLE_TASK_COLOR = new Color(235, 235, 235); // lighter than light grey
     public static int TRACE_HORIZONTAL_SCALE_DIVIDER = 30000;
     public static int TIME_LINE_PERIOD_NS = 10000000; // 10ms
     public static int TRACE_HEIGHT = 100;

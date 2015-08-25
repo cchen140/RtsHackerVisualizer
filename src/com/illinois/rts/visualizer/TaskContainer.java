@@ -36,7 +36,7 @@ public class TaskContainer {
 
         if (taskTitle.equalsIgnoreCase("IDLE"))
         {
-            tasks.get(taskId).setColor(Color.lightGray);
+            tasks.get(taskId).setColor(ProgConfig.IDLE_TASK_COLOR);
         }
         else
         {
