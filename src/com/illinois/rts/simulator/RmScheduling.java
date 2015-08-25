@@ -298,8 +298,7 @@ public class RmScheduling {
         for (int i = 0; i < numTasks; i++) {
             Task task_i = allTasks.get(i);
             if ((tick == task_i.nextReleaseTime))
-            // time to release
-            {
+            { // time to release
                 long nextInterarrivalTime = getNextInterarrivalTime(task_i);
                 task_i.nextReleaseTime = tick + nextInterarrivalTime;
                 if (DEBUG)
@@ -352,12 +351,13 @@ public class RmScheduling {
 
     boolean schedule() {
         if (currentJob == null)
-                /* No job is running */
-        {
-            if (readyQueue.size() == 0)
-                                /* No ready job */
+        { /* No job is running */
+            if (readyQueue.size() == 0) {
+                /* No ready job */
                 return true;
-                        /* Pick the highest priority job */
+            }
+
+            /* Pick the highest priority job */
             SimJob job_i = readyQueue.get(0);
             currentJob = job_i;
             readyQueue.remove(0);
@@ -391,8 +391,11 @@ public class RmScheduling {
 
             return true;
         } else {
+            /* There is a job running. */
             currentJob.remainingExecTime--;
+
             if (currentJob.remainingExecTime == 0) {
+                /* if the job is finished. */
                 currentJob.responseTime = tick - currentJob.releaseTime;
                 if (DEBUG)
                     System.out
@@ -441,11 +444,15 @@ public class RmScheduling {
                     // Time will proceed when picking the highest priority job
                 }
             } else {
-                if (readyQueue.size() == 0)
+                /* The current job is not finished yet, thus check whether there is higher priority task preempting it. */
+                if (readyQueue.size() == 0) {
+                    // No any other job is ready to run, clear!
                     return true;
+                }
+
                 SimJob job_i = readyQueue.get(0);
-                if (currentJob.task.getPriority() > job_i.task.getPriority()) {
-                    // Preempt
+                if (currentJob.task.getPriority() < job_i.task.getPriority()) {
+                    // Has a higher priority job, thus start preemption.
                     if (DEBUG)
                         System.out.println("\t\t\t[" + tick + "] Job "
                                 + job_i.task.getId() + "_" + job_i.seqNo
@@ -471,12 +478,13 @@ public class RmScheduling {
         }
     }
 
+    // Insert the job to ready queue according to the priority. (the bigger the higher)
     void insertToReadyQueue(SimJob job_i) {
         int idxToInsert = -1;
         for (int j = 0; j < readyQueue.size(); j++) {
             SimJob job_j = readyQueue.get(j);
-            if (job_i.task.getPriority() < job_j.task.getPriority()
-                    || (job_i.task.getId() == job_j.task.getId() && job_i.seqNo < job_j.seqNo)) {
+            if (job_i.task.getPriority() > job_j.task.getPriority()
+                    || (job_i.task.getId() == job_j.task.getId() && job_i.seqNo > job_j.seqNo)) {
                 idxToInsert = j;
                 break;
             }
@@ -669,20 +677,21 @@ public class RmScheduling {
         return distribution;
     }
 
-    // The bigger the number the less the priority
+    // The bigger the number the higher the priority
     protected void assignPriority()
     {
         /* Assign priorities (RM) */
         for (int i = 0; i < numTasks; i++) {
             Task task_i = allTasks.get(i);
-            int cnt = 0;
+            int cnt = 1;    // 1 represents highest priority.
+            /* Get the priority by comparing other tasks. */
             for (int j = 0; j < numTasks; j++) {
                 if (i == j)
                     continue;
 
                 Task task_j = allTasks.get(j);
-                if (task_j.getPeriodNs() < task_i.getPeriodNs()
-                        || (task_j.getPeriodNs() == task_i.getPeriodNs() && task_j.getId() < task_i.getId())) {
+                if (task_j.getPeriodNs() > task_i.getPeriodNs()
+                        || (task_j.getPeriodNs() == task_i.getPeriodNs() && task_j.getId() > task_i.getId())) {
                     cnt++;
                 }
             }
