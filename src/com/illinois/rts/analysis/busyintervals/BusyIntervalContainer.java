@@ -134,4 +134,15 @@ public class BusyIntervalContainer {
         }
         return resultEvents;
     }
+
+    public int getEndTime()
+    {
+        int endTime = 0;
+        for (BusyInterval thisBusyInterval : busyIntervals) {
+            if (thisBusyInterval.getEndTimeStampNs() > endTime) {
+                endTime = thisBusyInterval.getEndTimeStampNs();
+            }
+        }
+        return endTime;
+    }
 }

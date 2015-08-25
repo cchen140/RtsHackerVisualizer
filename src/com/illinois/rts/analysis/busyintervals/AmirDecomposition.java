@@ -520,15 +520,22 @@ public class AmirDecomposition {
             return null;
         }
 
-        Interval thisTaskArrivalTimeWindow = taskArrivalTimeWindows.get(inTask);
+        Interval taskArrivalTimeWindow = taskArrivalTimeWindows.get(inTask);
+        int windowLength = taskArrivalTimeWindow.getLength();
 
         ArrayList<IntervalEvent> intervalEvents = new ArrayList<>();
-        for (int loop = 0; loop<10; loop++)
+        int thisWindowBeginTime = taskArrivalTimeWindow.getBegin(); // Initialize window time with the first window.
+        int taskPeriod = inTask.getPeriodNs();
+        int endTime = busyIntervalContainer.getEndTime();
+
+        while ((thisWindowBeginTime + windowLength) <= endTime)
         {
-            IntervalEvent thisIntervalEvent = new IntervalEvent(thisTaskArrivalTimeWindow.getBegin()+loop*inTask.getPeriodNs(), thisTaskArrivalTimeWindow.getEnd()+loop*inTask.getPeriodNs());
+            IntervalEvent thisIntervalEvent = new IntervalEvent(thisWindowBeginTime, thisWindowBeginTime+windowLength);
             thisIntervalEvent.setColor(inTask.getTaskColor());
             thisIntervalEvent.enableTexture();
             intervalEvents.add(thisIntervalEvent);
+
+            thisWindowBeginTime += taskPeriod;
         }
 
         return new Trace(inTask.getTitle() + " Arrival Time", inTask, intervalEvents, new TimeLine(), Trace.TRACE_TYPE_OTHER);
