@@ -20,11 +20,13 @@ public class TaskConfigSingleRowPanel extends JPanel implements ActionListener {
 
     Task task;
     Boolean removeBtnEnabled = false;   // The remove button is disabled by default.
+    Boolean priorityFieldEnabled = true;
 
     JTextField inputName = new JTextField();
     JTextField inputPeriod = new JTextField();
     JTextField inputComputation = new JTextField();
     JTextField inputInitialOffset = new JTextField();
+    JTextField inputPriority = new JTextField();
     JButton inputColor = new JButton();
     JButton removeBtn = new JButton();
 
@@ -32,7 +34,7 @@ public class TaskConfigSingleRowPanel extends JPanel implements ActionListener {
         super();
     }
 
-    public TaskConfigSingleRowPanel(Task inTask, Boolean inEnableRemoveBtn) {
+    public TaskConfigSingleRowPanel(Task inTask, Boolean inEnableRemoveBtn, Boolean inEnablePriorityField) {
         super();
 
         task = inTask;
@@ -79,6 +81,16 @@ public class TaskConfigSingleRowPanel extends JPanel implements ActionListener {
         this.add(inputInitialOffset);
         addJLabelComponent("ns");
 
+        /* Priority */
+        addSpaceComponent(COMPONENT_SPACE_LENGTH);
+        addJLabelComponent("Priority:");
+
+        inputPriority.setText(String.valueOf(task.getPriority()));
+        inputPriority.setColumns(TEXTFIELD_COLUMN_SIZE);
+        this.add(inputPriority);
+        priorityFieldEnabled = inEnablePriorityField;
+        inputPriority.setEnabled(priorityFieldEnabled);
+
         /* Remove button */
         addSpaceComponent(COMPONENT_SPACE_LENGTH);
         removeBtn.setText("X");
@@ -107,6 +119,7 @@ public class TaskConfigSingleRowPanel extends JPanel implements ActionListener {
         task.setPeriodNs(Integer.valueOf(inputPeriod.getText()));
         task.setComputationTimeNs(Integer.valueOf(inputComputation.getText()));
         task.initialOffset = Integer.valueOf(inputInitialOffset.getText());
+        task.setPriority( Integer.valueOf(inputPriority.getText()) );
         task.setColor(inputColor.getBackground());
     }
 
@@ -135,5 +148,17 @@ public class TaskConfigSingleRowPanel extends JPanel implements ActionListener {
     public void disableRemoveTaskBtn() {
         this.removeBtnEnabled = false;
         removeBtn.setVisible(false);
+    }
+
+    public void enablePriorityField()
+    {
+        priorityFieldEnabled = true;
+        inputPriority.setEnabled(priorityFieldEnabled);
+    }
+
+    public void disablePriorityField()
+    {
+        priorityFieldEnabled = false;
+        inputPriority.setEnabled(priorityFieldEnabled);
     }
 }

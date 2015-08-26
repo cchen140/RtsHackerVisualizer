@@ -64,6 +64,7 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
 
         // Initialize taskSetterPanel
         taskSetterPanel.enableRemoveTaskBtn();
+        taskSetterPanel.disablePriorityField();
 
         // Simulation duration.
         inputSimDuration.setText("1000");   // unit is ms

@@ -21,6 +21,7 @@ public class TaskConfigGroupPanel extends JPanel implements ActionListener {
     TaskContainer taskContainer = new TaskContainer();
 
     Boolean removeBtnEnabled = false;   // The remove button is disabled by default.
+    Boolean priorityFieldEnabled = true;
 
     public TaskConfigGroupPanel() {
         super();
@@ -33,7 +34,7 @@ public class TaskConfigGroupPanel extends JPanel implements ActionListener {
     }
 
     public void addOneRow(Task inTask) {
-        TaskConfigSingleRowPanel thisTaskConfigRow = new TaskConfigSingleRowPanel(inTask, removeBtnEnabled);
+        TaskConfigSingleRowPanel thisTaskConfigRow = new TaskConfigSingleRowPanel(inTask, removeBtnEnabled, priorityFieldEnabled);
         taskConfigPanels.put(inTask, thisTaskConfigRow);
 
         this.add(thisTaskConfigRow);
@@ -127,6 +128,14 @@ public class TaskConfigGroupPanel extends JPanel implements ActionListener {
         this.removeBtnEnabled = false;
         for (TaskConfigSingleRowPanel thisTaskRowPanel : taskConfigPanels.values()) {
             thisTaskRowPanel.disableRemoveTaskBtn();
+        }
+    }
+
+    public void disablePriorityField()
+    {
+        this.priorityFieldEnabled = false;
+        for (TaskConfigSingleRowPanel thisTaskRowPanel : taskConfigPanels.values()) {
+            thisTaskRowPanel.disablePriorityField();
         }
     }
 }
