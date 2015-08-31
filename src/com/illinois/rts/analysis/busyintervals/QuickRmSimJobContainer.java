@@ -15,6 +15,9 @@ public class QuickRmSimJobContainer {
         jobs.add( inJob );
     }
 
+
+    /* This method pops the earliest available job.
+    * Use popNextHighestPriorityJobByTime() instead to determine reference time stamp. */
     public SimJob popNextHighPriorityJob()
     {
         if ( jobs.size() == 0 )
@@ -39,7 +42,7 @@ public class QuickRmSimJobContainer {
         return nextHighJob;
     }
 
-    public SimJob popNextHigherPriorityJobByTime( int inPriority, int timeStamp )
+    public SimJob popNextEarliestHigherPriorityJobByTime(int inPriority, int timeStamp)
     {
         if ( jobs.size() == 0 )
             return null;
@@ -57,8 +60,35 @@ public class QuickRmSimJobContainer {
                 continue;
             }
 
+            // Among those jobs that have higher priority, find the earliest one.
+            if ( thisJob.releaseTime<=nextHighJob.releaseTime ) {
+                nextHighJob = thisJob;
+            }
+        }
+        jobs.remove( nextHighJob );
+        return nextHighJob;
+    }
+
+    public SimJob popNextHighestPriorityJobByTime( int timeStamp )
+    {
+        if ( jobs.size() == 0 )
+            return null;
+
+        SimJob nextHighJob = null;
+        Boolean firstLoop = true;
+        for ( SimJob thisJob : jobs ) {
+            // Skip the job that is later than the designated time.
+            if ( thisJob.releaseTime>timeStamp )
+                continue;
+
+            if ( firstLoop == true ) {
+                firstLoop = false;
+                nextHighJob = thisJob;
+                continue;
+            }
+
             // Note that bigger value in priority means higher priority.
-            if ( (thisJob.releaseTime<=nextHighJob.releaseTime) && (thisJob.task.getPriority()>nextHighJob.task.getPriority()) ) {
+            if ( thisJob.task.getPriority() > nextHighJob.task.getPriority() ) {
                 nextHighJob = thisJob;
             }
         }

@@ -3,8 +3,6 @@ package com.illinois.rts.analysis.busyintervals;
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.simulator.SimJob;
 import com.illinois.rts.visualizer.AppEvent;
-import com.illinois.rts.visualizer.ProgMsg;
-import com.illinois.rts.visualizer.TaskContainer;
 import com.illinois.rts.visualizer.TaskIntervalEvent;
 
 import java.util.ArrayList;
@@ -39,14 +37,14 @@ public class QuickRmScheduling {
         Task currentRunTask = null;
         SimJob currentJob = null;
         SimJob nextJob;
-        int currentTimeStamp = 0;
+        int currentTimeStamp = bi.getBeginTimeStampNs();    // TODO: may have to check whether it includes the error.
 
         Boolean anyJobRunning = false;
         while ( true ) {
 
             if ( anyJobRunning == false ) {
                 anyJobRunning = true;
-                currentJob = jobContainer.popNextHighPriorityJob();
+                currentJob = jobContainer.popNextHighestPriorityJobByTime(currentTimeStamp);
 
                 if ( currentJob == null )
                     break;
@@ -60,29 +58,25 @@ public class QuickRmScheduling {
                     resultSchedulingEvents.add(new AppEvent((int) currentJob.releaseTime, currentRunTask, 0, "BEGIN"));
 
                 continue;
-            } else {
-                nextJob = jobContainer.popNextHigherPriorityJobByTime( currentRunTask.getPriority(), (int)(currentJob.releaseTime+currentJob.remainingExecTime) );
             }
 
-            if ( nextJob != null ) {
-                if ( nextJob.releaseTime<(currentJob.releaseTime+currentJob.remainingExecTime) ) {
-                    // Next higher priority job is within current job.
-                    // Current job is preempted. Create and push the updated current job.
-                    TaskIntervalEvent currentJobEvent = new TaskIntervalEvent((int) currentJob.releaseTime, (int) nextJob.releaseTime, currentRunTask, "");
-                    resultSchedulingEvents.add(currentJobEvent);
+            /* There is a job running. */
 
-                    currentJob.remainingExecTime -= (nextJob.releaseTime - currentJob.releaseTime);
-                    currentJob.releaseTime = nextJob.releaseTime;
-                    jobContainer.add(currentJob);
-                } else {
-                    // No Preemption upon currentJob, thus finish this job.
-                    TaskIntervalEvent currentJobEvent = new TaskIntervalEvent( (int)currentJob.releaseTime, (int)(currentJob.releaseTime+currentJob.remainingExecTime), currentRunTask, "END");
-                    resultSchedulingEvents.add(currentJobEvent);
-                }
+            // Get the job that will preempt current job before within the remaining computation time.
+            nextJob = jobContainer.popNextEarliestHigherPriorityJobByTime(currentRunTask.getPriority(), (int) (currentTimeStamp + currentJob.remainingExecTime));
+
+            if ( nextJob != null ) {
+                // Current job is being preempted. Create and push the updated current job.
+                TaskIntervalEvent currentJobEvent = new TaskIntervalEvent((int) currentJob.releaseTime, (int) nextJob.releaseTime, currentRunTask, "");
+                resultSchedulingEvents.add(currentJobEvent);
+
+                currentJob.remainingExecTime -= (nextJob.releaseTime - currentTimeStamp);
+                currentJob.releaseTime = nextJob.releaseTime;
+                jobContainer.add(currentJob);
 
                 currentJob = nextJob;
                 currentRunTask = currentJob.task;
-                //currentTimeStamp = (int)currentJob.releaseTime;
+                currentTimeStamp = (int)currentJob.releaseTime;
 
                 // Check if it is the beginning of a new job.
                 if ( ((int)currentJob.remainingExecTime) == currentRunTask.getComputationTimeNs() )
@@ -92,11 +86,11 @@ public class QuickRmScheduling {
             } else {
 
                 // No next higher priority event, thus finish the last remaining job.
-                TaskIntervalEvent currentJobEvent = new TaskIntervalEvent( (int)currentJob.releaseTime, (int)(currentJob.releaseTime+currentJob.remainingExecTime), currentRunTask, "END");
+                TaskIntervalEvent currentJobEvent = new TaskIntervalEvent( currentTimeStamp, (int)(currentTimeStamp+currentJob.remainingExecTime), currentRunTask, "END");
                 resultSchedulingEvents.add(currentJobEvent);
 
                 anyJobRunning = false;
-                currentTimeStamp = (int)(currentJob.releaseTime+currentJob.remainingExecTime);
+                currentTimeStamp = (int)(currentTimeStamp+currentJob.remainingExecTime);
             }
 
             continue;
