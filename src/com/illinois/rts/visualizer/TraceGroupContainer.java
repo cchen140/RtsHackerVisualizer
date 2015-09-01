@@ -11,14 +11,14 @@ public class TraceGroupContainer {
     private int scaledEndTimestamp = 0;
     private int orgEndTimestampNs = 0;
 
-    public ArrayList<TraceGroup> getTraceGroups() {
-        return traceGroups;
-    }
-
     private ArrayList<TraceGroup> traceGroups = new ArrayList<TraceGroup>();
     private TimeLine timeLine = null;   // Note that the timeLine object in each trace should be independent.
 
     public TraceGroupContainer() {
+    }
+
+    public ArrayList<TraceGroup> getTraceGroups() {
+        return traceGroups;
     }
 
     public void addTraceGroup(TraceGroup inTraceGroup)
@@ -144,5 +144,30 @@ public class TraceGroupContainer {
             resultScaledEndTimeStamp = (thisScaledEndTimeStamp>resultScaledEndTimeStamp) ? thisScaledEndTimeStamp : resultScaledEndTimeStamp;
         }
         return resultScaledEndTimeStamp;
+    }
+
+    public Trace findTraceByYPosition( int targetY )
+    {
+        int accuY = 0;
+
+        /**/
+        Boolean firstTraceGroup = true;
+        for (TraceGroup thisGroup : traceGroups) {
+            if (firstTraceGroup == true) {
+                firstTraceGroup = false;
+            } else {
+                // There is a gap between each trace group.
+                accuY += ProgConfig.TRACE_GROUP_MARGIN_Y;
+            }
+
+            accuY += thisGroup.getHeight();
+            if (accuY >= targetY) {
+                // Found the trace group that the target y is located!
+                return thisGroup.findTraceByYPosition( targetY - (accuY-thisGroup.getHeight()));
+            }
+        }
+
+        // If nothing is found, then return null.
+        return null;
     }
 }

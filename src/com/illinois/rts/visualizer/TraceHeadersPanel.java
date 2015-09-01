@@ -6,17 +6,20 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 /**
  * Created by CY on 6/24/2015.
  */
-public class TraceHeadersPanel extends JPanel {
+public class TraceHeadersPanel extends JPanel implements MouseListener {
     //    ArrayList<Trace> traces = null;
     TraceGroupContainer traceGroupContainer = null;
 
-    public TraceHeadersPanel(){
+    public TraceHeadersPanel() {
         super();
+        this.addMouseListener(this);
     }
 
 //    public void setTrace(ArrayList<Trace> inTraces)
@@ -66,12 +69,22 @@ public class TraceHeadersPanel extends JPanel {
                     continue;
 
                 int orgPaintingCursor = paintingCursorY;
-                paintingCursorY += thisTrace.getTraceHeight() / 2;
-                paintingCursorY = drawTraceNameAndIcon(g, ProgConfig.TRACE_HEADER_LEFT_MARGIN, paintingCursorY, thisTrace, true);
+                paintingCursorY += thisTrace.getTraceHeight() / 2;  // The center of Y axis of the trace header
 
-                if (thisTrace.getTask() != null && thisTrace.getTraceType() == Trace.TRACE_TYPE_TASK) {
-                    paintingCursorY += ProgConfig.TRACE_HEADER_TITLE_SUBTITLE_GAP;
-                    drawTaskAttributes(g, ProgConfig.TRACE_HEADER_LEFT_MARGIN, paintingCursorY, thisTrace.getTask());
+                // Trace icon
+                drawTraceIcon(g, ProgConfig.TRACE_HEADER_LEFT_MARGIN, paintingCursorY, thisTrace, true);
+
+                // Trace attributes
+                int paintingCursorX = ProgConfig.TRACE_HEADER_LEFT_MARGIN + ProgConfig.TRACE_ICON_WIDTH_HEIGHT + ProgConfig.TRACE_HEADER_ICON_TITLE_GAP;
+                if (thisTrace.getHeaderDisplayMode() == Trace.TRACE_HEADER_DISPLAY_MODE_NAME) {
+                    drawTraceName(g, paintingCursorX, paintingCursorY, thisTrace, true);
+                } else {
+                    if (thisTrace.getTask() != null && thisTrace.getTraceType() == Trace.TRACE_TYPE_TASK) {
+                        //paintingCursorY += ProgConfig.TRACE_HEADER_TITLE_SUBTITLE_GAP;
+                        drawTaskAttributes(g, paintingCursorX, paintingCursorY, thisTrace.getTask(), true);
+                    } else {
+                        drawTraceName(g, paintingCursorX, paintingCursorY, thisTrace, true);
+                    }
                 }
 
                 // Move the painting cursor
@@ -131,8 +144,8 @@ public class TraceHeadersPanel extends JPanel {
 
         // Draw header string (trace name).
         g.drawString(trace.getName(),   // string
-                     x+colorIcon.getIconWidth()+ProgConfig.TRACE_HEADER_ICON_TITLE_GAP, // x axis position
-                     centerLineY+g.getFontMetrics().getHeight()/2-2);   // y axis position
+                x + colorIcon.getIconWidth() + ProgConfig.TRACE_HEADER_ICON_TITLE_GAP, // x axis position
+                centerLineY + g.getFontMetrics().getHeight() / 2 - 2);   // y axis position
 
 
         /* Calculate the final position of the painting cursor. */
@@ -145,15 +158,100 @@ public class TraceHeadersPanel extends JPanel {
         }
     }
 
-    private int drawTaskAttributes(Graphics g, int x, int y, Task inTask)
+    /**
+     * This method draw the colored icon for a given trace.
+     * @param g graphic object from root JPanel
+     * @param x initial x axis position
+     * @param y initial y axis position
+     * @param trace the trace that the name and icon are to be shown
+     * @param vCenterAligned center aligned on the initial y axis line or start drawing from the given y position anyway
+     * @return the final y axis position after drawing objects
+     */
+    private int drawTraceIcon(Graphics g, int x, int y, Trace trace, Boolean vCenterAligned)
     {
-        int paintingCursorY = y;
+        TaskListColorIcon colorIcon = null;
+        if (trace.getTask() == null)
+        {
+            colorIcon = new TaskListColorIcon(Color.WHITE);
+        }
+        else {
+            colorIcon = new TaskListColorIcon(trace.getTask().getTaskColor(), trace.getTask().isDisplayBoxChecked(), trace.getTask().getSymbol());
+        }
+
+        // Set the font for the header string first in order to calculate the height.
+        g.setColor(ProgConfig.TRACE_HEADER_TITLE_COLOR);
+        g.setFont(ProgConfig.TRACE_HEADER_TITLE_FONT);
+
+        int centerLineY = 0;
+
+        if (vCenterAligned == true)
+            centerLineY = y;
+        else {
+            centerLineY = y + colorIcon.getIconHeight()/2;
+        }
+
+        // Draw icon.
+        colorIcon.paintIcon(null, g, x, centerLineY - colorIcon.getIconHeight() / 2);
+
+        /* Calculate the final position of the painting cursor. */
+        return (centerLineY + colorIcon.getIconHeight()/2);
+    }
+
+    /**
+     * This method draw the trace name for a given trace.
+     * @param g graphic object from root JPanel
+     * @param x initial x axis position
+     * @param y initial y axis position
+     * @param trace the trace that the name and icon are to be shown
+     * @param vCenterAligned center aligned on the initial y axis line (true) or start drawing from the given y position (false) anyway
+     * @return the final y axis position after drawing objects
+     */
+    private int drawTraceName(Graphics g, int x, int y, Trace trace, Boolean vCenterAligned)
+    {
+
+        // Set the font for the header string first in order to calculate the height.
+        g.setColor(ProgConfig.TRACE_HEADER_TITLE_COLOR);
+        g.setFont(ProgConfig.TRACE_HEADER_TITLE_FONT);
+
+        /* Before starting to paint, check where the icon and header string should align. */
+        int centerLineY = 0;
+
+        if (vCenterAligned == true)
+            centerLineY = y;
+        else {
+            centerLineY = y + g.getFontMetrics().getHeight()/2;
+        }
+
+        // Draw header string (trace name).
+        g.drawString(trace.getName(),   // string
+                x, // x axis position
+                centerLineY+g.getFontMetrics().getHeight()/2-2);   // y axis position
+
+
+        /* Calculate the final position of the painting cursor. */
+        return (centerLineY + g.getFontMetrics().getHeight()/2);
+    }
+
+    private int drawTaskAttributes(Graphics g, int x, int y, Task inTask, Boolean vCenterAligned)
+    {
+        int NUM_OF_ROWS = 4;
+        int paintingCursorY = 0;
         g.setColor(ProgConfig.TRACE_HEADER_SUBTITLE_COLOR);
         g.setFont(ProgConfig.TRACE_HEADER_SUBTITLE_FONT);
 
-        g.drawString("Period:   "+inTask.getPeriodNs()/1000000.0+"ms", x , paintingCursorY+g.getFontMetrics().getHeight()/2-2);
+        if (vCenterAligned == true)
+            paintingCursorY = (int) (y - g.getFontMetrics().getHeight()*((double)NUM_OF_ROWS/2) + g.getFontMetrics().getHeight()/2);
+        else {
+            paintingCursorY = y + (g.getFontMetrics().getHeight()/2 * NUM_OF_ROWS);   // 2 rows thus times two.
+        }
+
+        g.drawString("Name: " + inTask.getTitle(), x, paintingCursorY + g.getFontMetrics().getHeight()/2-2);
+        paintingCursorY += g.getFontMetrics().getHeight();
+        g.drawString("Period:   " + inTask.getPeriodNs() / 1000000.0 + "ms", x, paintingCursorY + g.getFontMetrics().getHeight()/2-2);
         paintingCursorY += g.getFontMetrics().getHeight();
         g.drawString("Exe Time: "+inTask.getComputationTimeNs()/1000000.0+"ms", x , paintingCursorY+g.getFontMetrics().getHeight()/2-2);
+        paintingCursorY += g.getFontMetrics().getHeight();
+        g.drawString("Priority: "+inTask.getPriority(), x , paintingCursorY+g.getFontMetrics().getHeight()/2-2);
         paintingCursorY += g.getFontMetrics().getHeight();
 
         return paintingCursorY;
@@ -188,4 +286,38 @@ public class TraceHeadersPanel extends JPanel {
         g.drawString(inTraceGroup.title, groupTitleX, y+GraphicUtility.getGraphicFontHeight((Graphics2D) g));
     }
 
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        if (e.getSource() == this) {
+            Trace clickedTrace = traceGroupContainer.findTraceByYPosition(e.getPoint().y);
+
+            // Toggle header display mode
+            if (clickedTrace.getHeaderDisplayMode() == Trace.TRACE_HEADER_DISPLAY_MODE_NAME) {
+                clickedTrace.setHeaderDisplayMode(Trace.TRACE_HEADER_DISPLAY_MODE_DETAIL);
+            } else {
+                clickedTrace.setHeaderDisplayMode(Trace.TRACE_HEADER_DISPLAY_MODE_NAME);
+            }
+            this.repaint();
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
 }

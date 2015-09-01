@@ -221,4 +221,20 @@ public class TraceGroup {
         }
         return resultScaledEndTimeStamp;
     }
+
+    public Trace findTraceByYPosition(int targetY)
+    {
+        int accuY = ProgConfig.VIRTUAL_PANEL_MARGIN_Y;
+        for (Trace thisTrace : traces) {
+            if (thisTrace.getDoNotShow() == true)
+                continue;
+
+            accuY += thisTrace.getTraceHeight();
+            if (accuY >= targetY) {
+                return thisTrace;
+            }
+        }
+
+        return null;
+    }
 }

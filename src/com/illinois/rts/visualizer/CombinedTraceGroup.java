@@ -251,4 +251,17 @@ public class CombinedTraceGroup extends TraceGroup {
         return resultTraces;
     }
 
+    @Override
+    public Trace findTraceByYPosition(int targetY) {
+
+        if (combinedTrace.getDoNotShow() == true) {
+            return super.findTraceByYPosition(targetY);
+        } else {
+            if (combinedTrace.getTraceHeight() >= targetY) {
+                return combinedTrace;
+            } else {
+                return super.findTraceByYPosition(targetY-combinedTrace.getTraceHeight());
+            }
+        }
+    }
 }

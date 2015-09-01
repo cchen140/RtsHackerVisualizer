@@ -14,6 +14,10 @@ public class Trace {
     public static int TRACE_TYPE_TASK = 2;
     public static int TRACE_TYPE_OTHER = 3;
 
+    public static int TRACE_HEADER_DISPLAY_MODE_NORMAL = 0;
+    public static int TRACE_HEADER_DISPLAY_MODE_NAME = 1;
+    public static int TRACE_HEADER_DISPLAY_MODE_DETAIL = 2;
+
     private ArrayList eventArray = null;
     private TimeLine timeLine = null;
 
@@ -53,6 +57,7 @@ public class Trace {
     }
 
     private Boolean doNotShow = false;
+    private int headerDisplayMode = TRACE_HEADER_DISPLAY_MODE_NAME;
 
     public Trace(ArrayList inEventArray, TimeLine inTimeLine)
     {
@@ -180,6 +185,14 @@ public class Trace {
     public void setTraceName(String inTraceName)
     {
         traceName = inTraceName;
+    }
+
+    public int getHeaderDisplayMode() {
+        return headerDisplayMode;
+    }
+
+    public void setHeaderDisplayMode(int headerDisplayMode) {
+        this.headerDisplayMode = headerDisplayMode;
     }
 
     public int getTraceHeight()
