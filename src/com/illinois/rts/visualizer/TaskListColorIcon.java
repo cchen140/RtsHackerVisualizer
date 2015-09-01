@@ -8,8 +8,8 @@ import java.awt.*;
  */
 public class TaskListColorIcon implements Icon
 {
-    private static final int ICON_HEIGHT = 30;
-    private static final int ICON_WIDTH = 30;
+    private static final int ICON_HEIGHT = ProgConfig.TRACE_ICON_WIDTH_HEIGHT;
+    private static final int ICON_WIDTH = ProgConfig.TRACE_ICON_WIDTH_HEIGHT;
     private int height = 0;
     private int width = 0;
 

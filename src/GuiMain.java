@@ -76,11 +76,18 @@ public class GuiMain implements ActionListener, MouseListener {
         // Set up program log messenger handler.
         //progMsger = ProgMsg.getInstance();
         ProgMsg.setDocument(msgTextPane.getStyledDocument());
-        msgTextPane.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+        msgTextPane.setFont(ProgConfig.DEFAULT_CONTENT_FONT);
 
+
+        /* Initialize button's font. */
+        buttonOpenFile.setFont(ProgConfig.DEFAULT_BTN_FONT);
+        buttonSettings.setFont(ProgConfig.DEFAULT_BTN_FONT);
+        buttonTaskSetter.setFont(ProgConfig.DEFAULT_BTN_FONT);
+        btnHideTaskList.setFont(ProgConfig.DEFAULT_BTN_FONT);
+        btnLaunchSimulator.setFont(ProgConfig.DEFAULT_BTN_FONT);
 
         /* Create menu bar. */
-        Font menuFont = new Font("TimesRoman", Font.PLAIN, 18); // Menu Font
+        Font menuFont = ProgConfig.DEFAULT_MENU_FONT; // Menu Font
         JMenu topMenuInstance;
         JMenu subMEnuInstance;
         JMenuItem menuItemInstance;
@@ -154,6 +161,7 @@ public class GuiMain implements ActionListener, MouseListener {
 
         ListCellRenderer rendererTaskList = new TaskListRenderer();
         taskList.setCellRenderer(rendererTaskList);
+        taskList.setFont(ProgConfig.DEFAULT_CONTENT_FONT);
 
 
         /* zPanel settings. */

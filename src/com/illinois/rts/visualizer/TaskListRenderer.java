@@ -38,12 +38,12 @@ public class TaskListRenderer extends JLabel implements ListCellRenderer {
         }
 
         /* Create simulated padding effect from creating border. */
-        Border paddingBorder = BorderFactory.createEmptyBorder(8, 10, 8, 5); // top, left, bottom, right
+        Border paddingBorder = BorderFactory.createEmptyBorder(ProgConfig.TASK_LIST_CELL_MARGIN_Y, 10, ProgConfig.TASK_LIST_CELL_MARGIN_Y, 5); // top, left, bottom, right
         Border border = BorderFactory.createLineBorder(Color.WHITE);
         renderer.setBorder(BorderFactory.createCompoundBorder(border,paddingBorder));
 
         renderer.setText(theText);
-        renderer.setFont(new Font("TimesRoman", Font.PLAIN, 18));
+        renderer.setFont(ProgConfig.DEFAULT_CONTENT_FONT);
 
         renderer.setIconTextGap(10);
 

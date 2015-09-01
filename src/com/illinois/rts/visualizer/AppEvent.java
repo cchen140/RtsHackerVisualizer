@@ -27,7 +27,7 @@ public class AppEvent extends Event {
         int currentOffsetX = offsetX + scaledBeginTimestamp;
         int movedOffsetY = 0;
         if (task.isDisplayBoxChecked()) {
-            g.setFont(new Font("TimesRoman", Font.BOLD, 16));
+            g.setFont(ProgConfig.TRACE_CONTENT_FONT);
             g.setColor(task.getTaskColor());
 
             /* Display in South */

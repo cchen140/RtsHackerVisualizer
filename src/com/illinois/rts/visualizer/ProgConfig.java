@@ -8,9 +8,15 @@ import java.awt.*;
 public class ProgConfig {
     static void ProgConfig() {}
 
-    public static Font DEFAULT_HEADING_FONT = new Font("TimesRoman", Font.PLAIN, 20);
-    public static Font DEFAULT_CONTENT_FONT = new Font("TimesRoman", Font.PLAIN, 18);
-    public static Font DEFAULT_BTN_FONT = new Font("TimesRoman", Font.PLAIN, 16);
+    private static String DEFAULT_FONT_NAME = "Arial";
+    private static int DEFAULT_FONT_SIZE = 12;
+    private static int DEFAULT_FONT_STYLE = Font.PLAIN;
+    private static Font DEFAULT_FONT = new Font(DEFAULT_FONT_NAME, DEFAULT_FONT_STYLE, DEFAULT_FONT_SIZE);
+
+    public static Font DEFAULT_HEADING_FONT = DEFAULT_FONT;
+    public static Font DEFAULT_CONTENT_FONT = DEFAULT_FONT;
+    public static Font DEFAULT_MENU_FONT = new Font(DEFAULT_FONT_NAME, Font.BOLD, DEFAULT_FONT_SIZE);
+    public static Font DEFAULT_BTN_FONT = DEFAULT_FONT;
 
     public static int MAIN_DISPLAY_PANEL_PADDING_Y = 0;//10;
     public static int MAIN_DISPLAY_PANEL_PADDING_X = 0;//10;
@@ -22,6 +28,9 @@ public class ProgConfig {
     /* Configuration from log */
     public static double TIMESTAMP_UNIT_NS = 1; // 1 tick represents 1ns
 
+    /* Task list display */
+    public static int TASK_LIST_CELL_MARGIN_Y = 6;
+
     /* Trace group settings */
     public static int TRACE_GROUP_MARGIN_Y = 10;
 
@@ -30,27 +39,29 @@ public class ProgConfig {
     public static int TRACE_HORIZONTAL_SCALE_DIVIDER = 30000;
     public static int TIME_LINE_PERIOD_NS = 10000000; // 10ms
     public static int TRACE_HEIGHT = 100;
-    public static int TRACE_MARGIN_Y = 30;
+    public static int TRACE_MARGIN_Y = 10;
     public static int TRACE_PANEL_BORDER_WIDTH = 1;
     public static Color TRACE_PANEL_BACKGROUND = Color.GRAY;
     public static Color TRACE_PANEL_BACKGROUND_BORDER = Color.BLACK;
     public static Color TRACE_PANEL_FOREGROUND = Color.WHITE;
     public static Color TRACE_PANEL_BORDER_COLOR = Color.LIGHT_GRAY;
     public static Color TRACE_PANEL_TEXT_COLOR = Color.BLACK;
+    public static Font TRACE_CONTENT_FONT = DEFAULT_FONT;
 
     /* Trace header appearance */
     public static int TRACE_HEADER_PANEL_DEFAULT_WIDTH = 200;
     public static int TRACE_HEADER_LEFT_MARGIN = 50;
     public static int TRACE_HEADER_ICON_TITLE_GAP = 10;
+    public static int TRACE_ICON_WIDTH_HEIGHT = 18; // Best to be a multiple of 6.
     public static int TRACE_HEADER_TITLE_SUBTITLE_GAP = 20;
-    public static Font TRACE_HEADER_TITLE_FONT = new Font("TimesRoman", Font.PLAIN, 20);
+    public static Font TRACE_HEADER_TITLE_FONT = new Font(DEFAULT_FONT_NAME, DEFAULT_FONT_STYLE, DEFAULT_FONT_SIZE+1);
     public static Color TRACE_HEADER_TITLE_COLOR = Color.BLACK;
-    public static Font TRACE_HEADER_SUBTITLE_FONT = new Font("TimesRoman", Font.PLAIN, 16);
+    public static Font TRACE_HEADER_SUBTITLE_FONT = new Font(DEFAULT_FONT_NAME, DEFAULT_FONT_STYLE, DEFAULT_FONT_SIZE);
     public static Color TRACE_HEADER_SUBTITLE_COLOR = Color.BLACK;
 
-    public static int TRACE_HEADER_GROUP_HEAD_HEIGHT = 30;
+    public static int TRACE_HEADER_GROUP_HEAD_HEIGHT = 20;
     public static Color TRACE_HEADER_GROUP_HEAD_BACKGROUND = Color.BLUE;
-    public static Font TRACE_HEADER_GROUP_HEAD_TITLE_FONT = new Font("TimesRoman", Font.PLAIN, 16);
+    public static Font TRACE_HEADER_GROUP_HEAD_TITLE_FONT = new Font(DEFAULT_FONT_NAME, DEFAULT_FONT_STYLE, DEFAULT_FONT_SIZE);
     public static Color TRACE_HEADER_GROUP_HEAD_TITLE_COLOR = Color.WHITE;
 
     // Scheduler Traces

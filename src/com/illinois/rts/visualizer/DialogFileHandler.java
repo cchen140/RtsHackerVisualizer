@@ -1,5 +1,6 @@
 package com.illinois.rts.visualizer;
 
+import com.illinois.rts.utility.GuiUtility;
 import com.sun.media.sound.InvalidDataException;
 
 import javax.swing.*;
@@ -63,7 +64,7 @@ public class DialogFileHandler {
     {
         JFileChooser fileChooser = new JFileChooser();
         //fileChooser.setFont(new Font("TimesRoman", Font.PLAIN, 32));//;setPreferredSize(new Dimension(800, 600));
-        recursivelySetFonts(fileChooser, new Font("TimesRoman", Font.PLAIN, 18));
+        GuiUtility.changeChildrenFont(fileChooser, ProgConfig.DEFAULT_CONTENT_FONT);
         fileChooser.setPreferredSize(new Dimension(800, 600));
 
         int dialogReturnValue = 0;
@@ -122,18 +123,6 @@ public class DialogFileHandler {
             System.err.format("IOException @ openWriteFile() while reading file: %s%n", x);
             //throw new InvalidDataException("Can't load file.");
             return null;
-        }
-    }
-
-/**
-* Load file as a BufferReader.
-*/
-    private static void recursivelySetFonts(Component comp, Font font) {
-        comp.setFont(font);
-        if (comp instanceof Container) {
-            Container cont = (Container) comp;
-            for(int j=0, ub=cont.getComponentCount(); j<ub; ++j)
-                recursivelySetFonts(cont.getComponent(j), font);
         }
     }
 }

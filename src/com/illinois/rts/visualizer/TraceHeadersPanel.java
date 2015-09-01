@@ -1,6 +1,7 @@
 package com.illinois.rts.visualizer;
 
 import com.illinois.rts.framework.Task;
+import com.illinois.rts.utility.GraphicUtility;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import javax.swing.*;
@@ -158,6 +159,7 @@ public class TraceHeadersPanel extends JPanel {
         return paintingCursorY;
     }
 
+    /* Normally, parameter x should be 0. */
     private void drawTraceGroupHeader(Graphics g, int x, int y, TraceGroup inTraceGroup)
     {
         int headHeight = ProgConfig.TRACE_HEADER_GROUP_HEAD_HEIGHT;
@@ -165,7 +167,7 @@ public class TraceHeadersPanel extends JPanel {
 
         /* Draw trace group head background*/
         g.setColor(ProgConfig.TRACE_HEADER_GROUP_HEAD_BACKGROUND);
-        g.fillArc( x+this.getWidth()-headHeight*2, y-headHeight, headHeight*2, headHeight*2, 270, 90);
+        g.fillArc(x + this.getWidth() - headHeight * 2, y - headHeight, headHeight * 2, headHeight * 2, 270, 90);
         g.fillRect( x, y, x+this.getWidth()-headHeight, headHeight);
 
         /* Draw left side bar. */
@@ -173,8 +175,17 @@ public class TraceHeadersPanel extends JPanel {
 
         /* Draw trace group title */
         g.setColor(ProgConfig.TRACE_HEADER_GROUP_HEAD_TITLE_COLOR);
-        g.setFont(ProgConfig.TRACE_HEADER_TITLE_FONT);
-        g.drawString(inTraceGroup.title, x+ProgConfig.TRACE_HEADER_LEFT_MARGIN, y+20);
+        g.setFont(ProgConfig.TRACE_HEADER_GROUP_HEAD_TITLE_FONT);
+
+        int groupTitleX;
+        int groupTitleGraphicWidth = GraphicUtility.getGraphicStringWidth((Graphics2D)g, inTraceGroup.title);
+        if ( groupTitleGraphicWidth >= this.getWidth() ) {
+            /* If title width is longer than display area, then align the title to the left. */
+            groupTitleX = x;
+        } else {
+            groupTitleX = x + (this.getWidth() - groupTitleGraphicWidth)/2;
+        }
+        g.drawString(inTraceGroup.title, groupTitleX, y+GraphicUtility.getGraphicFontHeight((Graphics2D) g));
     }
 
 }

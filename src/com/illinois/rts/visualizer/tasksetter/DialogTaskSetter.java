@@ -1,5 +1,6 @@
 package com.illinois.rts.visualizer.tasksetter;
 
+import com.illinois.rts.visualizer.ProgConfig;
 import com.illinois.rts.visualizer.TaskContainer;
 
 import javax.swing.*;
@@ -50,6 +51,10 @@ public class DialogTaskSetter extends JDialog implements ActionListener{
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         this.setTitle("Task Setter");
+
+        /* Initialize button's font. */
+        buttonCancel.setFont(ProgConfig.DEFAULT_BTN_FONT);
+        buttonOK.setFont(ProgConfig.DEFAULT_BTN_FONT);
     }
 
     private void onOK() {

@@ -28,4 +28,9 @@ public class GraphicUtility {
         FontMetrics fontMetrics = g.getFontMetrics();
         return fontMetrics.stringWidth( inString );
     }
+
+    public static int getGraphicFontHeight( Graphics2D g) {
+        FontMetrics fontMetrics = g.getFontMetrics();
+        return fontMetrics.getHeight();
+    }
 }
