@@ -52,8 +52,25 @@ public class TaskContainer {
         return addTask(taskId, taskTitle, taskType, taskPeriod, taskPeriod, taskComputationTime, taskPriority);
     }
 
-    public void addTask(Task inTask) {
+    public Boolean addTask(Task inTask) {
+        String reTaskTitle = inTask.getTitle().toLowerCase().trim();
+        if (tasks.containsKey(reTaskTitle))
+        {
+            return false;
+        }
 
+        tasks.put(inTask.getId(), inTask);
+
+        if (inTask.getTitle().equalsIgnoreCase("IDLE"))
+        {
+            inTask.setColor(ProgConfig.IDLE_TASK_COLOR);
+        }
+        else
+        {
+            inTask.setColor(getColorByIndex(inTask.getId()));
+        }
+
+        return true;
     }
 
     public Task addBlankTask() {
@@ -287,7 +304,7 @@ public class TaskContainer {
         }
     }
 
-    public void removeNotAppTasks()
+    public void removeNoneAppTasks()
     {
         int taskCount = tasks.size();
         int loop;

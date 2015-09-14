@@ -129,7 +129,7 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
             TaskContainer simTaskContainer = taskSetterPanel.getTaskContainerWithLatestConfigs();
 
             // Remove everything except app tasks.
-            simTaskContainer.removeNotAppTasks();
+            simTaskContainer.removeNoneAppTasks();
 
             if (simTaskContainer.size() > 0) {
                 RmScheduling rmScheduling = new RmScheduling();
@@ -156,11 +156,11 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
             taskSetterPanel.addOneBlankTask();
         } else if ( e.getSource() == btnImportTaskConfig ) {
 
-            ConfigLoader configLoader = new ConfigLoader();
+            TaskSetFileHandler taskSetFileHandler = new TaskSetFileHandler();
             TaskContainer simTaskContainer;
 
             try {
-                simTaskContainer = configLoader.loadConfigFromDialog();
+                simTaskContainer = taskSetFileHandler.loadSingleTaskSetFromDialog();
             } catch (Exception ex) {
                 System.out.println("Error occurs while loading the task config file.");
                 ex.printStackTrace();
@@ -171,8 +171,8 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
                 setTaskContainer(simTaskContainer);
             }
         } else if ( e.getSource() == btnExportTaskConfig ) {
-            ConfigLoader taskConfigExporter = new ConfigLoader();
-            taskConfigExporter.exportTaskConfigsByDialog( taskSetterPanel.getTaskContainerWithLatestConfigs() );
+            TaskSetFileHandler taskConfigExporter = new TaskSetFileHandler();
+            taskConfigExporter.exportSingleTaskSetByDialog(taskSetterPanel.getTaskContainerWithLatestConfigs());
         }
     }
 

@@ -145,15 +145,15 @@ public class Task {
 
 
     /* The following section is from Man-Ki's RM scheduling simulator. */
-    public int initialOffset;
+    public int initialOffset = 0;
 
-    public long WCRT;
+    public long WCRT = 0;
 
-    public long jobSeqNo;
-    public long lastReleaseTime;
-    public long lastFinishTime;
+    public long jobSeqNo = 0;
+    public long lastReleaseTime = 0;
+    public long lastFinishTime = 0;
 
-    public long nextReleaseTime;
+    public long nextReleaseTime = 0;
 
     public Task(int inTaskId, String inTitle, int inType, int inPeriod, int inComputationTime, int inPriority, int inDeadline)
     {
@@ -241,5 +241,13 @@ public class Task {
         responseTimeHistory.clear();
         interarrivalTImeHistory.clear();
         execTimeHistory.clear();
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setTaskType(int taskType) {
+        this.taskType = taskType;
     }
 }

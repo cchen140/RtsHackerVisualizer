@@ -54,8 +54,11 @@ public class QuickRmScheduling {
                     currentJob.releaseTime = (long)currentTimeStamp;
                 }
 
-                if ( (int)currentJob.remainingExecTime == currentRunTask.getComputationTimeNs() )
-                    resultSchedulingEvents.add(new AppEvent((int) currentJob.releaseTime, currentRunTask, 0, "BEGIN"));
+                if ( (int)currentJob.remainingExecTime == currentRunTask.getComputationTimeNs() ) {
+                    AppEvent thisReleaseEvent = new AppEvent((int) currentJob.releaseTime, currentRunTask, 0, "BEGIN");
+                    resultSchedulingEvents.add(thisReleaseEvent);
+                    bi.compositionInference.add(thisReleaseEvent);
+                }
 
                 continue;
             }
@@ -79,8 +82,11 @@ public class QuickRmScheduling {
                 currentTimeStamp = (int)currentJob.releaseTime;
 
                 // Check if it is the beginning of a new job.
-                if ( ((int)currentJob.remainingExecTime) == currentRunTask.getComputationTimeNs() )
-                    resultSchedulingEvents.add(new AppEvent((int) currentJob.releaseTime, currentRunTask, 0, "BEGIN"));
+                if ( ((int)currentJob.remainingExecTime) == currentRunTask.getComputationTimeNs() ) {
+                    AppEvent thisReleaseEvent = new AppEvent((int) currentJob.releaseTime, currentRunTask, 0, "BEGIN");
+                    resultSchedulingEvents.add(thisReleaseEvent);
+                    bi.compositionInference.add(thisReleaseEvent);
+                }
 
 
             } else {

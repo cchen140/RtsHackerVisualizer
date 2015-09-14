@@ -2,6 +2,7 @@ import javax.swing.*;
 
 import com.illinois.rts.analysis.busyintervals.BusyIntervalContainer;
 import com.illinois.rts.analysis.busyintervals.Decomposition;
+import com.illinois.rts.analysis.busyintervals.autotest.DialogAutoTestWizard;
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.hack.HackManager;
 import com.illinois.rts.simulator.DialogSimulationLauncher;
@@ -40,6 +41,7 @@ public class GuiMain implements ActionListener, MouseListener {
     private JMenuItem menuItemLoadLog;
     private JMenuItem menuItemBusyIntervalsRunGe;
     private JMenuItem menuItemBusyIntervalsRunAmir;
+    private JMenuItem menuItemBusyIntervalAnalysisAutoTestWizard;
     private JMenuItem menuItemHackPlotCapturedBusyIntervals;
 
     JFrame frame = new JFrame("RTS Hacker Visualizer");
@@ -89,7 +91,7 @@ public class GuiMain implements ActionListener, MouseListener {
         /* Create menu bar. */
         Font menuFont = ProgConfig.DEFAULT_MENU_FONT; // Menu Font
         JMenu topMenuInstance;
-        JMenu subMEnuInstance;
+        JMenu subMenuInstance;
         JMenuItem menuItemInstance;
         menueBar = new JMenuBar();
 
@@ -113,21 +115,28 @@ public class GuiMain implements ActionListener, MouseListener {
         menueBar.add(topMenuInstance);
 
         // - Analyze -> Busy Intervals
-        subMEnuInstance = new JMenu("Busy Intervals");
-        subMEnuInstance.setFont(menuFont);
-        topMenuInstance.add(subMEnuInstance);
+        subMenuInstance = new JMenu("Busy Intervals");
+        subMenuInstance.setFont(menuFont);
+        topMenuInstance.add(subMenuInstance);
 
         // - Analyze -> Busy Intervals -> Run Ge's Analysis
-        menuItemBusyIntervalsRunGe = new JMenuItem("Run Ge's Analysis");
-        menuItemBusyIntervalsRunGe.setFont(menuFont);
-        subMEnuInstance.add(menuItemBusyIntervalsRunGe);
-        menuItemBusyIntervalsRunGe.addActionListener(this);
+//        menuItemBusyIntervalsRunGe = new JMenuItem("Run Ge's Analysis");
+//        menuItemBusyIntervalsRunGe.setFont(menuFont);
+//        subMenuInstance.add(menuItemBusyIntervalsRunGe);
+//        menuItemBusyIntervalsRunGe.addActionListener(this);
 
         // - Analyze -> Busy Intervals -> Run Amir's Analysis
         menuItemBusyIntervalsRunAmir = new JMenuItem("Run Amir's Analysis");
         menuItemBusyIntervalsRunAmir.setFont(menuFont);
-        subMEnuInstance.add(menuItemBusyIntervalsRunAmir);
+        subMenuInstance.add(menuItemBusyIntervalsRunAmir);
         menuItemBusyIntervalsRunAmir.addActionListener(this);
+
+        // - Analyze -> Busy Intervals -> AutoTest Wizard
+        menuItemBusyIntervalAnalysisAutoTestWizard = new JMenuItem("AutoTest Wizard");
+        menuItemBusyIntervalAnalysisAutoTestWizard.setFont(menuFont);
+        subMenuInstance.add(menuItemBusyIntervalAnalysisAutoTestWizard);
+        menuItemBusyIntervalAnalysisAutoTestWizard.addActionListener(this);
+
         
         // Create "Hack" menu
         topMenuInstance = new JMenu("Hack");
@@ -269,19 +278,18 @@ public class GuiMain implements ActionListener, MouseListener {
             }
         } else if (e.getSource() == btnLaunchSimulator) {
 
-                DialogSimulationLauncher dialogSimulationLauncher = DialogSimulationLauncher.getInstance();
-                dialogSimulationLauncher.setTaskContainer(eventContainer.getTaskContainer().clone());
-                Boolean simReturnValue = dialogSimulationLauncher.runLauncher(frame);
+            DialogSimulationLauncher dialogSimulationLauncher = DialogSimulationLauncher.getInstance();
+            dialogSimulationLauncher.setTaskContainer(eventContainer.getTaskContainer().clone());
+            Boolean simReturnValue = dialogSimulationLauncher.runLauncher(frame);
 
-                if ( simReturnValue == true ) {
-                    // Simulation is completed, draw the result.
-                    eventContainer = dialogSimulationLauncher.getSimulationResultEventContainer();
-                    drawPlotFromEventContainer();
-                    buttonTaskSetter.setEnabled(true);
-                }
+            if ( simReturnValue == true ) {
+                // Simulation is completed, draw the result.
+                eventContainer = dialogSimulationLauncher.getSimulationResultEventContainer();
+                drawPlotFromEventContainer();
+                buttonTaskSetter.setEnabled(true);
+            }
 
-        } else if (e.getSource()==menuItemBusyIntervalsRunGe || e.getSource()==menuItemBusyIntervalsRunAmir)
-        {
+        } else if (e.getSource()==menuItemBusyIntervalsRunGe || e.getSource()==menuItemBusyIntervalsRunAmir) {
             if (eventContainer != null) {
                 BusyIntervalContainer busyIntervalContainer = new BusyIntervalContainer();
                 busyIntervalContainer.createBusyIntervalsFromEvents(eventContainer);
@@ -345,6 +353,9 @@ public class GuiMain implements ActionListener, MouseListener {
             hackDecompositionTraceGroup.addTraces(hackDecomposition.buildAmirDecompositionResultTraces());
             zPanel.getTraceGroupContainer().addTraceGroup(hackDecompositionTraceGroup);
             applyNewSettingsAndRePaint();
+        } else if (e.getSource() == menuItemBusyIntervalAnalysisAutoTestWizard) {
+            DialogAutoTestWizard dialogAutoTestWizard = new DialogAutoTestWizard();
+            dialogAutoTestWizard.runAutoTestDialog(frame);
         }
 
     }
