@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class Decomposition {
     TaskContainer taskContainer;
 
-    AmirDecomposition amirDecomposition = null;
+    public AmirDecomposition amirDecomposition = null;
     GeDecomposition geDecomposition = null;
 
     public Decomposition(TaskContainer inTaskContainer)

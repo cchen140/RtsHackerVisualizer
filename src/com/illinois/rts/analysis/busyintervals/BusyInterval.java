@@ -12,11 +12,15 @@ import java.util.ArrayList;
 public class BusyInterval {
     private int beginTimeStampNs = 0;
     private int endTimeStampNs = 0;
-    TaskReleaseEventContainer compositionGroundTruth;
-    TaskReleaseEventContainer compositionInference = new TaskReleaseEventContainer();
-    TaskArrivalEventContainer arrivalInference = new TaskArrivalEventContainer();
+    
+    // Ground truth contains the start point of each job in this busy interval.
+    StartTimeEventContainer startTimesGroundTruth;
+    StartTimeEventContainer startTimesInference = new StartTimeEventContainer();
     ArrayList schedulingInference = new ArrayList<>();  // for plotting result trace.
-
+    
+    // The inference of the arrival points for each job.
+    TaskArrivalEventContainer arrivalInference = new TaskArrivalEventContainer();
+    
     // There may have multiple inferences, so two-layer array is used here.
     private ArrayList<ArrayList<Task>> composition = new ArrayList<>();
 
@@ -26,9 +30,9 @@ public class BusyInterval {
         endTimeStampNs = inEndTimeStamp;
     }
 
-    public void setCompositionGroundTruth(TaskReleaseEventContainer inGroundTruth)
+    public void setStartTimesGroundTruth(StartTimeEventContainer inGroundTruth)
     {
-        compositionGroundTruth = inGroundTruth;
+        startTimesGroundTruth = inGroundTruth;
     }
 
     public void setComposition(ArrayList<ArrayList<Task>> inComposition)
@@ -46,9 +50,13 @@ public class BusyInterval {
         return beginTimeStampNs;
     }
 
-    public TaskReleaseEventContainer getCompositionGroundTruth()
+    public StartTimeEventContainer getStartTimesInference() {
+        return startTimesInference;
+    }
+
+    public StartTimeEventContainer getStartTimesGroundTruth()
     {
-        return  compositionGroundTruth;
+        return startTimesGroundTruth;
     }
     
     public ArrayList<ArrayList<Task>> getComposition()

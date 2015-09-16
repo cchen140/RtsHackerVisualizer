@@ -235,7 +235,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             /* Start RM scheduling simulation */
             EventContainer thisEventContainer = null;
 
-            int simDurationNs = 1000000 * Integer.valueOf( 1000000 ); // 1ms
+            int simDurationNs = 1000000 * Integer.valueOf(1000000); // 1ms
 
             // Get task container from the panel with latest configurations.
             TaskContainer simTaskContainer = thisTaskContainer;
@@ -261,12 +261,12 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             // Build busy intervals
 
             // Analyze
-                BusyIntervalContainer busyIntervalContainer = new BusyIntervalContainer();
-                busyIntervalContainer.createBusyIntervalsFromEvents(thisEventContainer);
+            BusyIntervalContainer busyIntervalContainer = new BusyIntervalContainer();
+            busyIntervalContainer.createBusyIntervalsFromEvents(thisEventContainer);
 
                 /* Analyze busy intervals. The result will be written back to busy intervals. */
-                Decomposition decomposition = new Decomposition(thisEventContainer.getTaskContainer());
-                decomposition.runAmirDecompositionStep1(busyIntervalContainer);
+            Decomposition decomposition = new Decomposition(thisEventContainer.getTaskContainer());
+            decomposition.runAmirDecomposition(busyIntervalContainer);
 
             /* This block of code is for outputting the busy intervals. */
 //                DataExporter dataExporter = new DataExporter();
@@ -277,15 +277,16 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 //                }
 
                 /* Build a trace to show result of busy interval analysis. */
-                TraceGroup decompositionTraceGroup = new TraceGroup();
-                decompositionTraceGroup.setTitle("Decomposition");
-//                Trace decompositionInferenceTrace = decomposition.BuildInferenceTrace(busyIntervalContainer);
-//                decompositionTraceGroup.addTrace(decomposition.buildAmirDecompositionStep1ResultTrace());
-                decomposition.runAmirDecompositionStep2();
-                decomposition.runAmirDecompositionStep3();
-                decompositionTraceGroup.addTraces(decomposition.buildAmirDecompositionResultTraces());
-                zPanel.getTraceGroupContainer().addTraceGroup(decompositionTraceGroup);
-                applyNewSettingsAndRePaint();
+//                TraceGroup decompositionTraceGroup = new TraceGroup();
+//                decompositionTraceGroup.setTitle("Decomposition");
+////                Trace decompositionInferenceTrace = decomposition.BuildInferenceTrace(busyIntervalContainer);
+////                decompositionTraceGroup.addTrace(decomposition.buildAmirDecompositionStep1ResultTrace());
+//                decomposition.runAmirDecompositionStep2();
+//                decomposition.runAmirDecompositionStep3();
+//                decompositionTraceGroup.addTraces(decomposition.buildAmirDecompositionResultTraces());
+//                zPanel.getTraceGroupContainer().addTraceGroup(decompositionTraceGroup);
+//                applyNewSettingsAndRePaint();
+        }
 
         return true;
     }

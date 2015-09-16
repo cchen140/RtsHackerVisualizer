@@ -323,6 +323,8 @@ public class GuiMain implements ActionListener, MouseListener {
                 zPanel.getTraceGroupContainer().addTraceGroup(decompositionTraceGroup);
                 applyNewSettingsAndRePaint();
 
+                decomposition.amirDecomposition.verifySchedulingInference();
+
             }
             else
             {

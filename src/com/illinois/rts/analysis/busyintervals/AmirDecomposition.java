@@ -818,4 +818,42 @@ public class AmirDecomposition {
         taskWindow.shift( shiftFactor * inTask.getPeriodNs() );
         return taskWindow;
     }
+
+    // TODO: The range of the deviation between ground truth and inference has to be specified further.
+    private Boolean verifySchedulingInferenceSingleBusyInterval(BusyInterval bi) {
+        if ((bi.getStartTimesGroundTruth() == null) || (bi.getStartTimesInference()==null))
+            return false;
+
+        if (bi.getStartTimesGroundTruth().size() != bi.getStartTimesInference().size())
+            return false;
+
+        bi.getStartTimesInference().sortTaskReleaseEventsByTime();
+        bi.getStartTimesGroundTruth().sortTaskReleaseEventsByTime();
+
+        int countOfElements = bi.getStartTimesGroundTruth().size();
+        for (int i=0; i<countOfElements; i++) {
+            AppEvent startTimeGroundTruth = bi.getStartTimesGroundTruth().get(i);
+            AppEvent startTimeInference = bi.getStartTimesInference().get(i);
+
+            if (false == areEqualWithinError(startTimeGroundTruth.getOrgBeginTimestampNs(), startTimeInference.getOrgBeginTimestampNs(), 500000))
+                return false;
+        }
+
+        return true;
+    }
+
+    public Boolean verifySchedulingInference() {
+        Boolean overallResult = true;
+        for (BusyInterval bi : busyIntervalContainer.getBusyIntervals()) {
+            Boolean verificationResult = verifySchedulingInferenceSingleBusyInterval(bi);
+
+            if (verificationResult == false) {
+                ProgMsg.debugPutline("Busy interval verification failed.");
+                overallResult = false;
+            }
+        }
+
+        ProgMsg.debugPutline("Overall verification done: " + overallResult.toString());
+        return overallResult;
+    }
 }

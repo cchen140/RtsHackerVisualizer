@@ -9,7 +9,7 @@ public class ProgConfig {
     static void ProgConfig() {}
 
     private static String DEFAULT_FONT_NAME = "Arial";
-    private static int DEFAULT_FONT_SIZE = 12;
+    private static int DEFAULT_FONT_SIZE = 16;
     private static int DEFAULT_FONT_STYLE = Font.PLAIN;
     private static Font DEFAULT_FONT = new Font(DEFAULT_FONT_NAME, DEFAULT_FONT_STYLE, DEFAULT_FONT_SIZE);
 
@@ -38,7 +38,7 @@ public class ProgConfig {
     public static Color IDLE_TASK_COLOR = new Color(235, 235, 235); // lighter than light grey
     public static int TRACE_HORIZONTAL_SCALE_DIVIDER = 30000;
     public static int TIME_LINE_PERIOD_NS = 10000000; // 10ms
-    public static int TRACE_HEIGHT = 50;
+    public static int TRACE_HEIGHT = 80;
     public static int TRACE_MARGIN_Y = 10;
     public static int TRACE_PANEL_BORDER_WIDTH = 1;
     public static Color TRACE_PANEL_BACKGROUND = Color.GRAY;

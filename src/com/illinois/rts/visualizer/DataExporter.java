@@ -2,8 +2,7 @@ package com.illinois.rts.visualizer;
 
 import com.illinois.rts.analysis.busyintervals.BusyInterval;
 import com.illinois.rts.analysis.busyintervals.BusyIntervalContainer;
-import com.illinois.rts.analysis.busyintervals.Decomposition;
-import com.illinois.rts.analysis.busyintervals.TaskReleaseEventContainer;
+import com.illinois.rts.analysis.busyintervals.StartTimeEventContainer;
 import com.illinois.rts.framework.Task;
 
 import java.io.BufferedWriter;
@@ -178,7 +177,7 @@ public class DataExporter extends DialogFileHandler{
 //        {
 //            int beginTimeStampNs = thisBusyInterval.getBeginTimeStampNs();
 //            int intervalNs = thisBusyInterval.getIntervalNs();
-//            ArrayList<Task> compositionGroundTruth = thisBusyInterval.getCompositionGroundTruth();
+//            ArrayList<Task> compositionGroundTruth = thisBusyInterval.getStartTimesGroundTruth();
 //            String groundTruthString = "";
 //            String inferenceString = "";
 //
@@ -252,7 +251,7 @@ public class DataExporter extends DialogFileHandler{
         {
             int beginTimeStampNs = thisBusyInterval.getBeginTimeStampNs();
             int intervalNs = thisBusyInterval.getIntervalNs();
-            TaskReleaseEventContainer compositionGroundTruth = thisBusyInterval.getCompositionGroundTruth();
+            StartTimeEventContainer compositionGroundTruth = thisBusyInterval.getStartTimesGroundTruth();
             String groundTruthString = "";
             String inferenceString = "";
 

@@ -8,20 +8,20 @@ import java.util.ArrayList;
 /**
  * Created by CY on 7/29/2015.
  */
-public class TaskReleaseEventContainer {
-    ArrayList<AppEvent> taskReleaseEvents = new ArrayList<>();
+public class StartTimeEventContainer {
+    ArrayList<AppEvent> startTimeEvents = new ArrayList<>();
 
-    public TaskReleaseEventContainer() {}
+    public StartTimeEventContainer() {}
 
-    public TaskReleaseEventContainer( TaskReleaseEventContainer inContainer )
+    public StartTimeEventContainer(StartTimeEventContainer inContainer)
     {
         // replicate the event array.
-        taskReleaseEvents.addAll( inContainer.taskReleaseEvents );
+        startTimeEvents.addAll(inContainer.startTimeEvents);
     }
 
     public void add( AppEvent inEvent )
     {
-        taskReleaseEvents.add( inEvent );
+        startTimeEvents.add(inEvent);
         sortTaskReleaseEventsByTime();
     }
 
@@ -36,13 +36,13 @@ public class TaskReleaseEventContainer {
 
     public void addAll( ArrayList<AppEvent> inEvents )
     {
-        taskReleaseEvents.addAll(inEvents);
+        startTimeEvents.addAll(inEvents);
     }
 
     public void sortTaskReleaseEventsByTime()
     {
         ArrayList<AppEvent> sortedEvents = new ArrayList<>();
-        for ( AppEvent thisEvent : taskReleaseEvents ) {
+        for ( AppEvent thisEvent : startTimeEvents) {
 
             Boolean firstLoop = true;
             for ( AppEvent thisSortedEvent : sortedEvents ) {
@@ -63,13 +63,13 @@ public class TaskReleaseEventContainer {
 
     public int size()
     {
-        return taskReleaseEvents.size();
+        return startTimeEvents.size();
     }
 
     public ArrayList<Task> getTasksOfEvents()
     {
         ArrayList<Task> resultTasks = new ArrayList<>();
-        for ( AppEvent thisEvent : taskReleaseEvents ) {
+        for ( AppEvent thisEvent : startTimeEvents) {
             resultTasks.add(thisEvent.getTask());
         }
         return resultTasks;
@@ -77,19 +77,19 @@ public class TaskReleaseEventContainer {
 
     public AppEvent get(int index)
     {
-        return taskReleaseEvents.get( index );
+        return startTimeEvents.get( index );
     }
 
     public void clear()
     {
-        taskReleaseEvents.clear();
+        startTimeEvents.clear();
     }
 
 
     /* Find the first event after the designated time stamp. */
     public AppEvent getNextEvent( int inTimeStamp )
     {
-        for ( AppEvent thisEvent : taskReleaseEvents ) {
+        for ( AppEvent thisEvent : startTimeEvents) {
             if ( thisEvent.getOrgBeginTimestampNs() >= inTimeStamp )
                 return thisEvent;
         }
@@ -100,7 +100,7 @@ public class TaskReleaseEventContainer {
 
     public ArrayList<AppEvent> getEvents()
     {
-        return taskReleaseEvents;
+        return startTimeEvents;
     }
 
 }

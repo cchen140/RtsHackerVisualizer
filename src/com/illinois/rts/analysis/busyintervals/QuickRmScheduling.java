@@ -20,6 +20,7 @@ public class QuickRmScheduling {
 
     // Write scheduling inference to ArrayList<TaskIntervalEvent> inside the busy interval.
     /* Prerequisite: arrival time windows */
+    // TODO: It doesn't handle the scheduling correctly when multiple tasks have the same period.
     public static void constructSchedulingOfBusyIntervalByArrivalWindow( BusyInterval bi )
     {
         // Get the arrival events by replicating the container since we'll be modifying the container later (pop events).
@@ -57,7 +58,7 @@ public class QuickRmScheduling {
                 if ( (int)currentJob.remainingExecTime == currentRunTask.getComputationTimeNs() ) {
                     AppEvent thisReleaseEvent = new AppEvent((int) currentJob.releaseTime, currentRunTask, 0, "BEGIN");
                     resultSchedulingEvents.add(thisReleaseEvent);
-                    bi.compositionInference.add(thisReleaseEvent);
+                    bi.startTimesInference.add(thisReleaseEvent);
                 }
 
                 continue;
@@ -85,7 +86,7 @@ public class QuickRmScheduling {
                 if ( ((int)currentJob.remainingExecTime) == currentRunTask.getComputationTimeNs() ) {
                     AppEvent thisReleaseEvent = new AppEvent((int) currentJob.releaseTime, currentRunTask, 0, "BEGIN");
                     resultSchedulingEvents.add(thisReleaseEvent);
-                    bi.compositionInference.add(thisReleaseEvent);
+                    bi.startTimesInference.add(thisReleaseEvent);
                 }
 
 

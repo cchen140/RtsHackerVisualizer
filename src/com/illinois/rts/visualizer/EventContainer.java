@@ -31,15 +31,16 @@ public class EventContainer {
     {
         if (inEventType == SCHEDULER_EVENT)
         {// inEventTaskId is 0 as from scheduler, inData is the Id of the task being scheduled.
+         /* Note that the scheduler event has to be added in sequence. */
             if (schedulerEvents.size() > 0) {
                 schedulerEvents.get(schedulerEvents.size() - 1).setOrgEndTimestampNs(inTimestampNs);
             }
             schedulerEvents.add(new TaskIntervalEvent(inTimestampNs, taskContainer.getTaskById(inData), inEventString));
 
-            // Assume that the added scheduler event is in order, the latest one should be the latest.
-            // if (scaledEndTimestamp < inTimestampNs)
-            orgEndTimestampNs = inTimestampNs;
-            scaledEndTimestamp = inTimestampNs;
+            if (inTimestampNs > orgEndTimestampNs) {
+                orgEndTimestampNs = inTimestampNs;
+                scaledEndTimestamp = inTimestampNs;
+            }
         }
         else if (inEventType == HACKER_EVENT)
         {
