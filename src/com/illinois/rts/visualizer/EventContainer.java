@@ -51,6 +51,20 @@ public class EventContainer {
             appEvents.add(new AppEvent(inTimestampNs, taskContainer.getTaskById(inEventTaskId), inData, inEventString));
         }
     }
+    
+    public void addAppEvent(AppEvent inEvent) {
+        appEvents.add(inEvent);
+    }
+    
+    // "Complete" means the event has "begin" and "end" values.
+    public void addCompleteSchedulerEvent(TaskIntervalEvent inEvent) {
+        schedulerEvents.add(inEvent);
+        
+        if (inEvent.getOrgEndTimestampNs() > orgEndTimestampNs) {
+            orgEndTimestampNs = inEvent.getOrgEndTimestampNs();
+            scaledEndTimestamp = inEvent.getOrgEndTimestampNs();
+        }
+    }
 
     public void clearAll()
     {

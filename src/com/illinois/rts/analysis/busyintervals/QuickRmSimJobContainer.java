@@ -95,4 +95,8 @@ public class QuickRmSimJobContainer {
         jobs.remove( nextHighJob );
         return nextHighJob;
     }
+
+    public int size() {
+        return jobs.size();
+    }
 }

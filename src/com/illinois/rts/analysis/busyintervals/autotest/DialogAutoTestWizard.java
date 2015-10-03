@@ -1,10 +1,14 @@
 package com.illinois.rts.analysis.busyintervals.autotest;
 
+import com.illinois.rts.analysis.busyintervals.AmirDecomposition;
 import com.illinois.rts.analysis.busyintervals.BusyIntervalContainer;
 import com.illinois.rts.analysis.busyintervals.Decomposition;
+import com.illinois.rts.analysis.busyintervals.QuickRmScheduling;
 import com.illinois.rts.framework.Task;
+import com.illinois.rts.simulator.GenerateRmTaskSet;
 import com.illinois.rts.simulator.RmScheduling;
 import com.illinois.rts.simulator.TaskSetFileHandler;
+import com.illinois.rts.utility.GuiUtility;
 import com.illinois.rts.visualizer.*;
 
 import javax.swing.*;
@@ -29,9 +33,13 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
     private JTextField inputNumOfTasks;
     private JTextField inputNumOfTaskSets;
     private JScrollPane tableTaskSetsScroll;
+    private JTextField inputSimDuration;
 
     private Boolean startBtnClicked = false;
     private TaskSetContainer taskSetContainer = new TaskSetContainer();
+
+//    private DialogLogOutput dialogLogOutput = new DialogLogOutput();
+    String logBuffer = "";
 
     public DialogAutoTestWizard() {
         setContentPane(contentPane);
@@ -40,7 +48,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         btnStartAutoTest.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                onOK();
+                onStart();
             }
         });
 
@@ -93,13 +101,39 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         btnExportTaskSets.addActionListener(this);
         btnGenerateTaskSets.addActionListener(this);
 
+        // Simulation duration.
+        inputSimDuration.setText("1000");   // unit is ms
+
+        inputNumOfTaskSets.setText("5");
+        inputNumOfTasks.setText("3");
+
+        // Set the font for entire dialog.
+        GuiUtility.changeChildrenFont(this, ProgConfig.DEFAULT_CONTENT_FONT);
+
         this.setResizable(false);
+
+        importDemoTaskSet();
     }
 
-    private void onOK() {
+    private void onStart() {
 // add your code here
-        startBtnClicked = true;
-        dispose();
+
+        // Clear the log buffer for a new test.
+        logBuffer = "";
+
+        /* Put task set info in logBuffer */
+        TaskSetFileHandler taskSetFileHandler = new TaskSetFileHandler();
+        logBuffer += taskSetFileHandler.generateTaskParamsLines();
+        logBuffer += taskSetFileHandler.generateTaskSetContainerLines(taskSetContainer);
+        logBuffer += "@\r\n";
+
+        startAutoTest();
+
+        DialogLogOutput dialogLogOutput = new DialogLogOutput();
+        dialogLogOutput.put(logBuffer);
+        dialogLogOutput.showDialog(this);
+
+        //dispose();
     }
 
     private void onCancel() {
@@ -107,7 +141,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         dispose();
     }
 
-    public void runAutoTestDialog(Component locationReference) {
+    public void showDialog(Component locationReference) {
         this.pack();
 
         // If the parent frame is assigned, then set this dialog to show at the center.
@@ -117,9 +151,23 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         this.setVisible(true);
 
-        if (startBtnClicked == true) {
-            startAutoTest();
+    }
+
+    public Boolean importDemoTaskSet() {
+        TaskSetFileHandler taskSetFileHandler = new TaskSetFileHandler();
+
+        try {
+            taskSetContainer.setTaskContainers(taskSetFileHandler.loadMultipleTaskSetsFromPath("./log/AutoTestDemo_TaskSet_5Tx10.txt"));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return false;
         }
+
+        if (taskSetContainer.size() > 0) {
+            buildTableFromTaskContainers();
+        } // else, nothing loaded thus do nothing.
+
+        return true;
     }
 
     @Override
@@ -156,6 +204,12 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             }
 
         } else if (e.getSource() == btnGenerateTaskSets) {
+            GenerateRmTaskSet generateRmTaskSet = new GenerateRmTaskSet();
+            taskSetContainer = generateRmTaskSet.generate(Integer.valueOf(inputNumOfTasks.getText()), Integer.valueOf(inputNumOfTaskSets.getText()));
+
+            if (taskSetContainer.size() > 0) {
+                buildTableFromTaskContainers();
+            } // else, nothing loaded thus do nothing.
 
         } else if (e.getSource() == btnStartAutoTest) {
 
@@ -231,11 +285,12 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         if (taskSetContainer.size() == 0)
             return false;
 
+        int taskSetIndex = 1;
         for (TaskContainer thisTaskContainer : taskSetContainer.getTaskContainers()) {
             /* Start RM scheduling simulation */
             EventContainer thisEventContainer = null;
 
-            int simDurationNs = 1000000 * Integer.valueOf(1000000); // 1ms
+            int simDurationNs = 1000000 * Integer.valueOf( inputSimDuration.getText() );
 
             // Get task container from the panel with latest configurations.
             TaskContainer simTaskContainer = thisTaskContainer;
@@ -247,11 +302,9 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                 continue;
             }
 
-            RmScheduling rmScheduling = new RmScheduling();
-            rmScheduling.setTaskContainer(simTaskContainer);
-            if (rmScheduling.runSimWithProgressDialog(simDurationNs, this) == true) {
-                thisEventContainer = rmScheduling.getSimEventContainer();
-            }
+            QuickRmScheduling quickRmScheduling = new QuickRmScheduling(simTaskContainer);
+            quickRmScheduling.runSim(simDurationNs);
+            thisEventContainer = quickRmScheduling.getSimEventContainer();
 
             if (thisEventContainer == null) {
                 ProgMsg.errPutline("Got empty result from RM scheduling simulation.");
@@ -265,8 +318,22 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             busyIntervalContainer.createBusyIntervalsFromEvents(thisEventContainer);
 
                 /* Analyze busy intervals. The result will be written back to busy intervals. */
-            Decomposition decomposition = new Decomposition(thisEventContainer.getTaskContainer());
-            decomposition.runAmirDecomposition(busyIntervalContainer);
+            AmirDecomposition amirDecomposition = new AmirDecomposition(thisEventContainer.getTaskContainer(), busyIntervalContainer);
+            //Decomposition decomposition = new Decomposition(thisEventContainer.getTaskContainer());
+            //decomposition.runAmirDecomposition(busyIntervalContainer);
+            try {
+                amirDecomposition.runDecomposition();
+            } catch (RuntimeException rex) {
+                //rex.printStackTrace();
+                putLineLogBuffer("#%d TkSet: TERMINATE - " + rex.getMessage(), taskSetIndex);
+                continue;
+            }
+
+            if ( amirDecomposition.verifySchedulingInference() == true ) {
+                putLineLogBuffer("#%d TkSet: SUCCESS", taskSetIndex);
+            } else {
+                putLineLogBuffer("#%d TkSet: FAILED", taskSetIndex);
+            }
 
             /* This block of code is for outputting the busy intervals. */
 //                DataExporter dataExporter = new DataExporter();
@@ -286,8 +353,14 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 //                decompositionTraceGroup.addTraces(decomposition.buildAmirDecompositionResultTraces());
 //                zPanel.getTraceGroupContainer().addTraceGroup(decompositionTraceGroup);
 //                applyNewSettingsAndRePaint();
+
+            taskSetIndex++;
         }
 
         return true;
+    }
+
+    void putLineLogBuffer(String format, Object... args) {
+        logBuffer += String.format(format + "\r\n", args);
     }
 }

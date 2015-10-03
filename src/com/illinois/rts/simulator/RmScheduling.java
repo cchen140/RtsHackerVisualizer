@@ -22,8 +22,6 @@ import java.util.Random;
 import java.util.StringTokenizer;
 
 public class RmScheduling {
-    private static int IDLE_TASK_ID = -1;
-
     public ProgressUpdater progressUpdater = new ProgressUpdater();
 
     TaskContainer simTaskContainer = null;
@@ -77,7 +75,7 @@ public class RmScheduling {
         }
 
         numTasks = allTasks.size(); // It doesn't include the idle task.
-        simTaskContainer.addTask(IDLE_TASK_ID, "IDLE", Task.TASK_TYPE_IDLE, 0, 0, 0);
+        simTaskContainer.addTask(Task.IDLE_TASK_ID, "IDLE", Task.TASK_TYPE_IDLE, 0, 0, 0);
 //        allTasks.add(new Task(99, "IDLE", 1, 0, 0, 0, 0));
         simEventContainer.setTaskContainer(simTaskContainer);
         assignPriority();
@@ -435,7 +433,7 @@ public class RmScheduling {
                         System.out.println("@SchedulerLog");
                         System.out.println(tick + ", 0, IDLE_TASK_ID, \"IDLE\"");
                     }
-                    simEventContainer.add(EventContainer.SCHEDULER_EVENT, (int) tick, 0, IDLE_TASK_ID, "IDLE");
+                    simEventContainer.add(EventContainer.SCHEDULER_EVENT, (int) tick, 0, Task.IDLE_TASK_ID, "IDLE");
                     return true;
                 }
                 else {

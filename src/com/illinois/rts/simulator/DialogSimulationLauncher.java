@@ -1,9 +1,12 @@
 package com.illinois.rts.simulator;
 
+import com.illinois.rts.analysis.busyintervals.QuickRmScheduling;
+import com.illinois.rts.utility.GeneralUtility;
 import com.illinois.rts.utility.GuiUtility;
 import com.illinois.rts.visualizer.EventContainer;
 import com.illinois.rts.visualizer.ProgConfig;
 import com.illinois.rts.visualizer.TaskContainer;
+import com.illinois.rts.visualizer.TaskSetContainer;
 import com.illinois.rts.visualizer.tasksetter.TaskConfigGroupPanel;
 
 import javax.swing.*;
@@ -21,6 +24,7 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
     private JButton btnExportTaskConfig;
     private JButton btnAddNewTask;
     private TaskConfigGroupPanel taskSetterPanel;
+    private JButton btnRandomTasks;
 
     private Boolean isOkClicked = false;
     private EventContainer simResultEventContainer;
@@ -61,6 +65,7 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
         btnAddNewTask.addActionListener(this);
         btnImportTaskConfig.addActionListener(this);
         btnExportTaskConfig.addActionListener(this);
+        btnRandomTasks.addActionListener(this);
 
         // Initialize taskSetterPanel
         taskSetterPanel.enableRemoveTaskBtn();
@@ -132,11 +137,12 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
             simTaskContainer.removeNoneAppTasks();
 
             if (simTaskContainer.size() > 0) {
-                RmScheduling rmScheduling = new RmScheduling();
-                rmScheduling.setTaskContainer(simTaskContainer);
-                if (rmScheduling.runSimWithProgressDialog(simDurationNs, this) == true)
+                //RmScheduling rmScheduling = new RmScheduling();
+                //rmScheduling.setTaskContainer(simTaskContainer);
+                QuickRmScheduling quickRmScheduling = new QuickRmScheduling(simTaskContainer);
+                if (quickRmScheduling.runSimWithProgressDialog(simDurationNs, this) == true)
                 {
-                    simResultEventContainer = rmScheduling.getSimEventContainer();
+                    simResultEventContainer = quickRmScheduling.getSimEventContainer();
                     if ( simResultEventContainer != null ) {
                         return true;
                     }
@@ -173,6 +179,10 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
         } else if ( e.getSource() == btnExportTaskConfig ) {
             TaskSetFileHandler taskConfigExporter = new TaskSetFileHandler();
             taskConfigExporter.exportSingleTaskSetByDialog(taskSetterPanel.getTaskContainerWithLatestConfigs());
+        } else if ( e.getSource() == btnRandomTasks ) {
+            GenerateRmTaskSet generateRmTaskSet = new GenerateRmTaskSet();
+            TaskSetContainer taskSetContainer = generateRmTaskSet.generate(GeneralUtility.getRandom(3, 6), 1);
+            setTaskContainer( taskSetContainer.getTaskContainers().get(0) );
         }
     }
 

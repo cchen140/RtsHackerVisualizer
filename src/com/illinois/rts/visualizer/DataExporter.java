@@ -18,6 +18,12 @@ public class DataExporter extends DialogFileHandler{
     // Constructor
     public DataExporter() {}
 
+    public void exportStringToFileDialog(String inString) throws IOException {
+        openWriteFileFromDialog();  // set up fileWriter.
+        fileWriter.write(inString);
+        fileWriter.close();
+    }
+
     // This method uses variable "fileWriter" from father's class.
     public void exportBusyIntervalsToFileDialog(BusyIntervalContainer inBusyIntervalContainer) throws IOException {
 

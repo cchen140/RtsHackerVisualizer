@@ -357,7 +357,7 @@ public class GuiMain implements ActionListener, MouseListener {
             applyNewSettingsAndRePaint();
         } else if (e.getSource() == menuItemBusyIntervalAnalysisAutoTestWizard) {
             DialogAutoTestWizard dialogAutoTestWizard = new DialogAutoTestWizard();
-            dialogAutoTestWizard.runAutoTestDialog(frame);
+            dialogAutoTestWizard.showDialog(frame);
         }
 
     }

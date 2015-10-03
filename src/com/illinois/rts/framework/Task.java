@@ -7,6 +7,8 @@ import java.util.LinkedList;
  * Created by CY on 2/17/2015.
  */
 public class Task {
+    public static int IDLE_TASK_ID = -1;
+
     public static int TASK_TYPE_UNKNOWN = 0;
     public static int TASK_TYPE_SYS = 1;
     public static int TASK_TYPE_APP = 2;

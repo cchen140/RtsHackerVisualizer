@@ -31,7 +31,7 @@ public class AmirDecomposition {
         return true;
     }
 
-    public Boolean runDecompositionStep2()
+    public Boolean runDecompositionStep2() throws RuntimeException
     {
         // Step two: creating arrival time window for each task by processing the result from step one.
         calculateArrivalTimeOfAllTasks();
@@ -50,7 +50,7 @@ public class AmirDecomposition {
         return true;
     }
 
-    public Boolean runDecomposition()
+    public Boolean runDecomposition() throws RuntimeException
     {
 
         // Step one: finding n values for every task in every busy interval.
@@ -298,19 +298,23 @@ public class AmirDecomposition {
         return Math.abs(inNum01-inNum02)<=inErrorRange ? true : false;
     }
 
-    public Boolean calculateArrivalTimeOfAllTasks()
+    public Boolean calculateArrivalTimeOfAllTasks() throws RuntimeException
     {
         for (Task thisTask : taskContainer.getAppTasksAsArray()){
             Interval thisInterval = calculateArrivalTimeWindowOfTask(thisTask, taskArrivalTimeWindows.get(thisTask));
+            if (thisInterval == null) {
+                return false;
+            }
+
             taskArrivalTimeWindows.put(thisTask, thisInterval);
-            ProgMsg.debugPutline("%s, %d:%d", thisTask.getTitle(), thisInterval.getBegin(), thisInterval.getEnd());
+            //ProgMsg.debugPutline("%s, %d:%d", thisTask.getTitle(), thisInterval.getBegin(), thisInterval.getEnd());
         }
 
         // TODO: Should return false if any arrival time window is null?
         return true;
     }
 
-    public Interval calculateArrivalTimeWindowOfTask(Task inTask, Interval inFirstWindow)
+    public Interval calculateArrivalTimeWindowOfTask(Task inTask, Interval inFirstWindow) throws RuntimeException
     {
         ArrayList<BusyInterval> thisTaskBusyIntervals;
 
@@ -325,7 +329,15 @@ public class AmirDecomposition {
             firstWindow = inFirstWindow;
         }
         else {
-            firstWindow = calculateArrivalTimeWindowOfTaskInABusyInterval(findShortestBusyIntervalContainingTask(inTask), inTask);
+            BusyInterval shortestBusyIntervalContainingTask = findShortestBusyIntervalContainingTask(inTask);
+            if (shortestBusyIntervalContainingTask == null) {
+                // Unable to find the initial busy interval for calculating the arrival time window.
+                ProgMsg.errPutline("Unable to find the initial busy interval for calculating the arrival time window.");
+                throw new RuntimeException(String.format("Unable to find the initial busy interval for calculating the arrival time window for task '%s'.", inTask.getTitle()));
+                //return null;
+            } else {
+                firstWindow = calculateArrivalTimeWindowOfTaskInABusyInterval(shortestBusyIntervalContainingTask, inTask);
+            }
         }
         // Move the window to around zero point.
         firstWindow.shift(-(firstWindow.getBegin() / inTask.getPeriodNs()) * inTask.getPeriodNs());
@@ -538,7 +550,7 @@ public class AmirDecomposition {
             thisWindowBeginTime += taskPeriod;
         }
 
-        return new Trace(inTask.getTitle() + " Arrival Time", inTask, intervalEvents, new TimeLine(), Trace.TRACE_TYPE_OTHER);
+        return new Trace(inTask.getTitle() + " Arr. Window", inTask, intervalEvents, new TimeLine(), Trace.TRACE_TYPE_OTHER);
     }
 
     public ArrayList<Trace> buildTaskArrivalTimeWindowTracesForAllTasks()
@@ -562,21 +574,21 @@ public class AmirDecomposition {
         for ( BusyInterval thisBI : busyIntervalContainer.getBusyIntervals() ) {
             resultEvents.addAll( thisBI.schedulingInference );
         }
-        return new Trace("Scheduling", resultEvents, new TimeLine());
+        return new Trace("Inf. Schedule", resultEvents, new TimeLine());
     }
 
     public ArrayList<Trace> buildResultTraces()
     {
         ArrayList<Trace> resultTraces = new ArrayList<>();
 
-        // Composition trace
-        resultTraces.add(buildCompositionTrace());
+        // Scheduling inference
+        resultTraces.add(buildSchedulingInferenceTrace());
+
+        // Composition trace (inference of N values)
+        //resultTraces.add(buildCompositionTrace());
 
         // Arrival time window traces
         resultTraces.addAll(buildTaskArrivalTimeWindowTracesForAllTasks());
-
-        // Scheduling inference
-        resultTraces.add(buildSchedulingInferenceTrace());
 
         return resultTraces;
     }
@@ -848,12 +860,12 @@ public class AmirDecomposition {
             Boolean verificationResult = verifySchedulingInferenceSingleBusyInterval(bi);
 
             if (verificationResult == false) {
-                ProgMsg.debugPutline("Busy interval verification failed.");
+                ProgMsg.debugPutline("Busy interval verification failed at time %d.", bi.getBeginTimeStampNs());
                 overallResult = false;
             }
         }
 
-        ProgMsg.debugPutline("Overall verification done: " + overallResult.toString());
+        //ProgMsg.debugPutline("Overall verification done: " + overallResult.toString());
         return overallResult;
     }
 }

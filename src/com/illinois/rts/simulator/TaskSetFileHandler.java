@@ -89,6 +89,18 @@ public class TaskSetFileHandler extends DialogFileHandler {
             return taskContainers;
     }
 
+    public ArrayList<TaskContainer> loadMultipleTaskSetsFromPath(String filePath) throws IOException
+    {
+        fileReader = openFile(filePath);
+        if (fileReader == null)
+            throw new IOException("IOException @ openFileFromPath(): File path is incorrect.");
+
+        if (loadTaskSets(fileReader) == false)
+            throw new InvalidParameterException("Task set file is incorrect.");
+        else
+            return taskContainers;
+    }
+
 //    public TaskContainer loadDemoConfig() throws IOException
 //    {
 //        String demoLogFilePath = "./log/demoConfig1.txt";
@@ -159,8 +171,8 @@ public class TaskSetFileHandler extends DialogFileHandler {
             }
 
             if (currentLogBlock == 0) {
-                System.err.format("No valid block in the file.\r\n");
-                return false;
+                //System.err.format("No valid block in the file.\r\n");
+                //return false;
             }
         }
         catch (IOException x)
@@ -328,8 +340,23 @@ public class TaskSetFileHandler extends DialogFileHandler {
         return resultLines;
     }
 
-    protected Boolean writeTaskSetsToFile(TaskSetContainer inTaskSets, BufferedWriter inFileWriter)
-    {
+    public String generateTaskSetContainerLines(TaskSetContainer inTaskSets) {
+        String outputLines = "";
+        int taskSetIndex = 1;
+        for (TaskContainer thisTaskSet : inTaskSets.getTaskContainers()) {
+            outputLines += "@TaskList " + taskSetIndex;
+            outputLines += "\r\n";
+
+            outputLines += generateTaskSetLines(thisTaskSet);
+            //ProgMsg.debugPutline(outputLines);
+
+            outputLines += "\r\n";
+            taskSetIndex++;
+        }
+        return outputLines;
+    }
+
+    public String generateTaskParamsLines() {
         String outputLines = "";
 
         outputLines += "@TaskParameters";
@@ -345,19 +372,42 @@ public class TaskSetFileHandler extends DialogFileHandler {
             outputLines += "$" + taskParamTypeToString(thisParamType);
         }
         outputLines += "\r\n";
+        return outputLines;
+    }
+
+    protected Boolean writeTaskSetsToFile(TaskSetContainer inTaskSets, BufferedWriter inFileWriter)
+    {
+        String outputLines = "";
+
+//        outputLines += "@TaskParameters";
+//        outputLines += "\r\n";
+//
+//        Boolean firstLoop = true;
+//        for (Integer thisParamType : defaultTaskParamOrder) {
+//            if (firstLoop == true) {
+//                firstLoop = false;
+//            } else {
+//                outputLines += ", ";
+//            }
+//            outputLines += "$" + taskParamTypeToString(thisParamType);
+//        }
+//        outputLines += "\r\n";
+        outputLines += generateTaskParamsLines();
 
 
-        int taskSetIndex = 1;
-        for (TaskContainer thisTaskSet : inTaskSets.getTaskContainers()) {
-            outputLines += "@TaskList " + taskSetIndex;
-            outputLines += "\r\n";
+//        int taskSetIndex = 1;
+//        for (TaskContainer thisTaskSet : inTaskSets.getTaskContainers()) {
+//            outputLines += "@TaskList " + taskSetIndex;
+//            outputLines += "\r\n";
+//
+//            outputLines += generateTaskSetLines(thisTaskSet);
+//            //ProgMsg.debugPutline(outputLines);
+//
+//            outputLines += "\r\n";
+//            taskSetIndex++;
+//        }
 
-            outputLines += generateTaskSetLines(thisTaskSet);
-            ProgMsg.debugPutline(outputLines);
-
-            outputLines += "\r\n";
-            taskSetIndex++;
-        }
+        outputLines += generateTaskSetContainerLines(inTaskSets);
 
 
         try {
