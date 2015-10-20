@@ -18,7 +18,7 @@ public class QuickRmSimJobContainer {
 
     /* This method pops the earliest available job.
     * Use popNextHighestPriorityJobByTime() instead to determine reference time stamp. */
-    public SimJob popNextHighPriorityJob()
+    public SimJob popNextEarliestHighestPriorityJob()
     {
         if ( jobs.size() == 0 )
             return null;

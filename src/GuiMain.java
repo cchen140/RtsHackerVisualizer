@@ -315,8 +315,8 @@ public class GuiMain implements ActionListener, MouseListener {
                 /* Build a trace to show result of busy interval analysis. */
                 TraceGroup decompositionTraceGroup = new TraceGroup();
                 decompositionTraceGroup.setTitle("Decomposition");
-//                Trace decompositionInferenceTrace = decomposition.BuildInferenceTrace(busyIntervalContainer);
-//                decompositionTraceGroup.addTrace(decomposition.buildAmirDecompositionStep1ResultTrace());
+                  //Trace decompositionInferenceTrace = decomposition.BuildInferenceTrace(busyIntervalContainer);
+                  decompositionTraceGroup.addTrace(decomposition.buildAmirDecompositionStep1ResultTrace());
                 decomposition.runAmirDecompositionStep2();
                 decomposition.runAmirDecompositionStep3();
                 decompositionTraceGroup.addTraces(decomposition.buildAmirDecompositionResultTraces());

@@ -10,4 +10,8 @@ public class GeneralUtility {
         Random rand = new Random();
         return rand.nextInt(max - min + 1) + min;
     }
+
+    public static String nanoIntToMilliString(long inNum) {
+        return String.valueOf((double)inNum/1000_000.0);
+    }
 }

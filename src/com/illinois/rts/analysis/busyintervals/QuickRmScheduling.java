@@ -53,8 +53,16 @@ public class QuickRmScheduling {
                 anyJobRunning = true;
                 currentJob = jobContainer.popNextHighestPriorityJobByTime(currentTimeStamp);
 
-                if ( currentJob == null )
+                // TODO: If the schedule is not continuous, we still plot the intervals that will not be in the same busy interval.
+//                if ( currentJob == null ) {
+//                    break;
+//                }
+                if ((currentJob == null) && (jobContainer.size() == 0)) {
                     break;
+                } else if (currentJob == null) {
+                    currentJob = jobContainer.popNextEarliestHighestPriorityJob();
+                    currentTimeStamp = (int)currentJob.releaseTime;
+                }
 
                 currentRunTask = currentJob.task;
                 if (currentTimeStamp > (int)currentJob.releaseTime) {
@@ -198,17 +206,15 @@ public class QuickRmScheduling {
                 anyJobRunning = true;
                 currentJob = jobContainer.popNextHighestPriorityJobByTime(currentTimeStamp);
 
-                if ( currentJob == null ) {
-                    if (jobContainer.size() == 0) {
+                if ( (currentJob == null) && (jobContainer.size() == 0) ) {
                         break;
-                    } else {
-                        currentJob = jobContainer.popNextHighPriorityJob();
+                } else if (currentJob == null) {
+                    currentJob = jobContainer.popNextEarliestHighestPriorityJob();
 //                        simEventContainer.add(EventContainer.SCHEDULER_EVENT, (int) tick, 0, Task.IDLE_TASK_ID, "IDLE");
-                        TaskIntervalEvent currentIdleEvent = new TaskIntervalEvent(currentTimeStamp, (int)currentJob.releaseTime, idleTask, "");
-                        simEventContainer.addCompleteSchedulerEvent(currentIdleEvent);
+                    TaskIntervalEvent currentIdleEvent = new TaskIntervalEvent(currentTimeStamp, (int)currentJob.releaseTime, idleTask, "");
+                    simEventContainer.addCompleteSchedulerEvent(currentIdleEvent);
 
-                        currentTimeStamp = (int)currentJob.releaseTime;
-                    }
+                    currentTimeStamp = (int)currentJob.releaseTime;
                 }
 
 

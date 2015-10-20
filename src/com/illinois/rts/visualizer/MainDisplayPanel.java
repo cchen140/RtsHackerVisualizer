@@ -97,7 +97,7 @@ public class MainDisplayPanel extends JPanel {
     public void applyNewSettings()
     {
         /* Change global variables. */
-        DrawInterval.intervalHeight = ProgConfig.TRACE_HEIGHT;
+        //DrawInterval.intervalHeight = ProgConfig.TRACE_HEIGHT;
 
 //        combinedTraceGroup = new CombinedTraceGroup(eventContainer, new TimeLine(topTimeLine));
         traceGroupContainer.triggerUpdate();

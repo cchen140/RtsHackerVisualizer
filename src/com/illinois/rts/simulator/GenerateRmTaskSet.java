@@ -1,6 +1,7 @@
 package com.illinois.rts.simulator;
 
 import com.illinois.rts.framework.Task;
+import com.illinois.rts.utility.GeneralUtility;
 import com.illinois.rts.visualizer.ProgMsg;
 import com.illinois.rts.visualizer.TaskContainer;
 import com.illinois.rts.visualizer.TaskSetContainer;
@@ -166,6 +167,8 @@ public class GenerateRmTaskSet {
             return null;
 
 
+        ProgMsg.debugPutline(GeneralUtility.nanoIntToMilliString(calHyperPeriod(taskContainer)));
+
 //        int[][] sl = new int[numTasks][numTasks];
 //        for (int i=0; i<numTasks; i++)
 //        {
@@ -237,6 +240,14 @@ public class GenerateRmTaskSet {
 
     static long LCM(long a, long b) {
         return a * b / GCD(a, b);
+    }
+
+    public long calHyperPeriod(TaskContainer taskContainer) {
+        long hyperPeriod = 1;
+        for (Task thisTask : taskContainer.getAppTasksAsArray()) {
+            hyperPeriod = LCM(hyperPeriod, thisTask.getPeriodNs());
+        }
+        return hyperPeriod;
     }
 
     public Boolean schedulabilityTest(TaskContainer taskContainer) {
