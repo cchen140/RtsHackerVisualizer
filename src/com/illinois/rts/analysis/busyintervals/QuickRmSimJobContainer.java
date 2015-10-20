@@ -51,7 +51,7 @@ public class QuickRmSimJobContainer {
         Boolean firstLoop = true;
         for ( SimJob thisJob : jobs ) {
             // Skip the job that is later than the designated time.
-            if ( (thisJob.releaseTime>timeStamp) || (thisJob.task.getPriority()<inPriority) )
+            if ( (thisJob.releaseTime>timeStamp) || (thisJob.task.getPriority()<=inPriority) )
                 continue;
 
             if ( firstLoop == true ) {

@@ -2,12 +2,10 @@ package com.illinois.rts.analysis.busyintervals;
 
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.simulator.DialogSimulationProgress;
+import com.illinois.rts.simulator.GenerateRmTaskSet;
 import com.illinois.rts.simulator.ProgressUpdater;
 import com.illinois.rts.simulator.SimJob;
-import com.illinois.rts.visualizer.AppEvent;
-import com.illinois.rts.visualizer.EventContainer;
-import com.illinois.rts.visualizer.TaskContainer;
-import com.illinois.rts.visualizer.TaskIntervalEvent;
+import com.illinois.rts.visualizer.*;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -132,6 +130,12 @@ public class QuickRmScheduling {
 
 
     public void runSim(int tickLimit) {
+        GenerateRmTaskSet taskSetTest = new GenerateRmTaskSet();
+        if (taskSetTest.schedulabilityTest(taskContainer) == true)
+            ProgMsg.debugPutline("schedulable.");
+        else
+            ProgMsg.errPutline("not schedulable.");
+
         // Pre-schedule, turn tasks into jobs
         QuickRmSimJobContainer simJobContainer = preSchedule(tickLimit);
 

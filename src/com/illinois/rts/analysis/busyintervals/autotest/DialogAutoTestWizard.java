@@ -5,9 +5,7 @@ import com.illinois.rts.analysis.busyintervals.BusyIntervalContainer;
 import com.illinois.rts.analysis.busyintervals.Decomposition;
 import com.illinois.rts.analysis.busyintervals.QuickRmScheduling;
 import com.illinois.rts.framework.Task;
-import com.illinois.rts.simulator.GenerateRmTaskSet;
-import com.illinois.rts.simulator.RmScheduling;
-import com.illinois.rts.simulator.TaskSetFileHandler;
+import com.illinois.rts.simulator.*;
 import com.illinois.rts.utility.GuiUtility;
 import com.illinois.rts.visualizer.*;
 
@@ -22,6 +20,8 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
     private static int TEXTFIELD_COLUMN_SIZE = 5;
     private static int TABLE_COLUMN_WIDTH = 120;
     private static int TABLE_ROW_HEIGHT = 50;
+
+    private ProgressUpdater progressUpdater;    // It's initialized every time.
 
     private JPanel contentPane;
     private JButton btnStartAutoTest;
@@ -127,11 +127,12 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         logBuffer += taskSetFileHandler.generateTaskSetContainerLines(taskSetContainer);
         logBuffer += "@\r\n";
 
-        startAutoTest();
-
-        DialogLogOutput dialogLogOutput = new DialogLogOutput();
-        dialogLogOutput.put(logBuffer);
-        dialogLogOutput.showDialog(this);
+        Boolean isNotCancel = startAutoTest();
+        if (isNotCancel == true) {
+            DialogLogOutput dialogLogOutput = new DialogLogOutput();
+            dialogLogOutput.put(logBuffer);
+            dialogLogOutput.showDialog(this);
+        }
 
         //dispose();
     }
@@ -281,11 +282,43 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         this.pack();
     }
 
+    // With progress dialog
     private Boolean startAutoTest() {
-        if (taskSetContainer.size() == 0)
+        progressUpdater = new ProgressUpdater();
+        DialogSimulationProgress dialogSimulationProgress = new DialogSimulationProgress();
+        dialogSimulationProgress.setProgressUpdater(progressUpdater);
+
+        MainTestThread mainTestThread = new MainTestThread();
+        dialogSimulationProgress.setWatchedSimThread(mainTestThread);
+        mainTestThread.start();
+
+        dialogSimulationProgress.pack();
+
+        dialogSimulationProgress.setLocationRelativeTo(this);
+        dialogSimulationProgress.setVisible(true);
+
+        if ( (dialogSimulationProgress.isSimCanceled()==false) )//&&(rmSimThread.getSimResult()==true))
+        {
+            return true;
+        }
+        else
+        {
             return false;
+        }
+    }
+
+    private Boolean mainTest() {
+        progressUpdater.setIsFinished(false);
+        progressUpdater.setIsStarted(true);
+        if (taskSetContainer.size() == 0) {
+            progressUpdater.setIsFinished(true);
+            return false;
+        }
 
         int taskSetIndex = 1;
+        int failureCount = 0;
+        progressUpdater.setProgressPercent(0.0);
+        final int numOfTaskSet = taskSetContainer.getTaskContainers().size();
         for (TaskContainer thisTaskContainer : taskSetContainer.getTaskContainers()) {
             /* Start RM scheduling simulation */
             EventContainer thisEventContainer = null;
@@ -326,6 +359,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             } catch (RuntimeException rex) {
                 //rex.printStackTrace();
                 putLineLogBuffer("#%d TkSet: TERMINATE - " + rex.getMessage(), taskSetIndex);
+                failureCount++;
                 continue;
             }
 
@@ -333,6 +367,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                 putLineLogBuffer("#%d TkSet: SUCCESS", taskSetIndex);
             } else {
                 putLineLogBuffer("#%d TkSet: FAILED", taskSetIndex);
+                failureCount++;
             }
 
             /* This block of code is for outputting the busy intervals. */
@@ -355,12 +390,43 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 //                applyNewSettingsAndRePaint();
 
             taskSetIndex++;
+            progressUpdater.setProgressPercent((double)taskSetIndex / (double)numOfTaskSet);
         }
 
+        putLineLogBuffer("Summary: %d / %d failures.", failureCount, numOfTaskSet);
+
+        progressUpdater.setIsFinished(true);
         return true;
     }
 
     void putLineLogBuffer(String format, Object... args) {
         logBuffer += String.format(format + "\r\n", args);
+    }
+
+    class MainTestThread extends Thread
+    {
+        Boolean simResult = false;
+
+        public MainTestThread()
+        {
+            super();
+        }
+
+        public void run()
+        {
+            mainTest();
+            //dispose();
+        }
+
+        @Override
+        public void interrupt() {
+            super.interrupt();
+            System.out.println("Interrupted.");
+        }
+
+        //        public Boolean getSimResult()
+//        {
+//            return simResult;
+//        }
     }
 }

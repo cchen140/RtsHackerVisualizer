@@ -1,8 +1,10 @@
 package com.illinois.rts.simulator;
 
 import com.illinois.rts.framework.Task;
+import com.illinois.rts.visualizer.ProgMsg;
 import com.illinois.rts.visualizer.TaskContainer;
 import com.illinois.rts.visualizer.TaskSetContainer;
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -44,11 +46,11 @@ public class GenerateRmTaskSet {
         maxExecTime = 3_000_000; // 3 ms
         minExecTime = 300_000; // 0.1 ms
 
-        maxInitOffset = 10_000_000; // 10 ms
+        maxInitOffset = 0; // 0ms //10_000_000; // 10 ms
         minInitOffset = 0; // 0 ms
 
-        maxUtil = 0.7;
-        minUtil = 0.1;
+        maxUtil = 1;
+        minUtil = 0.9;
 
     }
 
@@ -123,35 +125,44 @@ public class GenerateRmTaskSet {
             task.setTitle("APP" + String.valueOf(i+1));
 
             int tempPeriod = (int) getRandom(minPeriod, maxPeriod);//TODO: maybe... 2^x 3^y 5^z
-            task.setPeriodNs(tempPeriod - tempPeriod % 50);
+            //task.setPeriodNs(tempPeriod - tempPeriod % 50);
 
+            // Round to 0.1ms (100us).
+            task.setPeriodNs(tempPeriod - tempPeriod % 100_000);
+            task.setDeadlineNs(task.getPeriodNs());
 
-            if (task.getPeriodNs() < maxExecTime)
-            {
+            int tempComputationTime;
+            if (task.getPeriodNs() < maxExecTime) {
                 if (minExecTime>task.getPeriodNs())
                     return null;
-                task.setComputationTimeNs( (int) getRandom(minExecTime, task.getPeriodNs()) );
+                tempComputationTime = (int) getRandom(minExecTime, task.getPeriodNs());
             }
-            else
-                task.setComputationTimeNs( (int) getRandom(minExecTime, maxExecTime) );
-
-            task.setDeadlineNs( task.getPeriodNs() );
+            else {
+                tempComputationTime = (int) getRandom(minExecTime, maxExecTime);
+            }
+            // Round to 0.1ms (100us).
+            task.setComputationTimeNs(tempComputationTime - tempComputationTime % 100_000);
 
             total_util += ( task.getComputationTimeNs() / (double)(task.getPeriodNs()));
 
             task.setTaskType(Task.TASK_TYPE_APP);
 
-            task.setInitialOffset((int) getRandom(minInitOffset, task.getPeriodNs()));
+            int tempInitialOffset = (int) getRandom(minInitOffset, Math.min(task.getPeriodNs(), maxInitOffset));
+            // Round to 0.1ms (100us).
+            task.setInitialOffset(tempInitialOffset - tempInitialOffset % 100_000);
 
-//            allTasks.add(task);
             taskContainer.addTask(task);
-
         }
 
         if (total_util>1)
             return null;
 
         if (total_util<minUtil || total_util>=maxUtil)
+            return null;
+
+        assignPriority(taskContainer);
+
+        if (schedulabilityTest(taskContainer) == false)
             return null;
 
 
@@ -210,5 +221,106 @@ public class GenerateRmTaskSet {
 //            e.printStackTrace();
 //        }
 //        return true;
+    }
+
+    static long GCD(long a, long b) {
+        long Remainder;
+
+        while (b != 0) {
+            Remainder = a % b;
+            a = b;
+            b = Remainder;
+        }
+
+        return a;
+    }
+
+    static long LCM(long a, long b) {
+        return a * b / GCD(a, b);
+    }
+
+    public Boolean schedulabilityTest(TaskContainer taskContainer) {
+        //int numTasks = taskContainer.getAppTasksAsArray().size();
+        for (Task thisTask : taskContainer.getAppTasksAsArray()) {
+            int thisWCRT = calc_WCRT(taskContainer, thisTask);
+            if (thisWCRT > thisTask.getDeadlineNs()) {
+                // unschedulable.
+                //ProgMsg.errPutline("%d > %d", thisWCRT, thisTask.getDeadlineNs());
+                return false;
+            } else {
+                //ProgMsg.sysPutLine("ok: %d < %d", thisWCRT, thisTask.getDeadlineNs());
+            }
+        }
+        return true;
+    }
+
+    // Code modified from Man-Ki's code
+    int calc_WCRT(TaskContainer taskContainer, Task task_i) {
+        int numItr = 0;
+        int Wi = task_i.getComputationTimeNs();
+        int prev_Wi = 0;
+
+        //int numTasks = taskContainer.getAppTasksAsArray().size();
+        while (true) {
+            int interference = 0;
+            for (Task thisTask : taskContainer.getAppTasksAsArray()) {
+                Task task_hp = thisTask;
+                if (task_hp.getPriority() <= task_i.getPriority())  // Priority: the bigger the higher
+                    continue;
+
+                int Tj = task_hp.getPeriodNs();
+                int Cj = task_hp.getComputationTimeNs();
+
+                interference += (int)myCeil((double)Wi / (double)Tj) * Cj;
+            }
+
+            Wi = task_i.getComputationTimeNs() + interference;
+
+            if (Integer.compare(Wi, prev_Wi) == 0)
+                return Wi;
+
+            prev_Wi = Wi;
+
+            numItr++;
+            if (numItr > 1000 || Wi < 0)
+                return Integer.MAX_VALUE;
+        }
+    }
+
+
+    // Code from Man-Ki
+    double myCeil(double val) {
+        double diff = Math.ceil(val) - val;
+        if (diff > 0.99999) {
+            ProgMsg.errPutline("###" + (val) + "###\t\t " + Math.ceil(val));
+            System.exit(-1);
+        }
+        return Math.ceil(val);
+    }
+
+    // The bigger the number the higher the priority
+    // When calling this function, the taskContainer should not contain idle task.
+    protected void assignPriority(TaskContainer taskContainer)
+    {
+        ArrayList<Task> allTasks = taskContainer.getTasksAsArray();
+        int numTasks = taskContainer.getAppTasksAsArray().size();
+
+        /* Assign priorities (RM) */
+        for (Task task_i : taskContainer.getAppTasksAsArray()) {
+            //Task task_i = allTasks.get(i);
+            int cnt = 1;    // 1 represents highest priority.
+            /* Get the priority by comparing other tasks. */
+            for (Task task_j : taskContainer.getAppTasksAsArray()) {
+                if (task_i.equals(task_j))
+                    continue;
+
+                //Task task_j = allTasks.get(j);
+                if (task_j.getPeriodNs() > task_i.getPeriodNs()
+                        || (task_j.getPeriodNs() == task_i.getPeriodNs() && task_j.getId() > task_i.getId())) {
+                    cnt++;
+                }
+            }
+            task_i.setPriority(cnt);
+        }
     }
 }
