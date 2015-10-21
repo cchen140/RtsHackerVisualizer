@@ -330,7 +330,11 @@ public class GuiMain implements ActionListener, MouseListener {
                 zPanel.getTraceGroupContainer().addTraceGroup(decompositionTraceGroup);
                 applyNewSettingsAndRePaint();
 
-                decomposition.amirDecomposition.verifySchedulingInference();
+                if (true == decomposition.amirDecomposition.verifySchedulingInference()) {
+                    ProgMsg.putLine("Inference of the schedules is correct and precise.");
+                } else {
+                    ProgMsg.errPutline("Inference of the schedules is incorrect.");
+                }
 
             }
             else
