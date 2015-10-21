@@ -149,6 +149,11 @@ public class GuiMain implements ActionListener, MouseListener {
         topMenuInstance.add(menuItemHackPlotCapturedBusyIntervals);
         menuItemHackPlotCapturedBusyIntervals.addActionListener(this);
 
+        menuItemBusyIntervalsRunAmir.setEnabled(false);
+        buttonTaskSetter.setEnabled(false);
+
+        menuItemHackPlotCapturedBusyIntervals.setEnabled(false);
+
 
         // Resize the button to fit the displayed string.
         GuiUtility.resizeJButtonByString(btnLaunchSimulator);
@@ -239,6 +244,7 @@ public class GuiMain implements ActionListener, MouseListener {
                     eventContainer = loadingEventContainer;
                     drawPlotFromEventContainer();
                     buttonTaskSetter.setEnabled(true);
+                    menuItemBusyIntervalsRunAmir.setEnabled(true);
                 }
             } catch (Exception ex) {
                 System.out.println("Error occurs while opening the file.");
@@ -287,6 +293,7 @@ public class GuiMain implements ActionListener, MouseListener {
                 eventContainer = dialogSimulationLauncher.getSimulationResultEventContainer();
                 drawPlotFromEventContainer();
                 buttonTaskSetter.setEnabled(true);
+                menuItemBusyIntervalsRunAmir.setEnabled(true);
             }
 
         } else if (e.getSource()==menuItemBusyIntervalsRunGe || e.getSource()==menuItemBusyIntervalsRunAmir) {
