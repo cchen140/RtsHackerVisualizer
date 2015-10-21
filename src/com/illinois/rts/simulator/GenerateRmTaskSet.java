@@ -2,6 +2,7 @@ package com.illinois.rts.simulator;
 
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.utility.GeneralUtility;
+import com.illinois.rts.visualizer.ProgConfig;
 import com.illinois.rts.visualizer.ProgMsg;
 import com.illinois.rts.visualizer.TaskContainer;
 import com.illinois.rts.visualizer.TaskSetContainer;
@@ -19,6 +20,8 @@ import java.util.Random;
  */
 public class GenerateRmTaskSet {
 //    private TaskSetContainer taskSetContainer = new TaskSetContainer();
+
+    static int resolution;
 
     static int minNumTasks;
     static int maxNumTasks;
@@ -41,11 +44,11 @@ public class GenerateRmTaskSet {
 
     public GenerateRmTaskSet() {
 
-        maxPeriod = 100_000_000; // 100 ms
-        minPeriod = 5_000_000;   // 5ms
+        maxPeriod = 100_000_000/ProgConfig.TIMESTAMP_UNIT_NS; // 100 ms
+        minPeriod = 5_000_000/ProgConfig.TIMESTAMP_UNIT_NS;   // 5ms
 
-        maxExecTime = 3_000_000; // 3 ms
-        minExecTime = 300_000; // 0.1 ms
+        maxExecTime = 3_000_000/ProgConfig.TIMESTAMP_UNIT_NS; // 3 ms
+        minExecTime = 100_000/ProgConfig.TIMESTAMP_UNIT_NS; // 0.1 ms
 
         maxInitOffset = 0; // 0ms //10_000_000; // 10 ms
         minInitOffset = 0; // 0 ms
@@ -129,7 +132,8 @@ public class GenerateRmTaskSet {
             //task.setPeriodNs(tempPeriod - tempPeriod % 50);
 
             // Round to 0.1ms (100us).
-            task.setPeriodNs(tempPeriod - tempPeriod % 100_000);
+            //task.setPeriodNs(tempPeriod - tempPeriod % 100_000);
+            task.setPeriodNs(tempPeriod);
             task.setDeadlineNs(task.getPeriodNs());
 
             int tempComputationTime;
@@ -142,7 +146,8 @@ public class GenerateRmTaskSet {
                 tempComputationTime = (int) getRandom(minExecTime, maxExecTime);
             }
             // Round to 0.1ms (100us).
-            task.setComputationTimeNs(tempComputationTime - tempComputationTime % 100_000);
+            //task.setComputationTimeNs(tempComputationTime - tempComputationTime % 100_000);
+            task.setComputationTimeNs(tempComputationTime);
 
             total_util += ( task.getComputationTimeNs() / (double)(task.getPeriodNs()));
 
@@ -150,7 +155,8 @@ public class GenerateRmTaskSet {
 
             int tempInitialOffset = (int) getRandom(minInitOffset, Math.min(task.getPeriodNs(), maxInitOffset));
             // Round to 0.1ms (100us).
-            task.setInitialOffset(tempInitialOffset - tempInitialOffset % 100_000);
+            //task.setInitialOffset(tempInitialOffset - tempInitialOffset % 100_000);
+            task.setInitialOffset(tempInitialOffset);
 
             taskContainer.addTask(task);
         }

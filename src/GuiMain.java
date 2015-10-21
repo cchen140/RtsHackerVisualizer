@@ -186,13 +186,13 @@ public class GuiMain implements ActionListener, MouseListener {
         zPanel.setHorizontalScrollBar(zPanelScrollBarHorizontal);
 
         /* Load default demo log file. */
-        try {
-            eventContainer = logLoader.loadDemoLog();
-            buttonTaskSetter.setEnabled(true);
-        } catch (Exception ex) {
-            System.err.println(ex);
-            //ex.printStackTrace();
-        }
+//        try {
+//            eventContainer = logLoader.loadDemoLog();
+//            buttonTaskSetter.setEnabled(true);
+//        } catch (Exception ex) {
+//            System.err.println(ex);
+//            //ex.printStackTrace();
+//        }
         drawPlotFromEventContainer();
 
 

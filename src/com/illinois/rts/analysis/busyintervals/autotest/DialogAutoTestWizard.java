@@ -252,7 +252,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
             int taskIndex = 1;
             for (Task thisTask : thisTaskContainer.getAppTaskAsArraySortedByPeriod()) {
-                tableTaskSets.setValueAt(thisTask.getComputationTimeNs()/1000 + "us/" + thisTask.getPeriodNs()/1000 + "us", rowIndex, taskIndex);
+                tableTaskSets.setValueAt(thisTask.getComputationTimeNs()*ProgConfig.TIMESTAMP_UNIT_NS/1000_000.0 + "ms/" + thisTask.getPeriodNs()*ProgConfig.TIMESTAMP_UNIT_NS/1000_000.0 + "ms", rowIndex, taskIndex);
                 taskIndex++;
             }
             rowIndex++;
@@ -323,7 +323,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             /* Start RM scheduling simulation */
             EventContainer thisEventContainer = null;
 
-            int simDurationNs = 1000000 * Integer.valueOf( inputSimDuration.getText() );
+            int simDurationNs = (int)(Double.valueOf( inputSimDuration.getText() ) * ProgConfig.TIMESTAMP_UNIT_MS_FACTOR);
 
             // Get task container from the panel with latest configurations.
             TaskContainer simTaskContainer = thisTaskContainer;

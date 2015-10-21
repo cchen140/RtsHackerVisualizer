@@ -32,7 +32,7 @@ public class CombinedTraceGroup extends TraceGroup {
         width = calculateWidth();
         height = calculateHeight();
 
-//        timeLine = new DrawTimeLine(eventContainer.getScaledEndTimestamp(), (int) ((ProgConfig.TIME_LINE_PERIOD_NS/ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER)/ProgConfig.TIMESTAMP_UNIT_NS));
+//        timeLine = new DrawTimeLine(eventContainer.getScaledEndTimestamp(), (int) ((ProgConfig.TIME_LINE_PERIOD_NS/ProgConfig.TRACE_HORIZONTAL_SCALE_FACTOR)/ProgConfig.LOG_TIMESTAMP_UNIT_NS));
 
         traceGap = new DrawTraceGap();
         traceGap.setFillColor(ProgConfig.TRACE_PANEL_BORDER_COLOR);

@@ -116,7 +116,7 @@ public class TraceGroupContainer {
         }
     }
 
-    public void applyHorizontalScale(int inScale)
+    public void applyHorizontalScale(double inScale)
     {
         for (TraceGroup thisTraceGroup : traceGroups)
         {
@@ -126,6 +126,8 @@ public class TraceGroupContainer {
 
     public int findOrgEndTimeStamp()
     {
+//        return findScaledEndTimeStamp();
+//        // TODO: Scale test
         int resultEndTimeStamp = 0;
         for (TraceGroup thisTraceGroup : traceGroups)
         {

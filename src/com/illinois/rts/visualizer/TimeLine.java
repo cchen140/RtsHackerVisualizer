@@ -7,10 +7,10 @@ import java.awt.*;
  */
 public class TimeLine extends DrawUnit {
     private static final int TIMELINE_MARKER_LENGTH = 6;
-    private int endTimestampNs = 0;
-    private int nsPerUnit = 1;
+    private int endTimestampOrg = 0;
+    private double countPerUnit = 1; // how many counts per TIMESTAMP_UNIT_NS
     private int periodInNs = 1;
-    private int numOfUnitInPeriod = 1;
+    private int unitPerPeriod = 1;
     private boolean displayMarkerLabels = true;
     private boolean displayMarkerLabelsInNorth = false;
 
@@ -28,34 +28,35 @@ public class TimeLine extends DrawUnit {
         copyTimeValues(inTimeLine);
     }
 
-    public void setTimeValues(int inEndTimestampNs, int inNsPerUnit, int inPeriodInNs)
+    public void setTimeValues(int inEndTimestampOrg, double inCountPerUnit, int inPeriodInNs)
     {
-        endTimestampNs = inEndTimestampNs;
-        nsPerUnit = inNsPerUnit;
+        endTimestampOrg = inEndTimestampOrg;
+        countPerUnit = inCountPerUnit;
         periodInNs = inPeriodInNs;
 
-        numOfUnitInPeriod = periodInNs / nsPerUnit;
+//        unitPerPeriod = (int) (periodInNs / countPerUnit);
+        unitPerPeriod = (int) (periodInNs/ProgConfig.TIMESTAMP_UNIT_NS);
     }
 
     public void copyTimeValues(TimeLine inTimeLine)
     {
-        setTimeValues(inTimeLine.getEndTimestampNs(), inTimeLine.getNsPerUnit(), inTimeLine.getPeriodInNs());
+        setTimeValues(inTimeLine.getEndTimestampOrg(), inTimeLine.getCountPerUnit(), inTimeLine.getPeriodInNs());
     }
 
 
     @Override
     protected void draw(Graphics2D g) {
         g.setColor(Color.black);
-        g.drawLine(offsetX, offsetY, offsetX+ endTimestampNs/nsPerUnit, offsetY);
-        g.fillOval(offsetX + 1 + endTimestampNs/nsPerUnit, offsetY-5, 10, 10);
+        g.drawLine(offsetX, offsetY, offsetX+ (int)((double) endTimestampOrg * countPerUnit), offsetY);
+        g.fillOval(offsetX + 1 + (int)((double) endTimestampOrg * countPerUnit), offsetY-5, 10, 10);
 
         /* Draw markers and labels */
-        for (int i=0, j=0; i<= endTimestampNs/ nsPerUnit; i+=numOfUnitInPeriod, j++)
+        for (int i=0, j=0; i<= endTimestampOrg; i+= unitPerPeriod, j++)
         {
-            g.drawLine(offsetX+i, offsetY+ TIMELINE_MARKER_LENGTH /2, offsetX+i, offsetY- TIMELINE_MARKER_LENGTH /2);
+            g.drawLine(offsetX+(int)(i*countPerUnit), offsetY+ TIMELINE_MARKER_LENGTH /2, offsetX+(int)(i*countPerUnit), offsetY- TIMELINE_MARKER_LENGTH /2);
 
             if (displayMarkerLabels == true) {
-                String timeString = nsToShortString(j*periodInNs);
+                String timeString = nsToShortString((long)j*(long)periodInNs);
                 g.setFont(new Font("TimesRoman", Font.PLAIN, 14));
 
                 /* Find the center point of the string to be drawn. */
@@ -64,19 +65,19 @@ public class TimeLine extends DrawUnit {
 
                 if (displayMarkerLabelsInNorth == true) {
                     // Display in north.
-                    g.drawString(timeString, offsetX + i - stringWidth / 2, offsetY - 5);
+                    g.drawString(timeString, offsetX + (int)(i*countPerUnit) - stringWidth / 2, offsetY - 5);
                 }
                 else {
                     // Display in south.
-                    g.drawString(timeString, offsetX + i - stringWidth / 2, offsetY + 20);
+                    g.drawString(timeString, offsetX + (int)(i*countPerUnit) - stringWidth / 2, offsetY + 20);
                 }
             }
         }
     }
 
-    public void setEndTimestampNs(int inEndTimestampeNs)
+    public void setEndTimestampOrg(int inEndTimestampeNs)
     {
-        endTimestampNs = inEndTimestampeNs;
+        endTimestampOrg = inEndTimestampeNs;
     }
     public void setDisplayMarkerLabels(boolean inDisplay)
     {
@@ -88,7 +89,7 @@ public class TimeLine extends DrawUnit {
         displayMarkerLabelsInNorth = inDisplay;
     }
 
-    protected String nsToShortString(int inValue)
+    protected String nsToShortString(long inValue)
     {
         String resultString = new String();
         if (inValue >= 1000000000)
@@ -113,13 +114,13 @@ public class TimeLine extends DrawUnit {
         }
     }
 
-    int getEndTimestampNs()
+    int getEndTimestampOrg()
     {
-        return endTimestampNs;
+        return endTimestampOrg;
     }
-    int getNsPerUnit()
+    double getCountPerUnit()
     {
-        return nsPerUnit;
+        return countPerUnit;
     }
     int getPeriodInNs()
     {

@@ -90,7 +90,7 @@ public class DialogSettings extends JDialog {
     {
         /* Trace Setting */
         textFieldTimeLineUnit.setText(String.valueOf(ProgConfig.TIME_LINE_PERIOD_NS));
-        textFieldHorizontalScale.setText(String.valueOf(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER));
+        textFieldHorizontalScale.setText(String.valueOf(ProgConfig.TRACE_HORIZONTAL_SCALE_FACTOR));
         checkBoxEnableSchedulerSummaryTrace.setSelected(ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE);
         checkBoxEnableSchedulerTaskTraces.setSelected(ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES);
 
@@ -106,7 +106,7 @@ public class DialogSettings extends JDialog {
     {
         /* Trace Setting */
         ProgConfig.TIME_LINE_PERIOD_NS = Integer.valueOf(textFieldTimeLineUnit.getText());
-        ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER = Integer.valueOf(textFieldHorizontalScale.getText());
+        ProgConfig.TRACE_HORIZONTAL_SCALE_FACTOR = Double.valueOf(textFieldHorizontalScale.getText());
         ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE = checkBoxEnableSchedulerSummaryTrace.isSelected();
         ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES = checkBoxEnableSchedulerTaskTraces.isSelected();
 

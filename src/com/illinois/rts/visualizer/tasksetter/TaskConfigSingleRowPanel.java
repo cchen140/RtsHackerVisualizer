@@ -1,6 +1,7 @@
 package com.illinois.rts.visualizer.tasksetter;
 
 import com.illinois.rts.framework.Task;
+import com.illinois.rts.utility.GeneralUtility;
 import com.illinois.rts.utility.GuiUtility;
 import com.illinois.rts.visualizer.ProgConfig;
 import sun.rmi.server.InactiveGroupException;
@@ -58,28 +59,28 @@ public class TaskConfigSingleRowPanel extends JPanel implements ActionListener {
         addSpaceComponent(COMPONENT_SPACE_LENGTH);
         addJLabelComponent("Period:");
 
-        inputPeriod.setText(String.valueOf(task.getPeriodNs()));
+        inputPeriod.setText(GeneralUtility.nanoIntToMilliString((long)task.getPeriodNs() * (long)ProgConfig.TIMESTAMP_UNIT_NS));
         inputPeriod.setColumns(TEXTFIELD_COLUMN_SIZE);
         this.add(inputPeriod);
-        addJLabelComponent("ns");
+        addJLabelComponent("ms");
 
         /* Computation time */
         addSpaceComponent(COMPONENT_SPACE_LENGTH);
         addJLabelComponent("Computation:");
 
-        inputComputation.setText(String.valueOf(task.getComputationTimeNs()));
+        inputComputation.setText(GeneralUtility.nanoIntToMilliString((long)task.getComputationTimeNs() * (long)ProgConfig.TIMESTAMP_UNIT_NS));
         inputComputation.setColumns(TEXTFIELD_COLUMN_SIZE);
         this.add(inputComputation);
-        addJLabelComponent("ns");
+        addJLabelComponent("ms");
 
         /* Initial offset */
         addSpaceComponent(COMPONENT_SPACE_LENGTH);
         addJLabelComponent("Initial Offset:");
 
-        inputInitialOffset.setText(String.valueOf(task.initialOffset));
+        inputInitialOffset.setText(GeneralUtility.nanoIntToMilliString((long)task.initialOffset * (long)ProgConfig.TIMESTAMP_UNIT_NS));
         inputInitialOffset.setColumns(TEXTFIELD_COLUMN_SIZE);
         this.add(inputInitialOffset);
-        addJLabelComponent("ns");
+        addJLabelComponent("ms");
 
         /* Priority */
         addSpaceComponent(COMPONENT_SPACE_LENGTH);
@@ -115,10 +116,10 @@ public class TaskConfigSingleRowPanel extends JPanel implements ActionListener {
     }
 
     public void applySettings() {
-        task.setTitle( inputName.getText() );
-        task.setPeriodNs(Integer.valueOf(inputPeriod.getText()));
-        task.setComputationTimeNs(Integer.valueOf(inputComputation.getText()));
-        task.initialOffset = Integer.valueOf(inputInitialOffset.getText());
+        task.setTitle(inputName.getText());
+        task.setPeriodNs((int) (Double.valueOf(inputPeriod.getText()) * (double)ProgConfig.TIMESTAMP_UNIT_MS_FACTOR));
+        task.setComputationTimeNs((int) (Double.valueOf(inputComputation.getText()) * (double)ProgConfig.TIMESTAMP_UNIT_MS_FACTOR));
+        task.initialOffset = (int) (Double.valueOf(inputInitialOffset.getText()) * (double)ProgConfig.TIMESTAMP_UNIT_MS_FACTOR);
         task.setPriority( Integer.valueOf(inputPriority.getText()) );
         task.setColor(inputColor.getBackground());
     }

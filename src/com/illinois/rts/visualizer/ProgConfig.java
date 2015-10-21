@@ -26,7 +26,9 @@ public class ProgConfig {
 
 
     /* Configuration from log */
-    public static double TIMESTAMP_UNIT_NS = 1; // 1 tick represents 1ns
+    public static double LOG_TIMESTAMP_UNIT_NS = 1; // 1 tick represents 1ns in log
+    public static int TIMESTAMP_UNIT_NS = 100_000; // 1 tick is 100 us
+    public static int TIMESTAMP_UNIT_MS_FACTOR = 1_000_000 / TIMESTAMP_UNIT_NS;
 
     /* Task list display */
     public static int TASK_LIST_CELL_MARGIN_Y = 6;
@@ -36,8 +38,8 @@ public class ProgConfig {
 
     /* Trace Settings */
     public static Color IDLE_TASK_COLOR = new Color(235, 235, 235); // lighter than light grey
-    public static int TRACE_HORIZONTAL_SCALE_DIVIDER = 30000;
-    public static int TIME_LINE_PERIOD_NS = 10000000; // 10ms
+    public static double TRACE_HORIZONTAL_SCALE_FACTOR = 5.0;// / (double)TIMESTAMP_UNIT_NS; how many counts per TIMESTAMP_UNIT_NS
+    public static int TIME_LINE_PERIOD_NS = 10_000_000; // 10ms
     public static int TRACE_HEIGHT = 80;
     public static int TRACE_MARGIN_Y = 10;
     public static int TRACE_PANEL_BORDER_WIDTH = 1;

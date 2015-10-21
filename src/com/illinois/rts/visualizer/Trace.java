@@ -21,7 +21,7 @@ public class Trace {
     private ArrayList eventArray = null;
     private TimeLine timeLine = null;
 
-//    public int getEndTimestampNs() {
+//    public int getEndTimestampOrg() {
 //        return endTimestampNs;
 //    }
 
@@ -65,7 +65,7 @@ public class Trace {
         timeLine = inTimeLine;
 
         endTimestampNs = findOrgEndTimestampNs();
-        timeLine.setEndTimestampNs(endTimestampNs);
+        timeLine.setEndTimestampOrg(endTimestampNs);
 
         traceSpace = calculateTraceSpace();
     }
@@ -201,7 +201,7 @@ public class Trace {
         return traceSpace.getHeight() + marginY*2;
     }
 
-    public void applyHorizontalScale(int inScale)
+    public void applyHorizontalScale(double inScale)
     {
         for (Object thisEvent : eventArray) {
             ((Event)thisEvent).applyScaleX(inScale);

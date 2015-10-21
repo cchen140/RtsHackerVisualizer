@@ -82,7 +82,7 @@ public class MainDisplayPanel extends JPanel {
     public void setEventContainer(EventContainer inputEventContainer)
     {
         eventContainer = inputEventContainer;
-        topTimeLine.setEndTimestampNs(eventContainer.getOrgEndTimestampNs());
+        topTimeLine.setEndTimestampOrg(eventContainer.getOrgEndTimestampNs());
 
         /* Update trace group container. */
         traceGroupContainer.clear();
@@ -106,17 +106,17 @@ public class MainDisplayPanel extends JPanel {
         traceGroupContainer.setMargin(ProgConfig.VIRTUAL_PANEL_MARGIN_X, ProgConfig.VIRTUAL_PANEL_MARGIN_Y);
 //        combinedTraceGroup.setMarginX(ProgConfig.VIRTUAL_PANEL_MARGIN_X);
 //        combinedTraceGroup.setMarginY(ProgConfig.VIRTUAL_PANEL_MARGIN_Y);
-////            combinedTraceGroup.setScaleX(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
+////            combinedTraceGroup.setScaleX(ProgConfig.TRACE_HORIZONTAL_SCALE_FACTOR);
 
         traceGroupContainer.setTraceMarginY(ProgConfig.TRACE_MARGIN_Y);
 //        combinedTraceGroup.updateTraceMarginY(ProgConfig.TRACE_MARGIN_Y);
 
-//        eventContainer.applyHorizontalScale(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
-        traceGroupContainer.applyHorizontalScale(ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER);
+//        eventContainer.applyHorizontalScale(ProgConfig.TRACE_HORIZONTAL_SCALE_FACTOR);
+        traceGroupContainer.applyHorizontalScale(ProgConfig.TRACE_HORIZONTAL_SCALE_FACTOR);
 
         /* Update time line. */
-//        topTimeLine.setTimeValues(eventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
-        topTimeLine.setTimeValues(traceGroupContainer.findOrgEndTimeStamp(), ProgConfig.TRACE_HORIZONTAL_SCALE_DIVIDER, ProgConfig.TIME_LINE_PERIOD_NS);
+//        topTimeLine.setTimeValues(eventContainer.getOrgEndTimestampNs(), ProgConfig.TRACE_HORIZONTAL_SCALE_FACTOR, ProgConfig.TIME_LINE_PERIOD_NS);
+        topTimeLine.setTimeValues(traceGroupContainer.findOrgEndTimeStamp(), ProgConfig.TRACE_HORIZONTAL_SCALE_FACTOR, ProgConfig.TIME_LINE_PERIOD_NS);
         traceGroupContainer.setTimeLine(topTimeLine);
         timeLinePanel.getTimeLine().copyTimeValues(topTimeLine);
 

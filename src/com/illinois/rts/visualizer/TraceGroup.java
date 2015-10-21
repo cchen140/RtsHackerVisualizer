@@ -190,7 +190,7 @@ public class TraceGroup {
         }
     }
 
-    public void applyHorizontalScale(int inScale)
+    public void applyHorizontalScale(double inScale)
     {
         for (Trace currentTrace : traces)
         {

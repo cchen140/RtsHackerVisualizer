@@ -128,7 +128,7 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
             /* Run simulation */
 
             // Simulation duration.
-            int simDurationNs = 1000000* Integer.valueOf( inputSimDuration.getText() ); // ms to ns
+            int simDuration = (int) (Double.valueOf( inputSimDuration.getText() ) * ProgConfig.TIMESTAMP_UNIT_MS_FACTOR); // ms to default unit
 
             // Get task container from the panel with latest configurations.
             TaskContainer simTaskContainer = taskSetterPanel.getTaskContainerWithLatestConfigs();
@@ -140,7 +140,7 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
                 //RmScheduling rmScheduling = new RmScheduling();
                 //rmScheduling.setTaskContainer(simTaskContainer);
                 QuickRmScheduling quickRmScheduling = new QuickRmScheduling(simTaskContainer);
-                if (quickRmScheduling.runSimWithProgressDialog(simDurationNs, this) == true)
+                if (quickRmScheduling.runSimWithProgressDialog(simDuration, this) == true)
                 {
                     simResultEventContainer = quickRmScheduling.getSimEventContainer();
                     if ( simResultEventContainer != null ) {

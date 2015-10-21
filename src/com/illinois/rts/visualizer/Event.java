@@ -39,10 +39,10 @@ public abstract class Event {
     public abstract void drawEvent(Graphics2D g, int offsetX, int offsetY);
     public abstract TraceSpace getGraphSpace();
 
-    public void applyScaleX(int inScaleX)
+    public void applyScaleX(double inScaleX)
     {
-        scaledBeginTimestamp = orgBeginTimestampNs /inScaleX;
-        scaledEndTimestamp = orgEndTimestampNs /inScaleX;
+        scaledBeginTimestamp = (int) (orgBeginTimestampNs * inScaleX);
+        scaledEndTimestamp = (int) (orgEndTimestampNs * inScaleX);
     }
 
     protected void drawArrow(Graphics g1, int x1, int y1, int x2, int y2) {
