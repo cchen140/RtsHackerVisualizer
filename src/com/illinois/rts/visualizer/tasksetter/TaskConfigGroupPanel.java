@@ -44,6 +44,8 @@ public class TaskConfigGroupPanel extends JPanel implements ActionListener {
     }
 
     public void setTaskContainer(TaskContainer inTaskContainer) {
+        if (inTaskContainer.size()==0)
+            return;
 
         /* Clear all existed components. */
         this.removeAll();

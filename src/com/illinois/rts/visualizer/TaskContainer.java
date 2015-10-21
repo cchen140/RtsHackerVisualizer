@@ -82,7 +82,7 @@ public class TaskContainer {
         }
         maxId++;
 
-        addTask(maxId, "Task" + maxId, Task.TASK_TYPE_APP, 10000000, 10000000, 100000, 0);
+        addTask(maxId, "Task" + maxId, Task.TASK_TYPE_APP, 10*ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER, 10*ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER, 1*ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER, 0);
         return getTaskById(maxId);
     }
 
