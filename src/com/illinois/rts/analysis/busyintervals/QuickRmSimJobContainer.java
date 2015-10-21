@@ -12,7 +12,7 @@ public class QuickRmSimJobContainer {
 
     public void add( SimJob inJob )
     {
-        jobs.add( inJob );
+        jobs.add(inJob);
     }
 
 
@@ -61,7 +61,8 @@ public class QuickRmSimJobContainer {
             }
 
             // Among those jobs that have higher priority, find the earliest one.
-            if ( thisJob.releaseTime<=nextHighJob.releaseTime ) {
+            if ( thisJob.releaseTime<nextHighJob.releaseTime
+                    || ( thisJob.releaseTime==nextHighJob.releaseTime && thisJob.task.getPriority()>nextHighJob.task.getPriority() )) {
                 nextHighJob = thisJob;
             }
         }
