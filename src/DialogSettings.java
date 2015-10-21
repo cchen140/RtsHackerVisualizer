@@ -1,5 +1,6 @@
 import com.illinois.rts.utility.GuiUtility;
 import com.illinois.rts.visualizer.ProgConfig;
+import com.illinois.rts.visualizer.ProgMsg;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -17,6 +18,7 @@ public class DialogSettings extends JDialog {
     private JTextField textFieldVirtualPanelMarginY;
     private JTextField textFieldVirtualPanelMarginX;
     private JTextField textFieldHorizontalScale;
+    private JTextField textFieldTimestampUnitNs;
 
     private static DialogSettings instance = null;
 
@@ -89,7 +91,8 @@ public class DialogSettings extends JDialog {
     public void updateDialog()
     {
         /* Trace Setting */
-        textFieldTimeLineUnit.setText(String.valueOf(ProgConfig.TIME_LINE_PERIOD_NS));
+        textFieldTimestampUnitNs.setText(String.valueOf(ProgConfig.TIMESTAMP_UNIT_NS));
+        textFieldTimeLineUnit.setText(String.valueOf(ProgConfig.TIME_LINE_PERIOD_NS/1000_000.0));
         textFieldHorizontalScale.setText(String.valueOf(ProgConfig.TRACE_HORIZONTAL_SCALE_FACTOR));
         checkBoxEnableSchedulerSummaryTrace.setSelected(ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE);
         checkBoxEnableSchedulerTaskTraces.setSelected(ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES);
@@ -105,7 +108,8 @@ public class DialogSettings extends JDialog {
     public void applySettings()
     {
         /* Trace Setting */
-        ProgConfig.TIME_LINE_PERIOD_NS = Integer.valueOf(textFieldTimeLineUnit.getText());
+        ProgConfig.setTimestampUnitNs(Integer.valueOf(textFieldTimestampUnitNs.getText()));
+        ProgConfig.TIME_LINE_PERIOD_NS = (int) (Double.valueOf(textFieldTimeLineUnit.getText())*1000_000);
         ProgConfig.TRACE_HORIZONTAL_SCALE_FACTOR = Double.valueOf(textFieldHorizontalScale.getText());
         ProgConfig.DISPLAY_SCHEDULER_SUMMARY_TRACE = checkBoxEnableSchedulerSummaryTrace.isSelected();
         ProgConfig.DISPLAY_SCHEDULER_TASK_TRACES = checkBoxEnableSchedulerTaskTraces.isSelected();

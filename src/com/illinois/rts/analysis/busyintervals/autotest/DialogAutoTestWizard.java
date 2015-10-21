@@ -2,7 +2,6 @@ package com.illinois.rts.analysis.busyintervals.autotest;
 
 import com.illinois.rts.analysis.busyintervals.AmirDecomposition;
 import com.illinois.rts.analysis.busyintervals.BusyIntervalContainer;
-import com.illinois.rts.analysis.busyintervals.Decomposition;
 import com.illinois.rts.analysis.busyintervals.QuickRmScheduling;
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.simulator.*;
@@ -123,6 +122,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         /* Put task set info in logBuffer */
         TaskSetFileHandler taskSetFileHandler = new TaskSetFileHandler();
+        logBuffer += taskSetFileHandler.generateProgConfigLines();
         logBuffer += taskSetFileHandler.generateTaskParamsLines();
         logBuffer += taskSetFileHandler.generateTaskSetContainerLines(taskSetContainer);
         logBuffer += "@\r\n";
@@ -323,7 +323,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             /* Start RM scheduling simulation */
             EventContainer thisEventContainer = null;
 
-            int simDurationNs = (int)(Double.valueOf( inputSimDuration.getText() ) * ProgConfig.TIMESTAMP_UNIT_MS_FACTOR);
+            int simDurationNs = (int)(Double.valueOf( inputSimDuration.getText() ) * ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER);
 
             // Get task container from the panel with latest configurations.
             TaskContainer simTaskContainer = thisTaskContainer;

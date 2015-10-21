@@ -131,9 +131,9 @@ public class GenerateRmTaskSet {
             int tempPeriod = (int) getRandom(minPeriod, maxPeriod);//TODO: maybe... 2^x 3^y 5^z
             //task.setPeriodNs(tempPeriod - tempPeriod % 50);
 
-            // Round to 0.1ms (100us).
-            //task.setPeriodNs(tempPeriod - tempPeriod % 100_000);
-            task.setPeriodNs(tempPeriod);
+            // Round to 1ms.
+            task.setPeriodNs(tempPeriod - tempPeriod % (1 * ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER));
+            //task.setPeriodNs(tempPeriod);
             task.setDeadlineNs(task.getPeriodNs());
 
             int tempComputationTime;
@@ -167,13 +167,13 @@ public class GenerateRmTaskSet {
         if (total_util<minUtil || total_util>=maxUtil)
             return null;
 
-        assignPriority(taskContainer);
+        taskContainer.assignPriorityRm();
 
-        if (schedulabilityTest(taskContainer) == false)
+        if (taskContainer.schedulabilityTest() == false)
             return null;
 
 
-        ProgMsg.debugPutline(GeneralUtility.nanoIntToMilliString(calHyperPeriod(taskContainer)));
+        ProgMsg.debugPutline(GeneralUtility.nanoIntToMilliString(taskContainer.calHyperPeriod()));
 
 //        int[][] sl = new int[numTasks][numTasks];
 //        for (int i=0; i<numTasks; i++)
@@ -232,112 +232,112 @@ public class GenerateRmTaskSet {
 //        return true;
     }
 
-    static long GCD(long a, long b) {
-        long Remainder;
-
-        while (b != 0) {
-            Remainder = a % b;
-            a = b;
-            b = Remainder;
-        }
-
-        return a;
-    }
-
-    static long LCM(long a, long b) {
-        return a * b / GCD(a, b);
-    }
-
-    public long calHyperPeriod(TaskContainer taskContainer) {
-        long hyperPeriod = 1;
-        for (Task thisTask : taskContainer.getAppTasksAsArray()) {
-            hyperPeriod = LCM(hyperPeriod, thisTask.getPeriodNs());
-        }
-        return hyperPeriod;
-    }
-
-    public Boolean schedulabilityTest(TaskContainer taskContainer) {
-        //int numTasks = taskContainer.getAppTasksAsArray().size();
-        for (Task thisTask : taskContainer.getAppTasksAsArray()) {
-            int thisWCRT = calc_WCRT(taskContainer, thisTask);
-            if (thisWCRT > thisTask.getDeadlineNs()) {
-                // unschedulable.
-                //ProgMsg.errPutline("%d > %d", thisWCRT, thisTask.getDeadlineNs());
-                return false;
-            } else {
-                //ProgMsg.sysPutLine("ok: %d < %d", thisWCRT, thisTask.getDeadlineNs());
-            }
-        }
-        return true;
-    }
-
-    // Code modified from Man-Ki's code
-    int calc_WCRT(TaskContainer taskContainer, Task task_i) {
-        int numItr = 0;
-        int Wi = task_i.getComputationTimeNs();
-        int prev_Wi = 0;
-
-        //int numTasks = taskContainer.getAppTasksAsArray().size();
-        while (true) {
-            int interference = 0;
-            for (Task thisTask : taskContainer.getAppTasksAsArray()) {
-                Task task_hp = thisTask;
-                if (task_hp.getPriority() <= task_i.getPriority())  // Priority: the bigger the higher
-                    continue;
-
-                int Tj = task_hp.getPeriodNs();
-                int Cj = task_hp.getComputationTimeNs();
-
-                interference += (int)myCeil((double)Wi / (double)Tj) * Cj;
-            }
-
-            Wi = task_i.getComputationTimeNs() + interference;
-
-            if (Integer.compare(Wi, prev_Wi) == 0)
-                return Wi;
-
-            prev_Wi = Wi;
-
-            numItr++;
-            if (numItr > 1000 || Wi < 0)
-                return Integer.MAX_VALUE;
-        }
-    }
-
-
-    // Code from Man-Ki
-    double myCeil(double val) {
-        double diff = Math.ceil(val) - val;
-        if (diff > 0.99999) {
-            ProgMsg.errPutline("###" + (val) + "###\t\t " + Math.ceil(val));
-            System.exit(-1);
-        }
-        return Math.ceil(val);
-    }
-
-    // The bigger the number the higher the priority
-    // When calling this function, the taskContainer should not contain idle task.
-    protected void assignPriority(TaskContainer taskContainer)
-    {
-        ArrayList<Task> allTasks = taskContainer.getTasksAsArray();
-        int numTasks = taskContainer.getAppTasksAsArray().size();
-
-        /* Assign priorities (RM) */
-        for (Task task_i : taskContainer.getAppTasksAsArray()) {
-            //Task task_i = allTasks.get(i);
-            int cnt = 1;    // 1 represents highest priority.
-            /* Get the priority by comparing other tasks. */
-            for (Task task_j : taskContainer.getAppTasksAsArray()) {
-                if (task_i.equals(task_j))
-                    continue;
-
-                //Task task_j = allTasks.get(j);
-                if (task_j.getPeriodNs() > task_i.getPeriodNs()
-                        || (task_j.getPeriodNs() == task_i.getPeriodNs() && task_j.getId() > task_i.getId())) {
-                    cnt++;
-                }
-            }
-            task_i.setPriority(cnt);
-        }
-    }
+//    static long GCD(long a, long b) {
+//        long Remainder;
+//
+//        while (b != 0) {
+//            Remainder = a % b;
+//            a = b;
+//            b = Remainder;
+//        }
+//
+//        return a;
+//    }
+//
+//    static long LCM(long a, long b) {
+//        return a * b / GCD(a, b);
+//    }
+//
+//    public long calHyperPeriod(TaskContainer taskContainer) {
+//        long hyperPeriod = 1;
+//        for (Task thisTask : taskContainer.getAppTasksAsArray()) {
+//            hyperPeriod = LCM(hyperPeriod, thisTask.getPeriodNs());
+//        }
+//        return hyperPeriod;
+//    }
+//
+//    public Boolean schedulabilityTest(TaskContainer taskContainer) {
+//        //int numTasks = taskContainer.getAppTasksAsArray().size();
+//        for (Task thisTask : taskContainer.getAppTasksAsArray()) {
+//            int thisWCRT = calc_WCRT(taskContainer, thisTask);
+//            if (thisWCRT > thisTask.getDeadlineNs()) {
+//                // unschedulable.
+//                //ProgMsg.errPutline("%d > %d", thisWCRT, thisTask.getDeadlineNs());
+//                return false;
+//            } else {
+//                //ProgMsg.sysPutLine("ok: %d < %d", thisWCRT, thisTask.getDeadlineNs());
+//            }
+//        }
+//        return true;
+//    }
+//
+//    // Code modified from Man-Ki's code
+//    int calc_WCRT(TaskContainer taskContainer, Task task_i) {
+//        int numItr = 0;
+//        int Wi = task_i.getComputationTimeNs();
+//        int prev_Wi = 0;
+//
+//        //int numTasks = taskContainer.getAppTasksAsArray().size();
+//        while (true) {
+//            int interference = 0;
+//            for (Task thisTask : taskContainer.getAppTasksAsArray()) {
+//                Task task_hp = thisTask;
+//                if (task_hp.getPriority() <= task_i.getPriority())  // Priority: the bigger the higher
+//                    continue;
+//
+//                int Tj = task_hp.getPeriodNs();
+//                int Cj = task_hp.getComputationTimeNs();
+//
+//                interference += (int)myCeil((double)Wi / (double)Tj) * Cj;
+//            }
+//
+//            Wi = task_i.getComputationTimeNs() + interference;
+//
+//            if (Integer.compare(Wi, prev_Wi) == 0)
+//                return Wi;
+//
+//            prev_Wi = Wi;
+//
+//            numItr++;
+//            if (numItr > 1000 || Wi < 0)
+//                return Integer.MAX_VALUE;
+//        }
+//    }
+//
+//
+//    // Code from Man-Ki
+//    double myCeil(double val) {
+//        double diff = Math.ceil(val) - val;
+//        if (diff > 0.99999) {
+//            ProgMsg.errPutline("###" + (val) + "###\t\t " + Math.ceil(val));
+//            System.exit(-1);
+//        }
+//        return Math.ceil(val);
+//    }
+//
+//    // The bigger the number the higher the priority
+//    // When calling this function, the taskContainer should not contain idle task.
+//    protected void assignPriority(TaskContainer taskContainer)
+//    {
+//        ArrayList<Task> allTasks = taskContainer.getTasksAsArray();
+//        int numTasks = taskContainer.getAppTasksAsArray().size();
+//
+//        /* Assign priorities (RM) */
+//        for (Task task_i : taskContainer.getAppTasksAsArray()) {
+//            //Task task_i = allTasks.get(i);
+//            int cnt = 1;    // 1 represents highest priority.
+//            /* Get the priority by comparing other tasks. */
+//            for (Task task_j : taskContainer.getAppTasksAsArray()) {
+//                if (task_i.equals(task_j))
+//                    continue;
+//
+//                //Task task_j = allTasks.get(j);
+//                if (task_j.getPeriodNs() > task_i.getPeriodNs()
+//                        || (task_j.getPeriodNs() == task_i.getPeriodNs() && task_j.getId() > task_i.getId())) {
+//                    cnt++;
+//                }
+//            }
+//            task_i.setPriority(cnt);
+//        }
+//    }
 }

@@ -1,5 +1,7 @@
 package com.illinois.rts.visualizer;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import java.awt.*;
 
 /**
@@ -28,7 +30,8 @@ public class ProgConfig {
     /* Configuration from log */
     public static double LOG_TIMESTAMP_UNIT_NS = 1; // 1 tick represents 1ns in log
     public static int TIMESTAMP_UNIT_NS = 100_000; // 1 tick is 100 us
-    public static int TIMESTAMP_UNIT_MS_FACTOR = 1_000_000 / TIMESTAMP_UNIT_NS;
+    public static int TIMESTAMP_MS_TO_UNIT_MULTIPLIER = 1_000_000 / TIMESTAMP_UNIT_NS;
+    public static int TIMESTAMP_UNIT_TO_MS_MULTIPLIER = TIMESTAMP_UNIT_NS / 1_000_000;
 
     /* Task list display */
     public static int TASK_LIST_CELL_MARGIN_Y = 6;
@@ -71,4 +74,22 @@ public class ProgConfig {
     public static boolean DISPLAY_SCHEDULER_TASK_TRACES = true;
 
 
+    public static Boolean assignValueByVariableName(String varName, String valString) {
+        if (varName.equalsIgnoreCase("TIMESTAMP_UNIT_NS")) {
+            ProgMsg.sysPutLine("TIMESTAMP_UNIT_NS = %d -> %d", TIMESTAMP_UNIT_NS, Integer.valueOf(valString.replace("_", "")));
+            setTimestampUnitNs( Integer.valueOf( valString.replace("_", "") ) );
+        } else if (varName.equalsIgnoreCase("TRACE_HORIZONTAL_SCALE_FACTOR")){
+            TRACE_HORIZONTAL_SCALE_FACTOR = Double.valueOf( valString.replace("_", ""));
+        } else {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static void setTimestampUnitNs(int val) {
+        TIMESTAMP_UNIT_NS = val;
+        TIMESTAMP_MS_TO_UNIT_MULTIPLIER = 1_000_000 / TIMESTAMP_UNIT_NS;
+        TIMESTAMP_UNIT_TO_MS_MULTIPLIER = TIMESTAMP_UNIT_NS / 1_000_000;
+    }
 }

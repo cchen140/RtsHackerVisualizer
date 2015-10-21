@@ -4,10 +4,8 @@ import com.illinois.rts.framework.Task;
 import com.illinois.rts.utility.GeneralUtility;
 import com.illinois.rts.utility.GuiUtility;
 import com.illinois.rts.visualizer.ProgConfig;
-import sun.rmi.server.InactiveGroupException;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -117,9 +115,9 @@ public class TaskConfigSingleRowPanel extends JPanel implements ActionListener {
 
     public void applySettings() {
         task.setTitle(inputName.getText());
-        task.setPeriodNs((int) (Double.valueOf(inputPeriod.getText()) * (double)ProgConfig.TIMESTAMP_UNIT_MS_FACTOR));
-        task.setComputationTimeNs((int) (Double.valueOf(inputComputation.getText()) * (double)ProgConfig.TIMESTAMP_UNIT_MS_FACTOR));
-        task.initialOffset = (int) (Double.valueOf(inputInitialOffset.getText()) * (double)ProgConfig.TIMESTAMP_UNIT_MS_FACTOR);
+        task.setPeriodNs((int) (Double.valueOf(inputPeriod.getText()) * (double)ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER));
+        task.setComputationTimeNs((int) (Double.valueOf(inputComputation.getText()) * (double)ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER));
+        task.initialOffset = (int) (Double.valueOf(inputInitialOffset.getText()) * (double)ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER);
         task.setPriority( Integer.valueOf(inputPriority.getText()) );
         task.setColor(inputColor.getBackground());
     }

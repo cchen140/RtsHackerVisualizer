@@ -3,10 +3,7 @@ package com.illinois.rts.simulator;
 import com.illinois.rts.analysis.busyintervals.QuickRmScheduling;
 import com.illinois.rts.utility.GeneralUtility;
 import com.illinois.rts.utility.GuiUtility;
-import com.illinois.rts.visualizer.EventContainer;
-import com.illinois.rts.visualizer.ProgConfig;
-import com.illinois.rts.visualizer.TaskContainer;
-import com.illinois.rts.visualizer.TaskSetContainer;
+import com.illinois.rts.visualizer.*;
 import com.illinois.rts.visualizer.tasksetter.TaskConfigGroupPanel;
 
 import javax.swing.*;
@@ -108,6 +105,7 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
     }
 
     public void setTaskContainer(TaskContainer inTaskContainer) {
+        ProgMsg.debugPutline("HyperPeriod = " + String.valueOf((inTaskContainer.calHyperPeriod()/1000_000.0)*(double)ProgConfig.TIMESTAMP_UNIT_NS) + " ms");
         taskSetterPanel.setTaskContainer(inTaskContainer);
     }
 
@@ -128,7 +126,7 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
             /* Run simulation */
 
             // Simulation duration.
-            int simDuration = (int) (Double.valueOf( inputSimDuration.getText() ) * ProgConfig.TIMESTAMP_UNIT_MS_FACTOR); // ms to default unit
+            int simDuration = (int) (Double.valueOf( inputSimDuration.getText() ) * ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER); // ms to default unit
 
             // Get task container from the panel with latest configurations.
             TaskContainer simTaskContainer = taskSetterPanel.getTaskContainerWithLatestConfigs();

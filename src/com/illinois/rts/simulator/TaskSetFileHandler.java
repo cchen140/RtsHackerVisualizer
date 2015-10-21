@@ -19,6 +19,7 @@ public class TaskSetFileHandler extends DialogFileHandler {
     private static final int CONFIG_BLOCK_UNKNOWN = 0;
     private static final int CONFIG_BLOCK_TASK_PARAMETERS = 1;
     private static final int CONFIG_BLOCK_TASK_LIST = 2;
+    private static final int CONFIG_BLOCK_PROG_CONFIG = 3;
 
     private ArrayList<Integer> defaultTaskParamOrder = new ArrayList<>();
     private HashMap<Integer, String> taskParamString = new HashMap<>();
@@ -136,6 +137,10 @@ public class TaskSetFileHandler extends DialogFileHandler {
                     currentLogBlock = CONFIG_BLOCK_TASK_PARAMETERS;
                     continue;
                 }
+                else if (line.trim().toLowerCase().equalsIgnoreCase("@ProgConfig")) {
+                    currentLogBlock = CONFIG_BLOCK_PROG_CONFIG;
+                    continue;
+                }
                 else if (line.trim().toLowerCase().contains("@TaskList".toLowerCase())) {
                     currentLogBlock = CONFIG_BLOCK_TASK_LIST;    // Reading task list block
                     currentTaskContainer = new TaskContainer();
@@ -162,6 +167,9 @@ public class TaskSetFileHandler extends DialogFileHandler {
                         break;
                     case CONFIG_BLOCK_TASK_PARAMETERS:
                         parseTaskParametersLine(line);
+                        break;
+                    case CONFIG_BLOCK_PROG_CONFIG:
+                        parseProgConfigLine(line);
                         break;
                     case CONFIG_BLOCK_UNKNOWN:  // Current parse as comments.
                     default:
@@ -197,6 +205,16 @@ public class TaskSetFileHandler extends DialogFileHandler {
             customTaskParamOrder.add(taskParamStringToTypeInt(thisString.trim().substring(1)));
         }
         return true;
+    }
+
+    private Boolean parseProgConfigLine(String line) {
+        String splitStrings[] = line.split("=");
+        if (splitStrings.length == 2) {
+            return ProgConfig.assignValueByVariableName(splitStrings[0].trim().substring(1), splitStrings[1].trim());
+        } else {
+            ProgMsg.errPutline("Invalid ProgConfig line: \"" + line + "\"");
+            return false;
+        }
     }
 
     /**
@@ -375,9 +393,26 @@ public class TaskSetFileHandler extends DialogFileHandler {
         return outputLines;
     }
 
+    public String generateProgConfigLines() {
+        String outputLines = "";
+
+        outputLines += "@ProgConfig";
+        outputLines += "\r\n";
+
+        outputLines += "$TIMESTAMP_UNIT_NS = " + String.valueOf(ProgConfig.TIMESTAMP_UNIT_NS);
+        outputLines += "\r\n";
+
+        outputLines += "$TRACE_HORIZONTAL_SCALE_FACTOR = " + String.valueOf(ProgConfig.TRACE_HORIZONTAL_SCALE_FACTOR);
+        outputLines += "\r\n";
+
+        return outputLines;
+    }
+
     protected Boolean writeTaskSetsToFile(TaskSetContainer inTaskSets, BufferedWriter inFileWriter)
     {
         String outputLines = "";
+
+        outputLines += generateProgConfigLines();
 
 //        outputLines += "@TaskParameters";
 //        outputLines += "\r\n";

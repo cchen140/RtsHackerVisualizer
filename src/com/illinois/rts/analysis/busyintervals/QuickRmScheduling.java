@@ -138,8 +138,7 @@ public class QuickRmScheduling {
 
 
     public void runSim(int tickLimit) {
-        GenerateRmTaskSet taskSetTest = new GenerateRmTaskSet();
-        if (taskSetTest.schedulabilityTest(taskContainer) == true)
+        if (taskContainer.schedulabilityTest() == true)
             ProgMsg.debugPutline("schedulable.");
         else
             ProgMsg.errPutline("not schedulable.");

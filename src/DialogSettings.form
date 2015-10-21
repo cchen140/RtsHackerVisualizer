@@ -85,7 +85,7 @@
           <title-color color="-16777216"/>
         </border>
         <children>
-          <grid id="26461" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="26461" layout-manager="GridLayoutManager" row-count="5" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="10" left="5" bottom="0" right="5"/>
             <constraints>
               <tabbedpane title="Trace Settings"/>
@@ -95,13 +95,13 @@
             <children>
               <vspacer id="898fa">
                 <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                 </constraints>
               </vspacer>
               <grid id="9e50f" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="5" bottom="10" right="5"/>
                 <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
                 <border type="etched"/>
@@ -260,7 +260,7 @@
               </grid>
               <splitpane id="f0bbd">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false">
                     <preferred-size width="200" height="-1"/>
                   </grid>
                 </constraints>
@@ -287,7 +287,7 @@
                         </constraints>
                         <properties>
                           <font size="18" style="0"/>
-                          <text value="Time Line Period (ns)"/>
+                          <text value="Time Line Period (ms)"/>
                         </properties>
                       </component>
                     </children>
@@ -305,7 +305,7 @@
                       <component id="2a0b4" class="javax.swing.JTextField" binding="textFieldTimeLineUnit">
                         <constraints>
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false">
-                            <preferred-size width="50" height="-1"/>
+                            <preferred-size width="100" height="-1"/>
                           </grid>
                         </constraints>
                         <properties>
@@ -321,7 +321,7 @@
               </splitpane>
               <splitpane id="b6a75">
                 <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false">
                     <preferred-size width="200" height="-1"/>
                   </grid>
                 </constraints>
@@ -368,7 +368,68 @@
                       <component id="49103" class="javax.swing.JTextField" binding="textFieldHorizontalScale">
                         <constraints>
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false">
-                            <preferred-size width="50" height="-1"/>
+                            <preferred-size width="100" height="-1"/>
+                          </grid>
+                        </constraints>
+                        <properties>
+                          <columns value="0"/>
+                          <font size="18" style="0"/>
+                          <horizontalAlignment value="0"/>
+                          <margin top="0" left="0" bottom="0" right="0"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                </children>
+              </splitpane>
+              <splitpane id="8db69">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                    <preferred-size width="200" height="-1"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <continuousLayout value="false"/>
+                  <dividerSize value="0"/>
+                  <resizeWeight value="0.5"/>
+                </properties>
+                <border type="empty"/>
+                <children>
+                  <grid id="b34c4" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <splitpane position="left"/>
+                    </constraints>
+                    <properties>
+                      <preferredSize width="233" height="-1"/>
+                    </properties>
+                    <border type="none"/>
+                    <children>
+                      <component id="3a03" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="5" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <font size="18" style="0"/>
+                          <text value="ns Per Tick (ns)"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <grid id="b5482" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <splitpane position="right"/>
+                    </constraints>
+                    <properties>
+                      <preferredSize width="28" height="-1"/>
+                    </properties>
+                    <border type="none"/>
+                    <children>
+                      <component id="d4755" class="javax.swing.JTextField" binding="textFieldTimestampUnitNs">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false">
+                            <preferred-size width="100" height="-1"/>
                           </grid>
                         </constraints>
                         <properties>
