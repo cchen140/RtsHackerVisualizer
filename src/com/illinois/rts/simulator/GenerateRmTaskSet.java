@@ -132,7 +132,7 @@ public class GenerateRmTaskSet {
             //task.setPeriodNs(tempPeriod - tempPeriod % 50);
 
             // Round to 1ms.
-            task.setPeriodNs(tempPeriod - tempPeriod % (1 * ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER));
+            task.setPeriodNs(tempPeriod - tempPeriod % (int)(1 * ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER));
             //task.setPeriodNs(tempPeriod);
             task.setDeadlineNs(task.getPeriodNs());
 

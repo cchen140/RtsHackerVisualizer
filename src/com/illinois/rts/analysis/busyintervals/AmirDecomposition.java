@@ -860,7 +860,7 @@ public class AmirDecomposition {
             Boolean verificationResult = verifySchedulingInferenceSingleBusyInterval(bi);
 
             if (verificationResult == false) {
-                ProgMsg.debugPutline("Busy interval verification failed at time %d.", bi.getBeginTimeStampNs());
+                ProgMsg.debugPutline("Busy interval verification failed in busy interval at " + String.valueOf((double)bi.getBeginTimeStampNs() * (double)ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + " ms");
                 overallResult = false;
             }
         }

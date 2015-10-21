@@ -30,8 +30,8 @@ public class ProgConfig {
     /* Configuration from log */
     public static double LOG_TIMESTAMP_UNIT_NS = 1; // 1 tick represents 1ns in log
     public static int TIMESTAMP_UNIT_NS = 100_000; // 1 tick is 100 us
-    public static int TIMESTAMP_MS_TO_UNIT_MULTIPLIER = 1_000_000 / TIMESTAMP_UNIT_NS;
-    public static int TIMESTAMP_UNIT_TO_MS_MULTIPLIER = TIMESTAMP_UNIT_NS / 1_000_000;
+    public static double TIMESTAMP_MS_TO_UNIT_MULTIPLIER = 1_000_000.0 / (double)TIMESTAMP_UNIT_NS;
+    public static double TIMESTAMP_UNIT_TO_MS_MULTIPLIER = (double)TIMESTAMP_UNIT_NS / 1_000_000.0;
 
     /* Task list display */
     public static int TASK_LIST_CELL_MARGIN_Y = 6;
@@ -89,7 +89,7 @@ public class ProgConfig {
 
     public static void setTimestampUnitNs(int val) {
         TIMESTAMP_UNIT_NS = val;
-        TIMESTAMP_MS_TO_UNIT_MULTIPLIER = 1_000_000 / TIMESTAMP_UNIT_NS;
-        TIMESTAMP_UNIT_TO_MS_MULTIPLIER = TIMESTAMP_UNIT_NS / 1_000_000;
+        TIMESTAMP_MS_TO_UNIT_MULTIPLIER = 1_000_000.0 / (double)TIMESTAMP_UNIT_NS;
+        TIMESTAMP_UNIT_TO_MS_MULTIPLIER = (double)TIMESTAMP_UNIT_NS / 1_000_000.0;
     }
 }
