@@ -43,6 +43,14 @@ public class ProgMsg {
         Throwable t = new Throwable();
         StackTraceElement ste = t.getStackTrace()[1];
         format = "[" + ste.getMethodName() + "] " + format;
+        System.out.format(format + "\r\n", args);
+    }
+
+    public static void debugErrPutline(String format, Object... args)
+    {
+        Throwable t = new Throwable();
+        StackTraceElement ste = t.getStackTrace()[1];
+        format = "[" + ste.getMethodName() + "] " + format;
         System.err.format(format + "\r\n", args);
     }
 
