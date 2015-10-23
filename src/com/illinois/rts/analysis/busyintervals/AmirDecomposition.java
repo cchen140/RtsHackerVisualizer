@@ -34,11 +34,21 @@ public class AmirDecomposition {
     public Boolean runDecompositionStep2() throws RuntimeException
     {
         // Step two: creating arrival time window for each task by processing the result from step one.
-        calculateArrivalTimeOfAllTasks();
 
-        removeAmbiguousInferenceByArrivalTimeWindow();
+        int passCount = 1;
+        while (true) {
+            ProgMsg.debugPutline("Start calculating arrival time window: %d pass.", passCount);
+            calculateArrivalTimeOfAllTasks();
 
-        calculateArrivalTimeOfAllTasks();
+            ProgMsg.debugPutline("Removing ambiguous inference: %d pass.", passCount);
+            Boolean isSomethingChanged = removeAmbiguousInferenceByArrivalTimeWindow();
+
+            if (isSomethingChanged == false) {
+                break;
+            } else {
+                passCount++;
+            }
+        }
 
         return true;
     }
@@ -307,7 +317,7 @@ public class AmirDecomposition {
             }
 
             taskArrivalTimeWindows.put(thisTask, thisInterval);
-            //ProgMsg.debugPutline("%s, %d:%d", thisTask.getTitle(), thisInterval.getBegin(), thisInterval.getEnd());
+            ProgMsg.debugPutline("%s, %d:%d", thisTask.getTitle(), thisInterval.getBegin(), thisInterval.getEnd());
         }
 
         // TODO: Should return false if any arrival time window is null?
@@ -340,7 +350,7 @@ public class AmirDecomposition {
             }
         }
         // Move the window to around zero point.
-        firstWindow.shift(-(firstWindow.getBegin() / inTask.getPeriodNs()) * inTask.getPeriodNs());
+        firstWindow.shift(-(firstWindow.getEnd() / inTask.getPeriodNs()) * inTask.getPeriodNs());
         firstLoop = false;
         /** Test ends **/
 
@@ -371,15 +381,23 @@ public class AmirDecomposition {
                     Interval shiftedThisWindow = new Interval(thisWindow);
                     shiftedThisWindow.shift(smallestShiftPeriodValue * inTask.getPeriodNs());
 
-                    // Shift one more period to see if there is another intersection
+                    // Shift one more -period to see if there is another intersection
                     shiftedThisWindow.shift(-inTask.getPeriodNs());
-
                     if (firstWindow.intersect(shiftedThisWindow) != null) {// Has two intersections, thus skip intersecting this window.
                         continue;
-                    } else {// In the end, it has only one intersection, so apply the intersection to firstWindow.
-                        thisWindow.shift(smallestShiftPeriodValue * inTask.getPeriodNs());
-                        firstWindow = firstWindow.intersect(thisWindow);
                     }
+                    // No intersection with moving -1 period.
+
+                    // Now testing the intersection with moving +1 period.
+                    // Shift one more +period to see if there is another intersection
+                    shiftedThisWindow.shift(2*inTask.getPeriodNs());
+                    if (firstWindow.intersect(shiftedThisWindow) != null) {// Has two intersections, thus skip intersecting this window.
+                        continue;
+                    }
+
+                    // In the end, it has only one intersection, so apply the intersection to firstWindow.
+                    thisWindow.shift(smallestShiftPeriodValue * inTask.getPeriodNs());
+                    firstWindow = firstWindow.intersect(thisWindow);
 
                 }
 
@@ -390,6 +408,9 @@ public class AmirDecomposition {
         if (firstWindow == null) {
             ProgMsg.debugPutline("No arrival window is found in all busy intervals for %s task", inTask.getTitle());
         }
+
+        // Move the window to around zero point.
+        firstWindow.shift(-(firstWindow.getBegin() / inTask.getPeriodNs()) * inTask.getPeriodNs());
 
         return firstWindow;
     }
@@ -461,12 +482,13 @@ public class AmirDecomposition {
 
                     if (numOfInTask==0 || thisNumOfInTask==0)
                     {// One of the inference contains no inTask, thus it's not doable.
-                        ProgMsg.debugPutline("One of the inference contains 0 designated task.");
+                        // TODO: watch this if too many busy intervals are skipped for the inference of arrival window for a task.
+                        //ProgMsg.debugPutline("One of the inference contains 0 designated task.");
                         return null;
                     }
                     else
                     {
-                        // Has ambiguity but it's doable.
+                        // Has ambiguity but it's doable. (different inferences contain different number of inTask)
                         hasAmbiguousInferenceForThisTask = true;
                     }
                 }
@@ -515,8 +537,10 @@ public class AmirDecomposition {
         if (hasAmbiguousInferenceForThisTask == true)
         {
             /* Do nothing for now. */
-            // TODO: Should mark this busy interval as unsolved?
+            // TODO: Should mark this busy interval as unsolved? Ans: This won't harm the inference. It just makes window bigger.
             ProgMsg.debugPutline("Has ambiguity to be solved.");
+            // It means that for sure we know there is inTask in this busy interval,
+            // but the number of inTask in this busy interval remain unknown since different inferences have inconsistent guess.
         }
 
         /** End **/
@@ -655,14 +679,21 @@ public class AmirDecomposition {
         return shortestBusyInterval;
     }
 
+    /**
+     * Use the existed arrival time window of each task to eliminate invalid inferences in each busy interval.
+     * @return true for one or more ambiguous inferences have been removed in this pass, false for nothing has been changed.
+     */
     public Boolean removeAmbiguousInferenceByArrivalTimeWindow()
     {
+        Boolean isSomethingChanged = false;
         for (BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals())
         {
             // If this busy interval has no ambiguous inference, then continue to next.
             if (thisBusyInterval.getComposition().size() == 1)
                 continue;
 
+            ArrayList<Task> matchedInference = null;
+            Boolean foundMatch = false;
             for (ArrayList<Task> thisInference : thisBusyInterval.getComposition())
             {
                 /* Check if the number of thisTask is consistent with thisInference.
@@ -677,34 +708,58 @@ public class AmirDecomposition {
                     int numOfThisTaskByInference = Collections.frequency(thisInference, thisTask);
                     int numOfThisTaskByWindow = calculateNumOfGivenTaskInBusyIntervalByArrivalTimeWindow(thisBusyInterval, thisTask);
 
+                    // TODO: !!Bug!! if the arrival window is too big, then it's likely to infer incorrect number.
                     if (numOfThisTaskByInference != numOfThisTaskByWindow) {
                         thisIsMismatch = true;
                         break;
                     }
                 }
-
-                if (thisIsMismatch == true) {
-                    ProgMsg.debugPutline("A mismatch inference is removing: %d", thisBusyInterval.getComposition().size());
-                    thisBusyInterval.getComposition().remove(thisInference);
-                    ProgMsg.debugPutline("A mismatch inference is removed: %d", thisBusyInterval.getComposition().size());
-
-                    /** Temporarily apply the following code to solve null pointer problem when removing
-                     * an inference from thisBusyInterval.getComposition().
-                     * Since at most 2 inferences are existed in a busy interval, removing one means another
-                     * one is potentially the true answer. **/
-                    break;
-                    /** End **/
+                if (thisIsMismatch == false) {
+                    if (foundMatch == true) {
+                        // Oh no!! we've found multiple matches! It should never happen!
+                        ProgMsg.debugErrPutline("Multiple matched inferences have been found. It should never happen.");
+                    }
+                    foundMatch = true;
+                    matchedInference = thisInference;
                 }
 
+//                if (thisIsMismatch == true) {
+//                    //ProgMsg.debugPutline("A mismatch inference is removing: %d", thisBusyInterval.getComposition().size());
+//                    thisBusyInterval.getComposition().remove(thisInference);
+//                    ProgMsg.debugPutline("A mismatch inference is removed for bi " + String.valueOf((double)thisBusyInterval.getBeginTimeStampNs()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + "ms: %d", thisBusyInterval.getComposition().size());
+//
+//                    /** Temporarily apply the following code to solve null pointer problem when removing
+//                     * an inference from thisBusyInterval.getComposition().
+//                     * Since at most 2 inferences are existed in a busy interval, removing one means another
+//                     * one is potentially the true answer. **/
+//                    break;
+//                    /** End **/
+//                }
+
+            }
+
+            if (foundMatch == true) {
+                // Note that we have skipped the busy intervals without ambiguity in the beginning of the for loop,
+                // thus anything reaches here means the ambiguity of an ambiguous busy interval is solved.
+                isSomethingChanged = true;
+                thisBusyInterval.getComposition().clear();
+                thisBusyInterval.getComposition().add(matchedInference);
+            } else {
+                ProgMsg.debugPutline("No matched inference is found for bi " + String.valueOf((double)thisBusyInterval.getBeginTimeStampNs()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + "ms: %d", thisBusyInterval.getComposition().size());
             }
 
             if (thisBusyInterval.getComposition().size() == 0) {
-                ProgMsg.debugPutline("One of busy interval's inferences become 0! Terminating!");
-                return false;
+                // This will never happen.
+                ProgMsg.debugErrPutline("One of busy interval's inferences become 0! I should never happen!");
             }
 
         }
-        return true;
+
+        if (isSomethingChanged == true) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public int calculateNumOfGivenTaskInBusyIntervalByArrivalTimeWindow(BusyInterval inBusyInterval, Task inTask)
@@ -747,6 +802,12 @@ public class AmirDecomposition {
     public Boolean reconstructCompositionOfBusyIntervalByArrivalTimeWindows()
     {
         for ( BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals() ) {
+            if (thisBusyInterval.getComposition().size() > 1) {
+                // TODO: What we can do when there are multiple possible inferences while reconstructing the schedule for a busy interval?
+                ProgMsg.debugErrPutline("Skipped!! Reconstruction Step: more than one inference in busy interval at " + String.valueOf((double)thisBusyInterval.getBeginTimeStampNs()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + " ms");
+                continue;
+            }
+
             // Here we assume that the number of possible inferences is reduced to one, thus process the only one inference.
             ArrayList<Task> thisInference = thisBusyInterval.getFirstComposition();
             TaskArrivalEventContainer thisArrivalInference = thisBusyInterval.arrivalInference;
@@ -847,7 +908,7 @@ public class AmirDecomposition {
             AppEvent startTimeGroundTruth = bi.getStartTimesGroundTruth().get(i);
             AppEvent startTimeInference = bi.getStartTimesInference().get(i);
 
-            if (false == areEqualWithinError(startTimeGroundTruth.getOrgBeginTimestampNs(), startTimeInference.getOrgBeginTimestampNs(), 500000))
+            if (false == areEqualWithinError(startTimeGroundTruth.getOrgBeginTimestampNs(), startTimeInference.getOrgBeginTimestampNs(), 0))
                 return false;
         }
 
