@@ -115,7 +115,8 @@ public class TaskConfigSingleRowPanel extends JPanel implements ActionListener {
 
     public void applySettings() {
         task.setTitle(inputName.getText());
-        task.setPeriodNs((int) (Double.valueOf(inputPeriod.getText()) * (double)ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER));
+        task.setPeriodNs((int) (Double.valueOf(inputPeriod.getText()) * (double) ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER));
+        task.setDeadlineNs((int) (Double.valueOf(inputPeriod.getText()) * (double)ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER));
         task.setComputationTimeNs((int) (Double.valueOf(inputComputation.getText()) * (double)ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER));
         task.initialOffset = (int) (Double.valueOf(inputInitialOffset.getText()) * (double)ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER);
         task.setPriority( Integer.valueOf(inputPriority.getText()) );
