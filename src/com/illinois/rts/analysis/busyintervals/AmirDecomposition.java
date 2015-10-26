@@ -37,10 +37,10 @@ public class AmirDecomposition {
 
         int passCount = 1;
         while (true) {
-            ProgMsg.debugPutline("Start calculating arrival time window: %d pass.", passCount);
+            //ProgMsg.debugPutline("Start calculating arrival time window: %d pass.", passCount);
             calculateArrivalTimeOfAllTasks();
 
-            ProgMsg.debugPutline("Removing ambiguous inference: %d pass.", passCount);
+            //ProgMsg.debugPutline("Removing ambiguous inference: %d pass.", passCount);
             Boolean isSomethingChanged = removeAmbiguousInferenceByArrivalTimeWindow();
 
             if (isSomethingChanged == false) {
@@ -317,7 +317,7 @@ public class AmirDecomposition {
             }
 
             taskArrivalTimeWindows.put(thisTask, thisInterval);
-            ProgMsg.debugPutline("%s, %d:%d", thisTask.getTitle(), thisInterval.getBegin(), thisInterval.getEnd());
+            //ProgMsg.debugPutline("%s, %d:%d", thisTask.getTitle(), thisInterval.getBegin(), thisInterval.getEnd());
         }
 
         // TODO: Should return false if any arrival time window is null?
@@ -538,7 +538,7 @@ public class AmirDecomposition {
         {
             /* Do nothing for now. */
             // TODO: Should mark this busy interval as unsolved? Ans: This won't harm the inference. It just makes window bigger.
-            ProgMsg.debugPutline("Has ambiguity to be solved.");
+            //ProgMsg.debugPutline("Has ambiguity to be solved.");
             // It means that for sure we know there is inTask in this busy interval,
             // but the number of inTask in this busy interval remain unknown since different inferences have inconsistent guess.
         }
@@ -745,7 +745,7 @@ public class AmirDecomposition {
                 thisBusyInterval.getComposition().clear();
                 thisBusyInterval.getComposition().add(matchedInference);
             } else {
-                ProgMsg.debugPutline("No matched inference is found for bi " + String.valueOf((double)thisBusyInterval.getBeginTimeStampNs()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + "ms: %d", thisBusyInterval.getComposition().size());
+                //ProgMsg.debugPutline("No matched inference is found for bi " + String.valueOf((double)thisBusyInterval.getBeginTimeStampNs()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + "ms: %d", thisBusyInterval.getComposition().size());
             }
 
             if (thisBusyInterval.getComposition().size() == 0) {

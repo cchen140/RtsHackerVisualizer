@@ -369,6 +369,9 @@ public class TaskSetFileHandler extends DialogFileHandler {
             //ProgMsg.debugPutline(outputLines);
 
             outputLines += "\r\n";
+            outputLines += "#HP=" + thisTaskSet.calHyperPeriod()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + " ms";
+
+            outputLines += "\r\n";
             taskSetIndex++;
         }
         return outputLines;

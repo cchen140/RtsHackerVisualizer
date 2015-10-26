@@ -1,5 +1,6 @@
 package com.illinois.rts.simulator;
 
+import com.illinois.rts.analysis.busyintervals.Interval;
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.utility.GeneralUtility;
 import com.illinois.rts.visualizer.ProgConfig;
@@ -12,6 +13,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -21,13 +23,15 @@ import java.util.Random;
 public class GenerateRmTaskSet {
 //    private TaskSetContainer taskSetContainer = new TaskSetContainer();
 
-    static int resolution;
+    //static int resolution;
 
     static int minNumTasks;
     static int maxNumTasks;
 
     static int minPeriod;
     static int maxPeriod;
+
+    static int maxHyperPeriod;
 
     static int minExecTime;
     static int maxExecTime;
@@ -44,10 +48,13 @@ public class GenerateRmTaskSet {
 
     public GenerateRmTaskSet() {
 
-        maxPeriod = 100_000_000/ProgConfig.TIMESTAMP_UNIT_NS; // 100 ms
-        minPeriod = 5_000_000/ProgConfig.TIMESTAMP_UNIT_NS;   // 5ms
+        maxHyperPeriod = (1000_000_000/ProgConfig.TIMESTAMP_UNIT_NS)*3; // 3 sec
 
-        maxExecTime = 3_000_000/ProgConfig.TIMESTAMP_UNIT_NS; // 3 ms
+        /* When maxHyperPeriod is specified, only minPeriod will be checked while the check for maxPeriod will be skipped. */
+        maxPeriod = 100_000_000/ProgConfig.TIMESTAMP_UNIT_NS; // 100 ms
+        minPeriod = 10_000_000/ProgConfig.TIMESTAMP_UNIT_NS;   // 10 ms // org = 5ms
+
+        maxExecTime = 50_000_000/ProgConfig.TIMESTAMP_UNIT_NS; // 50 ms // org=3 ms
         minExecTime = 100_000/ProgConfig.TIMESTAMP_UNIT_NS; // 0.1 ms
 
         maxInitOffset = 0; // 0ms //10_000_000; // 10 ms
@@ -121,6 +128,16 @@ public class GenerateRmTaskSet {
 
         int numTasks = getRandom(minNumTasks, maxNumTasks);
 
+
+        // Is maxHyperPeriod enabled?
+        ArrayList<Long> hyperPeriodFactors = null;
+        if (maxHyperPeriod > 0) {
+            hyperPeriodFactors = GeneralUtility.integerFactorization(maxHyperPeriod);
+            //ProgMsg.debugPutline(hyperPeriodFactors.toString());
+        }
+
+        ArrayList<Double> utilDistribution = getRandomUtilDistribution(numTasks, minUtil+(maxUtil-minUtil)/2);
+
         double total_util = 0;
         for (int i = 0; i < numTasks; i++)
         {
@@ -128,23 +145,53 @@ public class GenerateRmTaskSet {
             task.setId(i+1);
             task.setTitle("APP" + String.valueOf(i+1));
 
-            int tempPeriod = (int) getRandom(minPeriod, maxPeriod);//TODO: maybe... 2^x 3^y 5^z
-            //task.setPeriodNs(tempPeriod - tempPeriod % 50);
+            if (maxHyperPeriod > 0) {
+                int tempPeriod = 1;
+//                int currentIndex = 0;
+//                while (currentIndex != (hyperPeriodFactors.size()-1)) {
+//                    currentIndex = getRandom(currentIndex+1, hyperPeriodFactors.size()-1);
+//                    tempPeriod = tempPeriod * hyperPeriodFactors.get(currentIndex).intValue();
+//                }
+                tempPeriod = getRandomDivisor(hyperPeriodFactors);
 
-            // Round to 1ms.
-            task.setPeriodNs(tempPeriod - tempPeriod % (int)(1 * ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER));
-            //task.setPeriodNs(tempPeriod);
-            task.setDeadlineNs(task.getPeriodNs());
+                if (tempPeriod<minPeriod) { // || tempPeriod>maxPeriod) {
+                    i--;
+                    continue;
+                }
+
+                if (taskContainer.containPeriod(tempPeriod) == true) {
+                    // Skip duplicated period.
+                    i--;
+                    continue;
+                }
+
+                task.setPeriodNs(tempPeriod);
+                task.setDeadlineNs(task.getPeriodNs());
+            } else {
+                int tempPeriod = (int) getRandom(minPeriod, maxPeriod);//TODO: maybe... 2^x 3^y 5^z
+                //task.setPeriodNs(tempPeriod - tempPeriod % 50);
+
+                // Round to 1ms.
+                task.setPeriodNs(tempPeriod - tempPeriod % (int) (1 * ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER));
+                //task.setPeriodNs(tempPeriod);
+                task.setDeadlineNs(task.getPeriodNs());
+            }
 
             int tempComputationTime;
-            if (task.getPeriodNs() < maxExecTime) {
-                if (minExecTime>task.getPeriodNs())
-                    return null;
-                tempComputationTime = (int) getRandom(minExecTime, task.getPeriodNs());
+            tempComputationTime = task.getPeriodNs();
+            tempComputationTime  = (int)(((double)tempComputationTime)*utilDistribution.get(i));
+            //tempComputationTime = (int)(utilDistribution.get(i)*((double)task.getPeriodNs()));
+            if (tempComputationTime<minExecTime || tempComputationTime>maxExecTime) {
+                i--;
+                continue;
             }
-            else {
-                tempComputationTime = (int) getRandom(minExecTime, maxExecTime);
-            }
+
+//            if (minExecTime>task.getPeriodNs()) {
+//                return null;
+//            } else {
+//                tempComputationTime = (int) getRandom(minExecTime, Math.min(task.getPeriodNs(), maxExecTime));
+//            }
+
             // Round to 0.1ms (100us).
             //task.setComputationTimeNs(tempComputationTime - tempComputationTime % 100_000);
             task.setComputationTimeNs(tempComputationTime);
@@ -173,7 +220,6 @@ public class GenerateRmTaskSet {
             return null;
 
 
-        ProgMsg.debugPutline(GeneralUtility.nanoIntToMilliString(taskContainer.calHyperPeriod()));
 
 //        int[][] sl = new int[numTasks][numTasks];
 //        for (int i=0; i<numTasks; i++)
@@ -340,4 +386,51 @@ public class GenerateRmTaskSet {
 //            task_i.setPriority(cnt);
 //        }
 //    }
+
+    int getRandomDivisor(ArrayList<Long> inFactors) {
+        int resultDivisor = 1;
+        int numOfFactors = inFactors.size();
+        int randomLoopNum = getRandom(1, numOfFactors);
+        ArrayList<Integer> factorHistory = new ArrayList<>();
+        for (int i=0; i<randomLoopNum; i++) {
+            int thisIndex = getRandom(0, numOfFactors-1);
+            if (factorHistory.contains(thisIndex) == true) {
+                // This item has been chosen, try again.
+                i--;
+                continue;
+            } else {
+                // This index has not yet been chosen, so it's clear.
+                resultDivisor = resultDivisor * inFactors.get(thisIndex).intValue();
+                factorHistory.add(thisIndex);
+            }
+        }
+        return resultDivisor;
+    }
+
+    ArrayList<Double> getRandomUtilDistribution(int inMaxTaskNum, double inMaxUtil) {
+        ArrayList<Double> resultUtilArray = new ArrayList<>();
+
+        // Initialize the array with evenly divided utilization.
+        for (int i=0; i<inMaxTaskNum; i++) {
+            resultUtilArray.add(inMaxUtil/(double)inMaxTaskNum);
+        }
+
+        double randUnit = inMaxUtil/100.0;
+        for (int i=0; i<100; i++) {
+            int indexA, indexB;
+            indexA = getRandom(0, inMaxTaskNum-1);
+            indexB = getRandom(0, inMaxTaskNum-1);
+
+            if (indexA==indexB || resultUtilArray.get(indexB)<0.01) {
+                i--;
+                continue;
+            } else {
+                resultUtilArray.set(indexA, resultUtilArray.get(indexA) + randUnit);
+                resultUtilArray.set(indexB, resultUtilArray.get(indexB) - randUnit);
+            }
+        }
+
+        return  resultUtilArray;
+    }
+
 }

@@ -426,4 +426,13 @@ public class TaskContainer {
             task_i.setPriority(cnt);
         }
     }
+
+    public Boolean containPeriod(int inPeriod) {
+        for (Task thisTask: tasks.values())
+        {
+            if (thisTask.getPeriodNs() == inPeriod)
+                return true;
+        }
+        return false;
+    }
 }

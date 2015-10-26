@@ -33,6 +33,8 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
     private JTextField inputNumOfTaskSets;
     private JScrollPane tableTaskSetsScroll;
     private JTextField inputSimDuration;
+    private JRadioButton radioBtnHyperPeriod;
+    private JRadioButton radioBtnCustomDuration;
 
     private Boolean startBtnClicked = false;
     private TaskSetContainer taskSetContainer = new TaskSetContainer();
@@ -99,6 +101,11 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         btnImportTaskSets.addActionListener(this);
         btnExportTaskSets.addActionListener(this);
         btnGenerateTaskSets.addActionListener(this);
+        radioBtnCustomDuration.addActionListener(this);
+        radioBtnHyperPeriod.addActionListener(this);
+
+        // Select custom simulation duration by default.
+        radioBtnCustomDuration.setSelected(true);
 
         // Simulation duration.
         inputSimDuration.setText("1000");   // unit is ms
@@ -127,7 +134,9 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         logBuffer += taskSetFileHandler.generateTaskSetContainerLines(taskSetContainer);
         logBuffer += "@\r\n";
 
+        // Start test!!
         Boolean isNotCancel = startAutoTest();
+
         if (isNotCancel == true) {
             DialogLogOutput dialogLogOutput = new DialogLogOutput();
             dialogLogOutput.put(logBuffer);
@@ -212,8 +221,14 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                 buildTableFromTaskContainers();
             } // else, nothing loaded thus do nothing.
 
-        } else if (e.getSource() == btnStartAutoTest) {
+        } else if (e.getSource() == radioBtnHyperPeriod) {
+            inputSimDuration.setEnabled(false);
 
+        } else if (e.getSource() == radioBtnCustomDuration) {
+            inputSimDuration.setEnabled(true);
+
+        } else if (e.getSource() == btnStartAutoTest) {
+            // The function is handled by onStart()
         }
     }
 
@@ -323,8 +338,6 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             /* Start RM scheduling simulation */
             EventContainer thisEventContainer = null;
 
-            int simDurationNs = (int)(Double.valueOf( inputSimDuration.getText() ) * ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER);
-
             // Get task container from the panel with latest configurations.
             TaskContainer simTaskContainer = thisTaskContainer;
 
@@ -334,6 +347,18 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             if (simTaskContainer.size() <= 0) {
                 continue;
             }
+
+            /* Determine simulation duration. */
+            int simDurationNs;
+            if (radioBtnCustomDuration.isSelected() == true) {
+                simDurationNs = (int) (Double.valueOf(inputSimDuration.getText()) * ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER);
+            } else {
+                // Duration is at least one hyper-period
+                // TODO: need to make sure the hyper-period doesn't exceed integer limit.
+                simDurationNs = (int) (simTaskContainer.calHyperPeriod()*1.2); // 1.2 guarantees the simulation contains at least on hyper-period.
+                ProgMsg.debugPutline("HP=" + String.valueOf(simDurationNs*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + " ms");
+            }
+
 
             QuickRmScheduling quickRmScheduling = new QuickRmScheduling(simTaskContainer);
             quickRmScheduling.runSim(simDurationNs);
@@ -364,7 +389,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             }
 
             if ( amirDecomposition.verifySchedulingInference() == true ) {
-                putLineLogBuffer("#%d TkSet: SUCCESS", taskSetIndex);
+                //putLineLogBuffer("#%d TkSet: SUCCESS", taskSetIndex);
             } else {
                 putLineLogBuffer("#%d TkSet: FAILED", taskSetIndex);
                 failureCount++;
