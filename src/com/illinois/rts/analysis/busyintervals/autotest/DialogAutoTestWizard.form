@@ -65,14 +65,29 @@
                   <component id="80934" class="javax.swing.JRadioButton" binding="radioBtnHyperPeriod">
                     <constraints border-constraint="West"/>
                     <properties>
-                      <text value="Auto Hyper-period"/>
+                      <text value="Auto Hyper-period:"/>
                     </properties>
                   </component>
                   <grid id="dadd9" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
-                    <constraints border-constraint="Center"/>
+                    <constraints border-constraint="East"/>
                     <properties/>
                     <border type="none"/>
-                    <children/>
+                    <children>
+                      <component id="ebc34" class="javax.swing.JTextField" binding="inputHyperPeriodScale">
+                        <constraints/>
+                        <properties>
+                          <columns value="10"/>
+                          <horizontalAlignment value="4"/>
+                          <text value="1.2"/>
+                        </properties>
+                      </component>
+                      <component id="218ff" class="javax.swing.JLabel">
+                        <constraints/>
+                        <properties>
+                          <text value=" X  "/>
+                        </properties>
+                      </component>
+                    </children>
                   </grid>
                 </children>
               </grid>
@@ -90,7 +105,7 @@
                     </properties>
                   </component>
                   <grid id="3bdb8" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
-                    <constraints border-constraint="Center"/>
+                    <constraints border-constraint="East"/>
                     <properties/>
                     <border type="none"/>
                     <children>
@@ -98,6 +113,7 @@
                         <constraints/>
                         <properties>
                           <columns value="10"/>
+                          <horizontalAlignment value="4"/>
                           <text value="1000000000"/>
                         </properties>
                       </component>

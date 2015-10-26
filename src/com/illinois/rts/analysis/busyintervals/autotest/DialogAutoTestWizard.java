@@ -12,6 +12,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Arc2D;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -35,6 +36,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
     private JTextField inputSimDuration;
     private JRadioButton radioBtnHyperPeriod;
     private JRadioButton radioBtnCustomDuration;
+    private JTextField inputHyperPeriodScale;
 
     private Boolean startBtnClicked = false;
     private TaskSetContainer taskSetContainer = new TaskSetContainer();
@@ -106,9 +108,11 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         // Select custom simulation duration by default.
         radioBtnCustomDuration.setSelected(true);
+        inputHyperPeriodScale.setEnabled(false);
 
-        // Simulation duration.
+        // Simulation duration and hyper-period scale.
         inputSimDuration.setText("1000");   // unit is ms
+        inputHyperPeriodScale.setText("1.2");
 
         inputNumOfTaskSets.setText("5");
         inputNumOfTasks.setText("3");
@@ -223,9 +227,11 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         } else if (e.getSource() == radioBtnHyperPeriod) {
             inputSimDuration.setEnabled(false);
+            inputHyperPeriodScale.setEnabled(true);
 
         } else if (e.getSource() == radioBtnCustomDuration) {
             inputSimDuration.setEnabled(true);
+            inputHyperPeriodScale.setEnabled(false);
 
         } else if (e.getSource() == btnStartAutoTest) {
             // The function is handled by onStart()
@@ -355,8 +361,8 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             } else {
                 // Duration is at least one hyper-period
                 // TODO: need to make sure the hyper-period doesn't exceed integer limit.
-                simDurationNs = (int) (simTaskContainer.calHyperPeriod()*1.2); // 1.2 guarantees the simulation contains at least on hyper-period.
-                ProgMsg.debugPutline("HP=" + String.valueOf(simDurationNs*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + " ms");
+                simDurationNs = (int) (simTaskContainer.calHyperPeriod()* Double.valueOf(inputHyperPeriodScale.getText()));
+                ProgMsg.debugPutline("scaled HP=" + String.valueOf(simDurationNs*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + " ms");
             }
 
 
