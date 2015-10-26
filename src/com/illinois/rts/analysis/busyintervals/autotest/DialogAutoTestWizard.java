@@ -30,16 +30,17 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
     private JButton btnGenerateTaskSets;
     private JButton btnExportTaskSets;
     private JButton btnImportTaskSets;
-    private JTextField inputNumOfTasks;
     private JTextField inputNumOfTaskSets;
     private JScrollPane tableTaskSetsScroll;
     private JTextField inputSimDuration;
     private JRadioButton radioBtnHyperPeriod;
     private JRadioButton radioBtnCustomDuration;
     private JTextField inputHyperPeriodScale;
+    private JButton btnConfigTaskSetGenerator;
 
     private Boolean startBtnClicked = false;
     private TaskSetContainer taskSetContainer = new TaskSetContainer();
+    private GenerateRmTaskSet taskSetGenerator = new GenerateRmTaskSet();
 
 //    private DialogLogOutput dialogLogOutput = new DialogLogOutput();
     String logBuffer = "";
@@ -78,7 +79,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         this.setTitle("Busy Interval Analysis AutoTest Wizard");
 
-        inputNumOfTasks.setColumns(TEXTFIELD_COLUMN_SIZE);
+        //inputNumOfTasks.setColumns(TEXTFIELD_COLUMN_SIZE);
         inputNumOfTaskSets.setColumns(TEXTFIELD_COLUMN_SIZE);
 
 //        String tableHeader[] = {"Task Set #", "Task 1", "Task 2", "Task 3"};
@@ -103,6 +104,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         btnImportTaskSets.addActionListener(this);
         btnExportTaskSets.addActionListener(this);
         btnGenerateTaskSets.addActionListener(this);
+        btnConfigTaskSetGenerator.addActionListener(this);
         radioBtnCustomDuration.addActionListener(this);
         radioBtnHyperPeriod.addActionListener(this);
 
@@ -115,7 +117,6 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         inputHyperPeriodScale.setText("1.2");
 
         inputNumOfTaskSets.setText("5");
-        inputNumOfTasks.setText("3");
 
         // Set the font for entire dialog.
         GuiUtility.changeChildrenFont(this, ProgConfig.DEFAULT_CONTENT_FONT);
@@ -218,8 +219,9 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             }
 
         } else if (e.getSource() == btnGenerateTaskSets) {
-            GenerateRmTaskSet generateRmTaskSet = new GenerateRmTaskSet();
-            taskSetContainer = generateRmTaskSet.generate(Integer.valueOf(inputNumOfTasks.getText()), Integer.valueOf(inputNumOfTaskSets.getText()));
+            //GenerateRmTaskSet generateRmTaskSet = new GenerateRmTaskSet();
+            taskSetGenerator.setNumTaskSet(Integer.valueOf(inputNumOfTaskSets.getText()));
+            taskSetContainer = taskSetGenerator.generate();
 
             if (taskSetContainer.size() > 0) {
                 buildTableFromTaskContainers();
@@ -232,7 +234,10 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         } else if (e.getSource() == radioBtnCustomDuration) {
             inputSimDuration.setEnabled(true);
             inputHyperPeriodScale.setEnabled(false);
-
+        } else if (e.getSource() == btnConfigTaskSetGenerator) {
+            DialogTaskSetGeneratorSetter dialogTaskSetGeneratorSetter = new DialogTaskSetGeneratorSetter();
+            dialogTaskSetGeneratorSetter.setTaskSetGenerator(taskSetGenerator);
+            dialogTaskSetGeneratorSetter.showDialog(this);
         } else if (e.getSource() == btnStartAutoTest) {
             // The function is handled by onStart()
         }

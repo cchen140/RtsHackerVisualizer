@@ -9,6 +9,7 @@ import com.illinois.rts.visualizer.tasksetter.TaskConfigGroupPanel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 public class DialogSimulationLauncher extends JDialog implements ActionListener {
     private static DialogSimulationLauncher instance = null;
@@ -22,9 +23,15 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
     private JButton btnAddNewTask;
     private TaskConfigGroupPanel taskSetterPanel;
     private JButton btnRandomTasks;
+    private JButton btnConfigureTaskSetGenerator;
+    private JRadioButton checkSimDuration;
+    private JTextField inputHyperPeriodScale;
+    private JRadioButton checkSimAutoHyperPeriodScale;
 
     private Boolean isOkClicked = false;
     private EventContainer simResultEventContainer;
+
+    private GenerateRmTaskSet taskSEtGenerator = new GenerateRmTaskSet();
 
     private DialogSimulationLauncher() {
         setContentPane(contentPane);
@@ -63,6 +70,9 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
         btnImportTaskConfig.addActionListener(this);
         btnExportTaskConfig.addActionListener(this);
         btnRandomTasks.addActionListener(this);
+        btnConfigureTaskSetGenerator.addActionListener(this);
+        checkSimDuration.addActionListener(this);
+        checkSimAutoHyperPeriodScale.addActionListener(this);
 
         // Initialize taskSetterPanel
         taskSetterPanel.enableRemoveTaskBtn();
@@ -71,10 +81,15 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
         // Simulation duration.
         inputSimDuration.setText("1000");   // unit is ms
 
+        checkSimDuration.setSelected(true);
+        inputHyperPeriodScale.setEnabled(false);
+
         // Set the font for entire dialog.
         GuiUtility.changeChildrenFont(this, ProgConfig.DEFAULT_CONTENT_FONT);
 
         this.setTitle("Simulation Launcher");
+
+        importDemoTaskSet();
     }
 
     public static DialogSimulationLauncher getInstance()
@@ -105,7 +120,7 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
     }
 
     public void setTaskContainer(TaskContainer inTaskContainer) {
-        ProgMsg.debugPutline("HyperPeriod = " + String.valueOf((inTaskContainer.calHyperPeriod()/1000_000.0)*(double)ProgConfig.TIMESTAMP_UNIT_NS) + " ms");
+        ProgMsg.debugPutline("HyperPeriod = " + String.valueOf((inTaskContainer.calHyperPeriod() / 1000_000.0) * (double) ProgConfig.TIMESTAMP_UNIT_NS) + " ms");
         taskSetterPanel.setTaskContainer(inTaskContainer);
     }
 
@@ -125,9 +140,6 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
         if ( isOkClicked == true ) {
             /* Run simulation */
 
-            // Simulation duration.
-            int simDuration = (int) (Double.valueOf( inputSimDuration.getText() ) * ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER); // ms to default unit
-
             // Get task container from the panel with latest configurations.
             TaskContainer simTaskContainer = taskSetterPanel.getTaskContainerWithLatestConfigs();
 
@@ -137,6 +149,15 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
             if (simTaskContainer.size() > 0) {
                 //RmScheduling rmScheduling = new RmScheduling();
                 //rmScheduling.setTaskContainer(simTaskContainer);
+
+                // Simulation duration.
+                int simDuration;
+                if (checkSimAutoHyperPeriodScale.isSelected() == true) {
+                    simDuration = (int) ((double)simTaskContainer.calHyperPeriod() * Double.valueOf(inputHyperPeriodScale.getText()));
+                } else {
+                    simDuration = (int) (Double.valueOf(inputSimDuration.getText()) * ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER); // ms to default unit
+                }
+
                 QuickRmScheduling quickRmScheduling = new QuickRmScheduling(simTaskContainer);
                 if (quickRmScheduling.runSimWithProgressDialog(simDuration, this) == true)
                 {
@@ -178,13 +199,36 @@ public class DialogSimulationLauncher extends JDialog implements ActionListener 
             TaskSetFileHandler taskConfigExporter = new TaskSetFileHandler();
             taskConfigExporter.exportSingleTaskSetByDialog(taskSetterPanel.getTaskContainerWithLatestConfigs());
         } else if ( e.getSource() == btnRandomTasks ) {
-            GenerateRmTaskSet generateRmTaskSet = new GenerateRmTaskSet();
-            TaskSetContainer taskSetContainer = generateRmTaskSet.generate(GeneralUtility.getRandom(3, 6), 1);
+            taskSEtGenerator.setNumTaskSet(1);  // Generate only 1 task set.
+            TaskSetContainer taskSetContainer = taskSEtGenerator.generate();//GeneralUtility.getRandom(3, 10), 1);
             setTaskContainer( taskSetContainer.getTaskContainers().get(0) );
+        } else if ( e.getSource() == btnConfigureTaskSetGenerator) {
+            DialogTaskSetGeneratorSetter dialogTaskSetGeneratorSetter = new DialogTaskSetGeneratorSetter();
+            dialogTaskSetGeneratorSetter.setTaskSetGenerator(taskSEtGenerator);
+            dialogTaskSetGeneratorSetter.showDialog(this);
+            // It's automatically updates values to taskSetGenerator variable if Ok button is clicked.
+        } else if ( e.getSource() == checkSimAutoHyperPeriodScale ) {
+            inputSimDuration.setEnabled(false);
+            inputHyperPeriodScale.setEnabled(true);
+        } else if ( e.getSource() == checkSimDuration ) {
+            inputSimDuration.setEnabled(true);
+            inputHyperPeriodScale.setEnabled(false);
         }
     }
 
     public EventContainer getSimulationResultEventContainer() {
         return simResultEventContainer;
+    }
+
+    public Boolean importDemoTaskSet() {
+        TaskSetFileHandler taskSetFileHandler = new TaskSetFileHandler();
+
+        try {
+            setTaskContainer(taskSetFileHandler.loadMultipleTaskSetsFromPath("./log/RmSimulator_TaskSet_5Tx1.txt").get(0));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }

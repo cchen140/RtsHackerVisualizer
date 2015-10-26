@@ -33,6 +33,8 @@ public class GenerateRmTaskSet {
 
     static int maxHyperPeriod;
 
+    static Boolean generateFromHpDivisors;
+
     static int minExecTime;
     static int maxExecTime;
 
@@ -43,6 +45,9 @@ public class GenerateRmTaskSet {
 
     static double minUtil;
     static double maxUtil;
+
+    static int numTaskPerSet;
+    static int numTaskSet;
 
     static Random rand = new Random();
 
@@ -63,6 +68,15 @@ public class GenerateRmTaskSet {
         maxUtil = 1;
         minUtil = 0.9;
 
+        numTaskPerSet = 5;
+        numTaskSet = 10;
+
+        generateFromHpDivisors = false;
+
+    }
+
+    public TaskSetContainer generate() {
+        return generate(numTaskPerSet, numTaskSet);
     }
 
     public TaskSetContainer generate(int inNumTasksPerSet, int inNumTaskSet) {
@@ -131,7 +145,7 @@ public class GenerateRmTaskSet {
 
         // Is maxHyperPeriod enabled?
         ArrayList<Long> hyperPeriodFactors = null;
-        if (maxHyperPeriod > 0) {
+        if (generateFromHpDivisors == true) {
             hyperPeriodFactors = GeneralUtility.integerFactorization(maxHyperPeriod);
             //ProgMsg.debugPutline(hyperPeriodFactors.toString());
         }
@@ -145,13 +159,8 @@ public class GenerateRmTaskSet {
             task.setId(i+1);
             task.setTitle("APP" + String.valueOf(i+1));
 
-            if (maxHyperPeriod > 0) {
+            if (generateFromHpDivisors == true) {
                 int tempPeriod = 1;
-//                int currentIndex = 0;
-//                while (currentIndex != (hyperPeriodFactors.size()-1)) {
-//                    currentIndex = getRandom(currentIndex+1, hyperPeriodFactors.size()-1);
-//                    tempPeriod = tempPeriod * hyperPeriodFactors.get(currentIndex).intValue();
-//                }
                 tempPeriod = getRandomDivisor(hyperPeriodFactors);
 
                 if (tempPeriod<minPeriod) { // || tempPeriod>maxPeriod) {
@@ -433,4 +442,118 @@ public class GenerateRmTaskSet {
         return  resultUtilArray;
     }
 
+
+    /* The following section is the automatically generated setters and getters. */
+
+    public int getMinNumTasks() {
+        return minNumTasks;
+    }
+
+    public void setMinNumTasks(int minNumTasks) {
+        GenerateRmTaskSet.minNumTasks = minNumTasks;
+    }
+
+    public int getMaxNumTasks() {
+        return maxNumTasks;
+    }
+
+    public void setMaxNumTasks(int maxNumTasks) {
+        GenerateRmTaskSet.maxNumTasks = maxNumTasks;
+    }
+
+    public int getMinPeriod() {
+        return minPeriod;
+    }
+
+    public void setMinPeriod(int minPeriod) {
+        GenerateRmTaskSet.minPeriod = minPeriod;
+    }
+
+    public int getMaxPeriod() {
+        return maxPeriod;
+    }
+
+    public void setMaxPeriod(int maxPeriod) {
+        GenerateRmTaskSet.maxPeriod = maxPeriod;
+    }
+
+    public int getMaxHyperPeriod() {
+        return maxHyperPeriod;
+    }
+
+    public void setMaxHyperPeriod(int maxHyperPeriod) {
+        GenerateRmTaskSet.maxHyperPeriod = maxHyperPeriod;
+    }
+
+    public int getMinExecTime() {
+        return minExecTime;
+    }
+
+    public void setMinExecTime(int minExecTime) {
+        GenerateRmTaskSet.minExecTime = minExecTime;
+    }
+
+    public int getMaxExecTime() {
+        return maxExecTime;
+    }
+
+    public void setMaxExecTime(int maxExecTime) {
+        GenerateRmTaskSet.maxExecTime = maxExecTime;
+    }
+
+    public int getMinInitOffset() {
+        return minInitOffset;
+    }
+
+    public void setMinInitOffset(int minInitOffset) {
+        GenerateRmTaskSet.minInitOffset = minInitOffset;
+    }
+
+    public int getMaxInitOffset() {
+        return maxInitOffset;
+    }
+
+    public void setMaxInitOffset(int maxInitOffset) {
+        GenerateRmTaskSet.maxInitOffset = maxInitOffset;
+    }
+
+    public double getMinUtil() {
+        return minUtil;
+    }
+
+    public void setMinUtil(double minUtil) {
+        GenerateRmTaskSet.minUtil = minUtil;
+    }
+
+    public double getMaxUtil() {
+        return maxUtil;
+    }
+
+    public void setMaxUtil(double maxUtil) {
+        GenerateRmTaskSet.maxUtil = maxUtil;
+    }
+
+    public int getNumTaskPerSet() {
+        return numTaskPerSet;
+    }
+
+    public void setNumTaskPerSet(int numTaskPerSet) {
+        GenerateRmTaskSet.numTaskPerSet = numTaskPerSet;
+    }
+
+    public int getNumTaskSet() {
+        return numTaskSet;
+    }
+
+    public void setNumTaskSet(int numTaskSet) {
+        GenerateRmTaskSet.numTaskSet = numTaskSet;
+    }
+
+    public static Boolean getGenerateFromHpDivisors() {
+        return generateFromHpDivisors;
+    }
+
+    public static void setGenerateFromHpDivisors(Boolean generateFromHpDivisors) {
+        GenerateRmTaskSet.generateFromHpDivisors = generateFromHpDivisors;
+    }
 }
