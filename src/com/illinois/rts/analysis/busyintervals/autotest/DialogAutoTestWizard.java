@@ -132,6 +132,9 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         // Clear the log buffer for a new test.
         logBuffer = "";
 
+        /* Put note for the settings of task set generator. */
+        logBuffer += taskSetGenerator.toCommentString();
+
         /* Put task set info in logBuffer */
         TaskSetFileHandler taskSetFileHandler = new TaskSetFileHandler();
         logBuffer += taskSetFileHandler.generateProgConfigLines();
