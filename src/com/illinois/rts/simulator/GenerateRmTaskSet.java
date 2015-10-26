@@ -564,6 +564,7 @@ public class GenerateRmTaskSet {
         outputStr += "# num of tasks per set = " + numTaskPerSet + "\r\n";
         outputStr += "# util = " + minUtil*100 + "%% - " + maxUtil*100 + "%%\r\n";
         outputStr += "# exe = " + minExecTime*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + "ms - " + maxExecTime*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + "ms\r\n";
+        outputStr += "# offset = " + minInitOffset*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + "ms - " + maxInitOffset*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + "ms\r\n";
         outputStr += "# period = " + minPeriod*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + "ms - " + maxPeriod*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + "ms\r\n";
         outputStr += "#  - Is tasks generated based on HP upper bound? " + generateFromHpDivisors + "\r\n";
         outputStr += "#  --- If yes, hyper-period upper bound = " + maxHyperPeriod*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + "ms \r\n";
