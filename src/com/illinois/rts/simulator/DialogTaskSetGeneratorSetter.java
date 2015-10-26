@@ -7,7 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class DialogTaskSetGeneratorSetter extends JDialog implements ActionListener {
+public class DialogTaskSetGeneratorSetter extends JDialog implements ActionListener, FocusListener{
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -59,7 +59,20 @@ public class DialogTaskSetGeneratorSetter extends JDialog implements ActionListe
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
 
+        /* Action Listener */
         checkUseHyperPeriodUpperBound.addActionListener(this);
+
+        /* Focus listener */
+        inputUtilMax.addFocusListener(this);
+        inputUtilMin.addFocusListener(this);
+        inputPeriodMax.addFocusListener(this);
+        inputPeriodMin.addFocusListener(this);
+        inputExecutionMax.addFocusListener(this);
+        inputExecutionMin.addFocusListener(this);
+        inputOffsetMax.addFocusListener(this);
+        inputOffsetMin.addFocusListener(this);
+        inputNumTasks.addFocusListener(this);
+        inputHyperPeriodUpperBound.addFocusListener(this);
 
         // Set the font for entire dialog.
         GuiUtility.changeChildrenFont(this, ProgConfig.DEFAULT_CONTENT_FONT);
@@ -167,4 +180,17 @@ public class DialogTaskSetGeneratorSetter extends JDialog implements ActionListe
         }
     }
 
+    @Override
+    public void focusGained(FocusEvent e) {
+        if ( JTextField.class.isInstance(e.getSource()) ) {
+            ((JTextField) e.getSource()).selectAll();
+        }
+    }
+
+    @Override
+    public void focusLost(FocusEvent e) {
+        if ( JTextField.class.isInstance(e.getSource()) ) {
+            ((JTextField) e.getSource()).select(0, 0);
+        }
+    }
 }
