@@ -147,7 +147,7 @@ public class GenerateRmTaskSet {
         ArrayList<Long> hyperPeriodFactors = null;
         if (generateFromHpDivisors == true) {
             hyperPeriodFactors = GeneralUtility.integerFactorization(maxHyperPeriod);
-            //ProgMsg.debugPutline(hyperPeriodFactors.toString());
+            ProgMsg.debugPutline(hyperPeriodFactors.toString());
         }
 
         ArrayList<Double> utilDistribution = getRandomUtilDistribution(numTasks, minUtil+(maxUtil-minUtil)/2);
@@ -169,6 +169,8 @@ public class GenerateRmTaskSet {
                 }
 
                 if (taskContainer.containPeriod(tempPeriod) == true) {
+                    // TODO: Bug to be solved: need to check whether the possible combinations are more than needs.
+                    // If the possible combinations are smaller than needs, then it will be stuck here.
                     // Skip duplicated period.
                     i--;
                     continue;
@@ -397,27 +399,18 @@ public class GenerateRmTaskSet {
 //    }
 
     int getRandomDivisor(ArrayList<Long> inFactors) {
-        //ArrayList<Long> factors = (ArrayList<Long>) inFactors.clone();
+        ArrayList<Long> factors = (ArrayList<Long>) inFactors.clone();
         int resultDivisor = 1;
-        int numOfFactors = inFactors.size();
-        int randomLoopNum = getRandom(1, numOfFactors);
-        ArrayList<Integer> factorHistory = new ArrayList<>();
+        int randomLoopNum = getRandom(1, factors.size());
         for (int i=0; i<randomLoopNum; i++) {
-            int thisIndex = getRandom(0, numOfFactors-1);
-            if (factorHistory.contains(thisIndex) == true) {
-                // This item has been chosen, try again.
-                i--;
-                continue;
-            } else {
-                // This index has not yet been chosen, so it's clear.
-                resultDivisor = resultDivisor * inFactors.get(thisIndex).intValue();
-                factorHistory.add(thisIndex);
-            }
+            int thisIndex = getRandom(0, factors.size()-1);
+            resultDivisor = resultDivisor * factors.get(thisIndex).intValue();
+            factors.remove(thisIndex);
         }
         return resultDivisor;
     }
 
-    /* Divide inMaxUtil into inMaxTaskNum pieces evenly, and then mess it up. */
+    /* Divide inMaxUtil into inMaxTaskNum pieces evenly, and then mess them up. */
     ArrayList<Double> getRandomUtilDistribution(int inMaxTaskNum, double inMaxUtil) {
         ArrayList<Double> resultUtilArray = new ArrayList<>();
 

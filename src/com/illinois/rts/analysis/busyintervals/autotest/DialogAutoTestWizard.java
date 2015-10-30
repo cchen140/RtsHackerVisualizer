@@ -402,10 +402,11 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                 continue;
             }
 
+            Boolean isHarmonic = simTaskContainer.hasHarmonicPeriods();
             if ( amirDecomposition.verifySchedulingInference() == true ) {
-                //putLineLogBuffer("#%d TkSet: SUCCESS", taskSetIndex);
+                putLineLogBuffer("#%d TkSet: SUCCESS (harmonic?%s)", taskSetIndex, isHarmonic.toString());
             } else {
-                putLineLogBuffer("#%d TkSet: FAILED", taskSetIndex);
+                putLineLogBuffer("#%d TkSet: FAILED (harmonic?%s)", taskSetIndex, isHarmonic.toString());
                 failureCount++;
             }
 

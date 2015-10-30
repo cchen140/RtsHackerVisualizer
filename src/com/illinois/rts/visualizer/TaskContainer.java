@@ -443,4 +443,18 @@ public class TaskContainer {
         }
         return largestPeriod;
     }
+
+    public Boolean hasHarmonicPeriods() {
+        for (Task taskA: getAppTasksAsArray()) {
+            for (Task taskB: getAppTasksAsArray()) {
+                if (taskA == taskB)
+                    continue;
+
+                if (taskA.getPeriodNs() % taskB.getPeriodNs() == 0)
+                    return true;
+            }
+        }
+        // No harmonic periods.
+        return false;
+    }
 }
