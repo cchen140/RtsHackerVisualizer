@@ -23,6 +23,9 @@ public class AmirDecomposition {
 
     public Boolean runDecompositionStep1()
     {
+        // TODO: test for skipping the first few busy intervals
+        busyIntervalContainer.removeBusyIntervalsBeforeTimeStamp(taskContainer.getLargestPeriod());
+
         // Step one: finding n values for every task in every busy interval.
         for (BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals())
         {
@@ -488,7 +491,7 @@ public class AmirDecomposition {
                     }
                     else
                     {
-                        // Has ambiguity but it's doable. (different inferences contain different number of inTask)
+                        // Has ambiguity but it's doable. (different inferences contain different number of inTask but not zero.)
                         hasAmbiguousInferenceForThisTask = true;
                     }
                 }
@@ -516,7 +519,7 @@ public class AmirDecomposition {
                 // Calculate the window of the last period in this busy interval.
                 int lastPeriodBeginTime = inBusyInterval.getBeginTimeStampNs() + inTask.getPeriodNs()*(numOfInTask-1);
                 int lastPeriodEndTime = inBusyInterval.getEndTimeStampNs();
-                Interval lastPeriodArrivalTimeWindow = new Interval(lastPeriodBeginTime, lastPeriodEndTime);
+                Interval lastPeriodArrivalTimeWindow = new Interval(lastPeriodBeginTime, lastPeriodEndTime-inTask.getComputationTimeNs());
 
                 // Shift the window of last period to the first window
                 lastPeriodArrivalTimeWindow.shift( -(inTask.getPeriodNs()*(numOfInTask - 1)) );
@@ -530,17 +533,12 @@ public class AmirDecomposition {
                     ProgMsg.debugPutline("Got an empty Arrival Time Window from the intersection.");
                 }
             }
-        }
-
-
-        /** For early stage algorithm development only! It has to be removed after test. **/
-        if (hasAmbiguousInferenceForThisTask == true)
-        {
-            /* Do nothing for now. */
-            // TODO: Should mark this busy interval as unsolved? Ans: This won't harm the inference. It just makes window bigger.
-            //ProgMsg.debugPutline("Has ambiguity to be solved.");
+        } else { // (hasAmbiguousInferenceForThisTask == true)
             // It means that for sure we know there is inTask in this busy interval,
             // but the number of inTask in this busy interval remain unknown since different inferences have inconsistent guess.
+            // ProgMsg.debugPutline("Has ambiguity to be solved.");
+
+            // resultArrivalTimeWindow will be the arrival time window then.
         }
 
         /** End **/

@@ -397,6 +397,7 @@ public class GenerateRmTaskSet {
 //    }
 
     int getRandomDivisor(ArrayList<Long> inFactors) {
+        //ArrayList<Long> factors = (ArrayList<Long>) inFactors.clone();
         int resultDivisor = 1;
         int numOfFactors = inFactors.size();
         int randomLoopNum = getRandom(1, numOfFactors);
@@ -416,14 +417,16 @@ public class GenerateRmTaskSet {
         return resultDivisor;
     }
 
+    /* Divide inMaxUtil into inMaxTaskNum pieces evenly, and then mess it up. */
     ArrayList<Double> getRandomUtilDistribution(int inMaxTaskNum, double inMaxUtil) {
         ArrayList<Double> resultUtilArray = new ArrayList<>();
 
-        // Initialize the array with evenly divided utilization.
+        // Initialize the array with evenly dividing utilization.
         for (int i=0; i<inMaxTaskNum; i++) {
             resultUtilArray.add(inMaxUtil/(double)inMaxTaskNum);
         }
 
+        /* Randomize the distribution. */
         double randUnit = inMaxUtil/100.0;
         for (int i=0; i<100; i++) {
             int indexA, indexB;

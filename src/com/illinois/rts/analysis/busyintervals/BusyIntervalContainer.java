@@ -112,6 +112,19 @@ public class BusyIntervalContainer {
         return null;
     }
 
+    public ArrayList<BusyInterval> findBusyIntervalsBeforeTimeStamp(int inTimeStamp)
+    {
+        ArrayList<BusyInterval> resultBis = new ArrayList<>();
+        for (BusyInterval thisBusyInterval : busyIntervals)
+        {
+            if (thisBusyInterval.getBeginTimeStampNs() <= inTimeStamp)
+            {
+                resultBis.add(thisBusyInterval);
+            }
+        }
+        return resultBis;
+    }
+
     public ArrayList<BusyInterval> findBusyIntervalsByTask(Task inTask)
     {
         ArrayList<BusyInterval> resultArrayList = new ArrayList<>();
@@ -144,5 +157,13 @@ public class BusyIntervalContainer {
             }
         }
         return endTime;
+    }
+
+    public void removeBusyIntervalsBeforeTimeStamp(int inTimeStamp) {
+        ArrayList<BusyInterval> biBeforeTimeStamp;
+        biBeforeTimeStamp = findBusyIntervalsBeforeTimeStamp(inTimeStamp);
+        for (BusyInterval thisBi : biBeforeTimeStamp) {
+            busyIntervals.remove(thisBi);
+        }
     }
 }

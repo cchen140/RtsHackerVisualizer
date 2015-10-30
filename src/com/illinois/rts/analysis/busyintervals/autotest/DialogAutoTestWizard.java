@@ -389,7 +389,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             BusyIntervalContainer busyIntervalContainer = new BusyIntervalContainer();
             busyIntervalContainer.createBusyIntervalsFromEvents(thisEventContainer);
 
-                /* Analyze busy intervals. The result will be written back to busy intervals. */
+            /* Analyze busy intervals. The result will be written back to busy intervals. */
             AmirDecomposition amirDecomposition = new AmirDecomposition(thisEventContainer.getTaskContainer(), busyIntervalContainer);
             //Decomposition decomposition = new Decomposition(thisEventContainer.getTaskContainer());
             //decomposition.runAmirDecomposition(busyIntervalContainer);
