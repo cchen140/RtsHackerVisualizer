@@ -49,6 +49,8 @@ public class GenerateRmTaskSet {
     static int numTaskPerSet;
     static int numTaskSet;
 
+    static Boolean nonHarmonicOnly;
+
     static Random rand = new Random();
 
     public GenerateRmTaskSet() {
@@ -72,6 +74,8 @@ public class GenerateRmTaskSet {
         numTaskSet = 10;
 
         generateFromHpDivisors = false;
+
+        nonHarmonicOnly = false;
 
     }
 
@@ -161,7 +165,13 @@ public class GenerateRmTaskSet {
 
             if (generateFromHpDivisors == true) {
                 int tempPeriod = 1;
-                tempPeriod = getRandomDivisor(hyperPeriodFactors);
+
+                if (nonHarmonicOnly == true) {
+                    // By fixed the number of chosen factors, we can get nonharmoic task set.
+                    tempPeriod = getRandomDivisor(hyperPeriodFactors, 3);
+                } else {
+                    tempPeriod = getRandomDivisor(hyperPeriodFactors);
+                }
 
                 if (tempPeriod<minPeriod) { // || tempPeriod>maxPeriod) {
                     i--;
@@ -218,6 +228,15 @@ public class GenerateRmTaskSet {
             task.setInitialOffset(tempInitialOffset);
 
             taskContainer.addTask(task);
+
+            // Test for getting rid of harmonic periods.
+            if (nonHarmonicOnly == true) {
+                if (taskContainer.hasHarmonicPeriods() == true) {
+                    taskContainer.removeTask(task);
+                    i--;
+                    continue;
+                }
+            }
         }
 
         if (total_util>1)
@@ -399,10 +418,18 @@ public class GenerateRmTaskSet {
 //        }
 //    }
 
-    int getRandomDivisor(ArrayList<Long> inFactors) {
+    int getRandomDivisor(ArrayList<Long> inFactors, int numOfChosenFactors) {
         ArrayList<Long> factors = (ArrayList<Long>) inFactors.clone();
         int resultDivisor = 1;
-        int randomLoopNum = getRandom(1, factors.size());
+        // TODO: Here to set the upper bound.
+        int randomLoopNum;
+
+        if (numOfChosenFactors == 0) {
+            randomLoopNum = getRandom(1, factors.size());
+        } else {
+            randomLoopNum = numOfChosenFactors;
+        }
+
         for (int i=0; i<randomLoopNum; i++) {
             int thisIndex = getRandom(0, factors.size()-1);
             resultDivisor = resultDivisor * factors.get(thisIndex).intValue();
@@ -410,6 +437,11 @@ public class GenerateRmTaskSet {
         }
         return resultDivisor;
     }
+
+    int getRandomDivisor(ArrayList<Long> inFactors) {
+        return getRandomDivisor(inFactors, 0);
+    }
+
 
     /* Divide inMaxUtil into inMaxTaskNum pieces evenly, and then mess them up. */
     ArrayList<Double> getRandomUtilDistribution(int inMaxTaskNum, double inMaxUtil) {
@@ -552,6 +584,14 @@ public class GenerateRmTaskSet {
 
     public static void setGenerateFromHpDivisors(Boolean generateFromHpDivisors) {
         GenerateRmTaskSet.generateFromHpDivisors = generateFromHpDivisors;
+    }
+
+    public static Boolean getNonHarmonicOnly() {
+        return nonHarmonicOnly;
+    }
+
+    public static void setNonHarmonicOnly(Boolean nonHarmonicOnly) {
+        GenerateRmTaskSet.nonHarmonicOnly = nonHarmonicOnly;
     }
 
     public String toCommentString() {

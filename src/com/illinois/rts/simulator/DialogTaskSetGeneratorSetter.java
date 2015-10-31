@@ -23,6 +23,7 @@ public class DialogTaskSetGeneratorSetter extends JDialog implements ActionListe
     private JTextField inputExecutionMax;
     private JTextField inputOffsetMin;
     private JTextField inputOffsetMax;
+    private JCheckBox checkNonHarmonicOnly;
 
     GenerateRmTaskSet taskSetGenerator = null;
 
@@ -61,6 +62,7 @@ public class DialogTaskSetGeneratorSetter extends JDialog implements ActionListe
 
         /* Action Listener */
         checkUseHyperPeriodUpperBound.addActionListener(this);
+        checkNonHarmonicOnly.addActionListener(this);
 
         /* Focus listener */
         inputUtilMax.addFocusListener(this);
@@ -139,6 +141,8 @@ public class DialogTaskSetGeneratorSetter extends JDialog implements ActionListe
             checkUseHyperPeriodUpperBound.setSelected(false);
             inputPeriodMax.setEnabled(true);
         }
+
+        checkNonHarmonicOnly.setSelected(taskSetGenerator.getNonHarmonicOnly());
     }
 
     private void applyNewSettings() {
@@ -162,7 +166,8 @@ public class DialogTaskSetGeneratorSetter extends JDialog implements ActionListe
 
         taskSetGenerator.setMaxHyperPeriod((int) (Double.valueOf(inputHyperPeriodUpperBound.getText()) * ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER));
 
-        taskSetGenerator.setGenerateFromHpDivisors( checkUseHyperPeriodUpperBound.isSelected() );
+        taskSetGenerator.setGenerateFromHpDivisors(checkUseHyperPeriodUpperBound.isSelected() );
+        taskSetGenerator.setNonHarmonicOnly( checkNonHarmonicOnly.isSelected() );
     }
 
     @Override
@@ -177,6 +182,8 @@ public class DialogTaskSetGeneratorSetter extends JDialog implements ActionListe
                 checkUseHyperPeriodUpperBound.setSelected(false);
                 inputPeriodMax.setEnabled(true);
             }
+        } else if (e.getSource() == checkNonHarmonicOnly) {
+            // Do nothing here.
         }
     }
 
