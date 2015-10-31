@@ -404,7 +404,7 @@ public class AmirDecomposition {
             firstWindow = inFirstWindow;
         }
         else {
-            BusyInterval shortestBusyIntervalContainingTask = findShortestBusyIntervalContainingTask(inTask);
+            BusyInterval shortestBusyIntervalContainingTask = findShortestBusyIntervalContainingTask(inTask, thisTaskBusyIntervals);
             if (shortestBusyIntervalContainingTask == null) {
                 // Unable to find the initial busy interval for calculating the arrival time window.
                 ProgMsg.errPutline("Unable to find the initial busy interval for calculating the arrival time window for %s.", inTask.getTitle());
@@ -422,9 +422,7 @@ public class AmirDecomposition {
 
         Boolean anyoneHasTwoIntersectionsInTheEnd = false;
         Interval lastWindow = new Interval(firstWindow);
-//        int DEBUG_COUNT = 0;
-//        do {
-//            DEBUG_COUNT++;
+
             anyoneHasTwoIntersectionsInTheEnd = false;
             lastWindow.setBegin(firstWindow.getBegin());
             lastWindow.setEnd(firstWindow.getEnd());
@@ -487,9 +485,6 @@ public class AmirDecomposition {
                 }
 
             } // End of for loop.
-            //}
-//        } while(lastWindow.getBegin()!=firstWindow.getBegin() || lastWindow.getEnd()!=firstWindow.getEnd());
-//        ProgMsg.debugPutline("Interscetion loop: %d while loops", DEBUG_COUNT);
 
         // TODO: Check this variable to see whether we have two intersections for a pair of window in the end.
         if (anyoneHasTwoIntersectionsInTheEnd == true) {
@@ -711,11 +706,11 @@ public class AmirDecomposition {
     }
 
     /* It will skip the busy intervals that have ambiguity for the given task. */
-    public BusyInterval findShortestBusyIntervalContainingTask(Task inTask)
+    public BusyInterval findShortestBusyIntervalContainingTask(Task inTask, ArrayList<BusyInterval> inBusyIntervals)
     {
         BusyInterval shortestBusyInterval = null;
         Boolean firstLoop = true;
-        for (BusyInterval thisBusyInterval : busyIntervalContainer.findBusyIntervalsByTask(inTask))
+        for (BusyInterval thisBusyInterval : inBusyIntervals)
         {
             /* Check whether this busy interval is ambiguous for inTask. */
             if (thisBusyInterval.getComposition().size() > 1)
@@ -879,14 +874,14 @@ public class AmirDecomposition {
     public Boolean reconstructCompositionOfBusyIntervalByArrivalTimeWindows()
     {
         for ( BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals() ) {
-            if (thisBusyInterval.getComposition().size() > 1) {
-                // TODO: What we can do when there are multiple possible inferences while reconstructing the schedule for a busy interval?
-                ProgMsg.debugErrPutline("Skipped!! Reconstruction Step: more than one inference in busy interval at " + String.valueOf((double)thisBusyInterval.getBeginTimeStampNs()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + " ms");
-                continue;
-            }
+//            if (thisBusyInterval.getComposition().size() > 1) {
+//                // TODO: What we can do when there are multiple possible inferences while reconstructing the schedule for a busy interval?
+//                ProgMsg.debugErrPutline("Skipped!! Reconstruction Step: more than one inference in busy interval at " + String.valueOf((double)thisBusyInterval.getBeginTimeStampNs()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + " ms");
+//                continue;
+//            }
 
             // Here we assume that the number of possible inferences is reduced to one, thus process the only one inference.
-            ArrayList<Task> thisInference = thisBusyInterval.getFirstComposition();
+//            ArrayList<Task> thisInference = thisBusyInterval.getFirstComposition();
             TaskArrivalEventContainer thisArrivalInference = thisBusyInterval.arrivalInference;
             thisArrivalInference.clear();
 
@@ -896,10 +891,10 @@ public class AmirDecomposition {
                     continue;
                 }
 
-                int numOfThisTask = Collections.frequency(thisInference, thisTask);
+                //int numOfThisTask = calculateNumOfGivenTaskInBusyIntervalByArrivalTimeWindow(thisBusyInterval, thisTask);
                 Interval thisArrivalWindow = findClosestArrivalTimeOfTask( thisBusyInterval.getBeginTimeStampNs(), thisTask );
 
-                for (int loop=0; loop<numOfThisTask; loop++) {
+                while (thisArrivalWindow.getBegin() < thisBusyInterval.getEndTimeStampNs()) {
                     /* Note that after added element will be sorted by time. */
                     thisArrivalInference.add( thisArrivalWindow.getBegin(), thisTask );
                     thisArrivalWindow.shift( thisTask.getPeriodNs() );
