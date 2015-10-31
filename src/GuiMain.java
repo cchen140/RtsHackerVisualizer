@@ -367,7 +367,7 @@ public class GuiMain implements ActionListener, MouseListener {
             zPanel.getTraceGroupContainer().addTraceGroup(hackDecompositionTraceGroup);
             applyNewSettingsAndRePaint();
         } else if (e.getSource() == menuItemBusyIntervalAnalysisAutoTestWizard) {
-            DialogAutoTestWizard dialogAutoTestWizard = new DialogAutoTestWizard();
+            DialogAutoTestWizard dialogAutoTestWizard = DialogAutoTestWizard.getInstance();
             dialogAutoTestWizard.showDialog(frame);
         }
 

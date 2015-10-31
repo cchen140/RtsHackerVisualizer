@@ -45,7 +45,18 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 //    private DialogLogOutput dialogLogOutput = new DialogLogOutput();
     String logBuffer = "";
 
-    public DialogAutoTestWizard() {
+    private static DialogAutoTestWizard instance;
+
+    public static DialogAutoTestWizard getInstance()
+    {
+        if (instance == null)
+        {
+            instance = new DialogAutoTestWizard();
+        }
+        return instance;
+    }
+
+    private DialogAutoTestWizard() {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(btnStartAutoTest);
@@ -114,7 +125,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         // Simulation duration and hyper-period scale.
         inputSimDuration.setText("1000");   // unit is ms
-        inputHyperPeriodScale.setText("1.2");
+        inputHyperPeriodScale.setText("3.2");
 
         inputNumOfTaskSets.setText("5");
 
@@ -281,7 +292,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
             int taskIndex = 1;
             for (Task thisTask : thisTaskContainer.getAppTaskAsArraySortedByPeriod()) {
-                tableTaskSets.setValueAt(thisTask.getComputationTimeNs()*ProgConfig.TIMESTAMP_UNIT_NS/1000_000.0 + "ms/" + thisTask.getPeriodNs()*ProgConfig.TIMESTAMP_UNIT_NS/1000_000.0 + "ms", rowIndex, taskIndex);
+                tableTaskSets.setValueAt(thisTask.getComputationTimeNs()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + "ms/" + thisTask.getPeriodNs()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + "ms", rowIndex, taskIndex);
                 taskIndex++;
             }
             rowIndex++;
@@ -349,6 +360,8 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         progressUpdater.setProgressPercent(0.0);
         final int numOfTaskSet = taskSetContainer.getTaskContainers().size();
         for (TaskContainer thisTaskContainer : taskSetContainer.getTaskContainers()) {
+            System.out.println("");
+
             /* Start RM scheduling simulation */
             EventContainer thisEventContainer = null;
 
