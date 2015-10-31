@@ -5,6 +5,7 @@ import com.illinois.rts.visualizer.Event;
 import com.illinois.rts.visualizer.TaskIntervalEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by CY on 5/21/2015.
@@ -23,6 +24,8 @@ public class BusyInterval {
     
     // There may have multiple inferences, so two-layer array is used here.
     private ArrayList<ArrayList<Task>> composition = new ArrayList<>();
+
+    private HashMap<Task, Boolean> isArrivalTimeWindowParsedAndFixed = new HashMap<>();
 
     public BusyInterval(int inBeginTimeStamp, int inEndTimeStamp)
     {
@@ -129,4 +132,11 @@ public class BusyInterval {
         return resultEvents;
     }
 
+    public Boolean getIsArrivalTimeWindowParsedAndFixed(Task inTask) {
+        return isArrivalTimeWindowParsedAndFixed.get(inTask);
+    }
+
+    public void setIsArrivalTimeWindowParsedAndFixed(Task inTask, Boolean isParsedAndFixed) {
+        isArrivalTimeWindowParsedAndFixed.put(inTask, isParsedAndFixed);
+    }
 }

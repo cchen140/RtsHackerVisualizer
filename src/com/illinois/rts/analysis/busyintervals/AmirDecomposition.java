@@ -430,15 +430,14 @@ public class AmirDecomposition {
             lastWindow.setEnd(firstWindow.getEnd());
 
             for (BusyInterval thisBusyInterval : thisTaskBusyIntervals) {
-                // The first busy interval should be the leftmost one (or the first valid one).
-//                if (firstLoop == true) {
-//                    firstWindow = calculateArrivalTimeWindowOfTaskInABusyInterval(thisBusyInterval, inTask);
-//                    // If this windows is invalid, then search for next valid window.
-//                    if (firstWindow != null) {
-//                        firstLoop = false;
-//                    }
-//                    continue;
-//                }
+
+                // Check whether this busy interval has been solved for inTask.
+                if (thisBusyInterval.getIsArrivalTimeWindowParsedAndFixed(inTask) != null) {
+                    if (thisBusyInterval.getIsArrivalTimeWindowParsedAndFixed(inTask) == true) {
+                        // This busy interval has been parsed and the window can not contribute more, thus skip.
+                        continue;
+                    }
+                }
 
 
                 /* Get current arrival window and check whether the window is valid or not. */
@@ -463,6 +462,9 @@ public class AmirDecomposition {
                     if (firstWindow.intersect(shiftedThisWindow) != null) {// Has two intersections, thus skip intersecting this window.
                         //ProgMsg.debugPutline("Two windows have multiple intersections!! Skip intersecting this window for now.");
                         anyoneHasTwoIntersectionsInTheEnd = true;
+
+                        // Mark this busy interval as not solved.
+                        thisBusyInterval.setIsArrivalTimeWindowParsedAndFixed(inTask, false);
                         continue;
                     }
                     // No intersection with moving -1 period.
@@ -473,6 +475,9 @@ public class AmirDecomposition {
                     if (firstWindow.intersect(shiftedThisWindow) != null) {// Has two intersections, thus skip intersecting this window.
                         //ProgMsg.debugPutline("Two windows have multiple intersections!! Skip intersecting this window for now.");
                         anyoneHasTwoIntersectionsInTheEnd = true;
+
+                        // Mark this busy interval as not solved.
+                        thisBusyInterval.setIsArrivalTimeWindowParsedAndFixed(inTask, false);
                         continue;
                     }
 
@@ -619,6 +624,10 @@ public class AmirDecomposition {
                     ProgMsg.debugPutline("Got an empty Arrival Time Window from the intersection.");
                 }
             }
+
+            // Mark this busy interval as solved for inTask.
+            inBusyInterval.setIsArrivalTimeWindowParsedAndFixed(inTask, true);
+
         } else { // (hasAmbiguousInferenceForThisTask == true)
             // It means that for sure we know there is inTask in this busy interval,
             // but the number of inTask in this busy interval remain unknown since different inferences have inconsistent guess.
