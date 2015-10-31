@@ -193,8 +193,9 @@ public class GenerateRmTaskSet {
             tempComputationTime  = (int)(((double)tempComputationTime)*utilDistribution.get(i));
             //tempComputationTime = (int)(utilDistribution.get(i)*((double)task.getPeriodNs()));
             if (tempComputationTime<minExecTime || tempComputationTime>maxExecTime) {
-                i--;
-                continue;
+                return null;
+//                i--;
+//                continue;
             }
 
 //            if (minExecTime>task.getPeriodNs()) {
