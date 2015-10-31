@@ -52,7 +52,7 @@ public class AmirDecomposition {
                 passCount++;
             }
         }
-
+        ProgMsg.debugPutline("Removing ambiguous inference: %d pass.", passCount);
         return true;
     }
 
@@ -133,7 +133,10 @@ public class AmirDecomposition {
 
         // Find Ns match this interval.
         ArrayList<ArrayList<Task>> resultCompositions;// = new ArrayList<HashMap<Integer, Integer>>();//HashMap<Integer, Integer>();
-        resultCompositions = findMatchingCompositions(nOfTasks, intervalNs, null);
+
+        // TODO: test if we don't calculate C in the beginning
+        resultCompositions = getWhateverCompositions(nOfTasks, intervalNs, null);
+        //resultCompositions = findMatchingCompositions(nOfTasks, intervalNs, null);
 //        System.out.println(resultsNOfTasks);
         return resultCompositions;
 
@@ -306,6 +309,67 @@ public class AmirDecomposition {
         return resultCompositions;
     }
 
+    private ArrayList<ArrayList<Task>> getWhateverCompositions(HashMap<Integer, ArrayList<Integer>> inNOfTasks, int inTargetInterval, HashMap<Integer, Integer> inProcessingNOfTasks)
+    {
+        ArrayList<ArrayList<Task>> resultCompositions = new ArrayList<ArrayList<Task>>();
+
+        if (inNOfTasks.isEmpty())
+        {
+            /* Compute the interval from current compositions. */
+//            int compositeInterval = 0;
+//            for (int thisTaskId : inProcessingNOfTasks.keySet())
+//            {
+//                compositeInterval += taskContainer.getTaskById(thisTaskId).getComputationTimeNs() * inProcessingNOfTasks.get(thisTaskId);
+//            }
+//            System.out.format("End of recursive calls, %d\r\n", compositeInterval);
+
+            /* Check whether current composite interval equals target interval or not. */
+            //if (compositeInterval == inTargetInterval)
+            if (true)
+            {
+//                System.out.println("Matched!!");
+//                System.out.println(inProcessingNOfTasks);
+
+                ArrayList thisResultComposition = new ArrayList<Task>();
+                for (int thisTaskId : inProcessingNOfTasks.keySet())
+                {
+                    for (int loop=0; loop<inProcessingNOfTasks.get(thisTaskId); loop++)
+                    {
+                        thisResultComposition.add(taskContainer.getTaskById(thisTaskId));
+                    }
+                }
+                resultCompositions.add(thisResultComposition);
+                return resultCompositions;
+            }
+            else
+            {
+                /* Because addAll() doesn't accept null pointer, thus returning empty arrayList instead. */
+                //return null;
+                return resultCompositions;
+            }
+        }
+
+        /* Select an unsorted task to process and create a list which contains rest of n values of unsorted tasks. */
+        int thisTaskId = inNOfTasks.keySet().iterator().next();
+        ArrayList<Integer> nOfThisTask = inNOfTasks.get(thisTaskId);
+        HashMap<Integer, ArrayList<Integer>> restNOfTasks = new HashMap<Integer, ArrayList<Integer>>(inNOfTasks);
+        restNOfTasks.remove(thisTaskId);
+
+        if (inProcessingNOfTasks == null)
+        { // For the first time the program gets here, inProcessingNOfTasks has to be initialized.
+            inProcessingNOfTasks = new HashMap<Integer, Integer>();
+        }
+
+        // Iterate every possible n value of current task and pass the value down recursively.
+        for (Integer thisN: nOfThisTask)
+        {
+            inProcessingNOfTasks.put(thisTaskId, thisN);
+            resultCompositions.addAll(findMatchingCompositions(restNOfTasks, inTargetInterval, inProcessingNOfTasks));
+            inProcessingNOfTasks.remove(thisTaskId);
+        }
+        return resultCompositions;
+    }
+
     public Boolean areEqualWithinError(int inNum01, int inNum02, int inErrorRange)
     {
         return Math.abs(inNum01-inNum02)<=inErrorRange ? true : false;
@@ -319,7 +383,7 @@ public class AmirDecomposition {
                 //return false;
             } else {
                 taskArrivalTimeWindows.put(thisTask, thisInterval);
-                ProgMsg.debugPutline("%s, %d:%d ms", thisTask.getTitle(), (int)(thisInterval.getBegin()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER), (int)(thisInterval.getEnd()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER));
+                //ProgMsg.debugPutline("%s, %d:%d ms", thisTask.getTitle(), (int)(thisInterval.getBegin()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER), (int)(thisInterval.getEnd()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER));
             }
         }
 
@@ -335,9 +399,7 @@ public class AmirDecomposition {
         thisTaskBusyIntervals = busyIntervalContainer.findBusyIntervalsByTask(inTask);
 
         Interval firstWindow = null;
-        Boolean firstLoop = true;
 
-        /** TODO: Test for starting with the shortest busy interval **/
         if (inFirstWindow != null) {
             firstWindow = inFirstWindow;
         }
@@ -345,7 +407,7 @@ public class AmirDecomposition {
             BusyInterval shortestBusyIntervalContainingTask = findShortestBusyIntervalContainingTask(inTask);
             if (shortestBusyIntervalContainingTask == null) {
                 // Unable to find the initial busy interval for calculating the arrival time window.
-                ProgMsg.errPutline("Unable to find the initial busy interval for calculating the arrival time window.");
+                ProgMsg.errPutline("Unable to find the initial busy interval for calculating the arrival time window for %s.", inTask.getTitle());
                 //throw new RuntimeException(String.format("Unable to find the initial busy interval for calculating the arrival time window for task '%s'.", inTask.getTitle()));
                 return null;
             } else {
@@ -354,12 +416,19 @@ public class AmirDecomposition {
         }
         // Move the window to around zero point.
         firstWindow.shift(-(firstWindow.getEnd() / inTask.getPeriodNs()) * inTask.getPeriodNs());
-        ProgMsg.debugPutline("first window of %s, %d:%d ms", inTask.getTitle(), (int)(firstWindow.getBegin()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER), (int)(firstWindow.getEnd()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER));
-        firstLoop = false;
-        /** Test ends **/
+        //ProgMsg.debugPutline("first window of %s, %d:%d ms", inTask.getTitle(), (int)(firstWindow.getBegin()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER), (int)(firstWindow.getEnd()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER));
 
 
-        for (int loop=0; loop<2; loop++) {
+
+        Boolean anyoneHasTwoIntersectionsInTheEnd = false;
+        Interval lastWindow = new Interval(firstWindow);
+//        int DEBUG_COUNT = 0;
+//        do {
+//            DEBUG_COUNT++;
+            anyoneHasTwoIntersectionsInTheEnd = false;
+            lastWindow.setBegin(firstWindow.getBegin());
+            lastWindow.setEnd(firstWindow.getEnd());
+
             for (BusyInterval thisBusyInterval : thisTaskBusyIntervals) {
                 // The first busy interval should be the leftmost one (or the first valid one).
 //                if (firstLoop == true) {
@@ -383,7 +452,7 @@ public class AmirDecomposition {
 
                 if (smallestShiftPeriodValue == null) {// No intersection.
                     ProgMsg.errPutline("No intersection! Should not ever happen!!");
-                    ProgMsg.errPutline("\t %d:%d ms", (int)(thisWindow.getBegin()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER), (int)(thisWindow.getEnd()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER));
+                    ProgMsg.errPutline("\t- %d:%d ms", (int) (thisWindow.getBegin() * ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER), (int) (thisWindow.getEnd() * ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER));
                     continue;
                 } else {// Has intersection.
                     Interval shiftedThisWindow = new Interval(thisWindow);
@@ -392,24 +461,36 @@ public class AmirDecomposition {
                     // Shift one more -period to see if there is another intersection
                     shiftedThisWindow.shift(-inTask.getPeriodNs());
                     if (firstWindow.intersect(shiftedThisWindow) != null) {// Has two intersections, thus skip intersecting this window.
+                        //ProgMsg.debugPutline("Two windows have multiple intersections!! Skip intersecting this window for now.");
+                        anyoneHasTwoIntersectionsInTheEnd = true;
                         continue;
                     }
                     // No intersection with moving -1 period.
 
                     // Now testing the intersection with moving +1 period.
                     // Shift one more +period to see if there is another intersection
-                    shiftedThisWindow.shift(2*inTask.getPeriodNs());
+                    shiftedThisWindow.shift(2 * inTask.getPeriodNs());
                     if (firstWindow.intersect(shiftedThisWindow) != null) {// Has two intersections, thus skip intersecting this window.
+                        //ProgMsg.debugPutline("Two windows have multiple intersections!! Skip intersecting this window for now.");
+                        anyoneHasTwoIntersectionsInTheEnd = true;
                         continue;
                     }
 
                     // In the end, it has only one intersection, so apply the intersection to firstWindow.
                     thisWindow.shift(smallestShiftPeriodValue * inTask.getPeriodNs());
                     firstWindow = firstWindow.intersect(thisWindow);
-
                 }
 
             } // End of for loop.
+            //}
+//        } while(lastWindow.getBegin()!=firstWindow.getBegin() || lastWindow.getEnd()!=firstWindow.getEnd());
+//        ProgMsg.debugPutline("Interscetion loop: %d while loops", DEBUG_COUNT);
+
+        // TODO: Check this variable to see whether we have two intersections for a pair of window in the end.
+        if (anyoneHasTwoIntersectionsInTheEnd == true) {
+//            ProgMsg.errPutline("Still got someone having two intersections in the last parse for %s", inTask.getTitle());
+        } else {
+//            ProgMsg.debugPutline("2-intersection test pass for %s", inTask.getTitle());
         }
 
         assert firstWindow!=null : "No arrival window is found in all busy intervals for this task";
@@ -491,7 +572,7 @@ public class AmirDecomposition {
                     if (numOfInTask==0 || thisNumOfInTask==0)
                     {// One of the inference contains no inTask, thus it's not doable.
                         // TODO: watch this if too many busy intervals are skipped for the inference of arrival window for a task.
-                        ProgMsg.debugPutline("One of the inference contains 0 of %s.", inTask.getTitle());
+                        //ProgMsg.debugPutline("One of the inference contains 0 of %s.", inTask.getTitle());
                         return null;
                     }
                     else
