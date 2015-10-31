@@ -151,7 +151,7 @@ public class GenerateRmTaskSet {
         ArrayList<Long> hyperPeriodFactors = null;
         if (generateFromHpDivisors == true) {
             hyperPeriodFactors = GeneralUtility.integerFactorization(maxHyperPeriod);
-            ProgMsg.debugPutline(hyperPeriodFactors.toString());
+            //ProgMsg.debugPutline(hyperPeriodFactors.toString());
         }
 
         ArrayList<Double> utilDistribution = getRandomUtilDistribution(numTasks, minUtil+(maxUtil-minUtil)/2);
@@ -421,7 +421,6 @@ public class GenerateRmTaskSet {
     int getRandomDivisor(ArrayList<Long> inFactors, int numOfChosenFactors) {
         ArrayList<Long> factors = (ArrayList<Long>) inFactors.clone();
         int resultDivisor = 1;
-        // TODO: Here to set the upper bound.
         int randomLoopNum;
 
         if (numOfChosenFactors == 0) {
@@ -459,7 +458,7 @@ public class GenerateRmTaskSet {
             indexA = getRandom(0, inMaxTaskNum-1);
             indexB = getRandom(0, inMaxTaskNum-1);
 
-            if (indexA==indexB || resultUtilArray.get(indexB)<0.01) {
+            if (indexA==indexB || resultUtilArray.get(indexB)<0.001) {
                 i--;
                 continue;
             } else {
