@@ -411,6 +411,8 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             } catch (RuntimeException rex) {
                 //rex.printStackTrace();
                 putLineLogBuffer("#%d TkSet: TERMINATE - " + rex.getMessage(), taskSetIndex);
+                ProgMsg.errPutline("#%d TkSet: TERMINATE - " + rex.getMessage(), taskSetIndex);
+                rex.printStackTrace();
                 failureCount++;
                 continue;
             }

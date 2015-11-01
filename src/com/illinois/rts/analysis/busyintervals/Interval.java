@@ -98,4 +98,12 @@ public class Interval {
         }
     }
 
+    public Boolean within(Interval inLarger) {
+        if ( (inLarger.begin<=begin) && (inLarger.end>=end) ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

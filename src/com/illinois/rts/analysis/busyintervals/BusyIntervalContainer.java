@@ -1,5 +1,6 @@
 package com.illinois.rts.analysis.busyintervals;
 
+import com.illinois.rts.analysis.busyintervals.ArrivalTimeWindow.ArrivalSegment;
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.visualizer.*;
 
@@ -10,6 +11,12 @@ import java.util.ArrayList;
  */
 public class BusyIntervalContainer {
     ArrayList<BusyInterval> busyIntervals = new ArrayList<BusyInterval>();
+
+    public BusyIntervalContainer() {}
+
+    public BusyIntervalContainer(ArrayList<BusyInterval> inBusyIntervals) {
+        busyIntervals.addAll( inBusyIntervals );
+    }
 
     public Boolean createBusyIntervalsFromEvents(EventContainer inEventContainer)
     {
@@ -78,6 +85,7 @@ public class BusyIntervalContainer {
         return true;
     }
 
+    /* This is used to convert events from Zedboard log. */
     public Boolean createBusyIntervalsFromIntervalEvents(ArrayList<IntervalEvent> inEvents)
     {
         // Reset the variable.
@@ -130,7 +138,7 @@ public class BusyIntervalContainer {
         ArrayList<BusyInterval> resultArrayList = new ArrayList<>();
         for (BusyInterval thisBusyInterval : busyIntervals)
         {
-            if (thisBusyInterval.containsComposition(inTask) == true)
+            if (thisBusyInterval.containsTaskCheckedByNkValues(inTask) == true)
             {
                 resultArrayList.add(thisBusyInterval);
             }
@@ -159,11 +167,38 @@ public class BusyIntervalContainer {
         return endTime;
     }
 
+    public int getBeginTime()
+    {
+        int beginTime = 0;
+        Boolean firstLoop = true;
+        for (BusyInterval thisBusyInterval : busyIntervals) {
+            if (firstLoop == true) {
+                beginTime = thisBusyInterval.getBeginTimeStampNs();
+                firstLoop = false;
+            }
+
+            beginTime = thisBusyInterval.getBeginTimeStampNs() < beginTime ? thisBusyInterval.getBeginTimeStampNs() : beginTime;
+        }
+        return beginTime;
+    }
+
     public void removeBusyIntervalsBeforeTimeStamp(int inTimeStamp) {
         ArrayList<BusyInterval> biBeforeTimeStamp;
         biBeforeTimeStamp = findBusyIntervalsBeforeTimeStamp(inTimeStamp);
         for (BusyInterval thisBi : biBeforeTimeStamp) {
             busyIntervals.remove(thisBi);
         }
+    }
+
+    public void removeTheLastBusyInterval() {
+        int lastBeginTime = 0;
+        BusyInterval lastBi = null;
+        for (BusyInterval thisBi : busyIntervals) {
+            if (lastBeginTime < thisBi.getBeginTimeStampNs()) {
+                lastBeginTime = thisBi.getBeginTimeStampNs();
+                lastBi = thisBi;
+            }
+        }
+        busyIntervals.remove(lastBi);
     }
 }

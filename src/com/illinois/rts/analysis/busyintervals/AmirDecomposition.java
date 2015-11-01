@@ -1,5 +1,6 @@
 package com.illinois.rts.analysis.busyintervals;
 
+import com.illinois.rts.analysis.busyintervals.ArrivalTimeWindow.ArrivalSegmentsContainer;
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.visualizer.*;
 
@@ -26,10 +27,16 @@ public class AmirDecomposition {
         // TODO: test for skipping the first few busy intervals
         busyIntervalContainer.removeBusyIntervalsBeforeTimeStamp(taskContainer.getLargestPeriod());
 
+        // Remove the last one since it may not be complete.
+        busyIntervalContainer.removeTheLastBusyInterval();
+
         // Step one: finding n values for every task in every busy interval.
         for (BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals())
         {
-            thisBusyInterval.setComposition(calculateComposition(thisBusyInterval));
+            //thisBusyInterval.setComposition(calculateComposition(thisBusyInterval));
+
+            // This is to calculate Nk values for each task in each busy interval.
+            calculateAndSetNkValueOfBusyInterval(thisBusyInterval);
         }
         return true;
     }
@@ -53,6 +60,14 @@ public class AmirDecomposition {
             }
         }
         ProgMsg.debugPutline("Removing ambiguous inference: %d pass.", passCount);
+
+        /* Check whether there are multiple arrival time windows for a task. */
+        for (Task thisTask : taskContainer.getAppTasksAsArray()) {
+            if (taskArrivalTimeWindows.get(thisTask) == null) {
+                throw new RuntimeException(String.format("%s arrival time window not yet fixed.", thisTask.getTitle()));
+            }
+        }
+
         return true;
     }
 
@@ -95,13 +110,12 @@ public class AmirDecomposition {
         return true;
     }
 
-    public ArrayList<ArrayList<Task>> calculateComposition(BusyInterval inBusyInterval)
-    {
-        int intervalNs = inBusyInterval.getIntervalNs();
-//        int matchingInterval = 0;
+    public void calculateAndSetNkValueOfBusyInterval(BusyInterval inBusyInterval) {
+        int duration = inBusyInterval.getIntervalNs();
 
-        /* Calculate N of each task. */
-        HashMap<Integer, ArrayList<Integer>> nOfTasks = new HashMap<Integer, ArrayList<Integer>>();
+        HashMap<Task, ArrayList<Integer>> nkOfTasks = new HashMap<Task, ArrayList<Integer>>();
+
+        /* Calculate Nk of each task. */
         for (Object thisObject: taskContainer.getAppTasksAsArray())
         {
             Task thisTask = (Task) thisObject;
@@ -110,8 +124,8 @@ public class AmirDecomposition {
             int thisP = thisTask.getPeriodNs();
             int thisC = thisTask.getComputationTimeNs();
 
-            int numberOfCompletePeriods = (int) Math.floor(intervalNs / thisP);
-            int subIntervalNs = intervalNs - numberOfCompletePeriods*thisP;
+            int numberOfCompletePeriods = (int) Math.floor(duration / thisP);
+            int subIntervalNs = duration - numberOfCompletePeriods*thisP;
 
             if (subIntervalNs < thisC)
             {// This task can only have occurred 0 time in this sub-interval.
@@ -127,20 +141,66 @@ public class AmirDecomposition {
                 thisResult.add(numberOfCompletePeriods + 1);
             }
 
-            nOfTasks.put(thisTask.getId(), thisResult);
-//            matchingInterval += thisResult.get(0);
+            nkOfTasks.put(thisTask, thisResult);
         }
 
         // Find Ns match this interval.
         ArrayList<ArrayList<Task>> resultCompositions;// = new ArrayList<HashMap<Integer, Integer>>();//HashMap<Integer, Integer>();
 
-        // TODO: test if we don't calculate C in the beginning
-        resultCompositions = getWhateverCompositions(nOfTasks, intervalNs, null);
-        //resultCompositions = findMatchingCompositions(nOfTasks, intervalNs, null);
-//        System.out.println(resultsNOfTasks);
-        return resultCompositions;
+        resultCompositions = findMatchingCompositions(nkOfTasks, duration, null);
+        inBusyInterval.setComposition(resultCompositions);
+
+        /* Update Nk values. */
+        inBusyInterval.updateNkValuesFromCompositions(taskContainer);
 
     }
+
+//    public ArrayList<ArrayList<Task>> calculateComposition(BusyInterval inBusyInterval)
+//    {
+//        int intervalNs = inBusyInterval.getIntervalNs();
+////        int matchingInterval = 0;
+//
+//        /* Calculate N of each task. */
+//        HashMap<Integer, ArrayList<Integer>> nOfTasks = new HashMap<Integer, ArrayList<Integer>>();
+//        for (Object thisObject: taskContainer.getAppTasksAsArray())
+//        {
+//            Task thisTask = (Task) thisObject;
+//            ArrayList<Integer> thisResult = new ArrayList<Integer>();
+//
+//            int thisP = thisTask.getPeriodNs();
+//            int thisC = thisTask.getComputationTimeNs();
+//
+//            int numberOfCompletePeriods = (int) Math.floor(intervalNs / thisP);
+//            int subIntervalNs = intervalNs - numberOfCompletePeriods*thisP;
+//
+//            if (subIntervalNs < thisC)
+//            {// This task can only have occurred 0 time in this sub-interval.
+//                thisResult.add(numberOfCompletePeriods + 0);
+//            }
+//            else if (subIntervalNs < (thisP-thisC))
+//            {// This task can have occurred 0 or 1 time in this sub-interval.
+//                thisResult.add(numberOfCompletePeriods + 0);
+//                thisResult.add(numberOfCompletePeriods + 1);
+//            }
+//            else // if (subIntervalNs < thisP)
+//            {// This task can only have occurred 1 times in this sub-interval.
+//                thisResult.add(numberOfCompletePeriods + 1);
+//            }
+//
+//            nOfTasks.put(thisTask.getId(), thisResult);
+////            matchingInterval += thisResult.get(0);
+//        }
+//
+//        // Find Ns match this interval.
+//        ArrayList<ArrayList<Task>> resultCompositions;// = new ArrayList<HashMap<Integer, Integer>>();//HashMap<Integer, Integer>();
+//
+//        // TODO: test if we don't calculate C in the beginning
+//        resultCompositions = getWhateverCompositions(nOfTasks, intervalNs, null);
+//        //resultCompositions = findMatchingCompositions(nOfTasks, intervalNs, null);
+////        System.out.println(resultsNOfTasks);
+//        return resultCompositions;
+//
+//    }
 
     public ArrayList<ArrayList<Task>> calculateCompositionWithErrors(BusyInterval inBusyInterval)
     {
@@ -186,7 +246,7 @@ public class AmirDecomposition {
 
     }
 
-    private ArrayList<ArrayList<Task>> findMatchingCompositions(HashMap<Integer, ArrayList<Integer>> inNOfTasks, int inTargetInterval, HashMap<Integer, Integer> inProcessingNOfTasks)
+    private ArrayList<ArrayList<Task>> findMatchingCompositions(HashMap<Task, ArrayList<Integer>> inNOfTasks, int inTargetInterval, HashMap<Task, Integer> inProcessingNOfTasks)
     {
         ArrayList<ArrayList<Task>> resultCompositions = new ArrayList<ArrayList<Task>>();
 
@@ -194,9 +254,9 @@ public class AmirDecomposition {
         {
             /* Compute the interval from current compositions. */
             int compositeInterval = 0;
-            for (int thisTaskId : inProcessingNOfTasks.keySet())
+            for (Task thisTask : inProcessingNOfTasks.keySet())
             {
-                compositeInterval += taskContainer.getTaskById(thisTaskId).getComputationTimeNs() * inProcessingNOfTasks.get(thisTaskId);
+                compositeInterval += thisTask.getComputationTimeNs() * inProcessingNOfTasks.get(thisTask);
             }
 //            System.out.format("End of recursive calls, %d\r\n", compositeInterval);
 
@@ -207,11 +267,11 @@ public class AmirDecomposition {
 //                System.out.println(inProcessingNOfTasks);
 
                 ArrayList thisResultComposition = new ArrayList<Task>();
-                for (int thisTaskId : inProcessingNOfTasks.keySet())
+                for (Task thisTask : inProcessingNOfTasks.keySet())
                 {
-                    for (int loop=0; loop<inProcessingNOfTasks.get(thisTaskId); loop++)
+                    for (int loop=0; loop<inProcessingNOfTasks.get(thisTask); loop++)
                     {
-                        thisResultComposition.add(taskContainer.getTaskById(thisTaskId));
+                        thisResultComposition.add(thisTask);
                     }
                 }
                 resultCompositions.add(thisResultComposition);
@@ -226,22 +286,22 @@ public class AmirDecomposition {
         }
 
         /* Select an unsorted task to process and create a list which contains rest of n values of unsorted tasks. */
-        int thisTaskId = inNOfTasks.keySet().iterator().next();
-        ArrayList<Integer> nOfThisTask = inNOfTasks.get(thisTaskId);
-        HashMap<Integer, ArrayList<Integer>> restNOfTasks = new HashMap<Integer, ArrayList<Integer>>(inNOfTasks);
-        restNOfTasks.remove(thisTaskId);
+        Task thisTask = inNOfTasks.keySet().iterator().next();
+        ArrayList<Integer> nOfThisTask = inNOfTasks.get(thisTask);
+        HashMap<Task, ArrayList<Integer>> restNOfTasks = new HashMap<Task, ArrayList<Integer>>(inNOfTasks);
+        restNOfTasks.remove(thisTask);
 
         if (inProcessingNOfTasks == null)
         { // For the first time the program gets here, inProcessingNOfTasks has to be initialized.
-            inProcessingNOfTasks = new HashMap<Integer, Integer>();
+            inProcessingNOfTasks = new HashMap<Task, Integer>();
         }
 
         // Iterate every possible n value of current task and pass the value down recursively.
         for (Integer thisN: nOfThisTask)
         {
-            inProcessingNOfTasks.put(thisTaskId, thisN);
+            inProcessingNOfTasks.put(thisTask, thisN);
             resultCompositions.addAll(findMatchingCompositions(restNOfTasks, inTargetInterval, inProcessingNOfTasks));
-            inProcessingNOfTasks.remove(thisTaskId);
+            inProcessingNOfTasks.remove(thisTask);
         }
         return resultCompositions;
     }
@@ -309,66 +369,66 @@ public class AmirDecomposition {
         return resultCompositions;
     }
 
-    private ArrayList<ArrayList<Task>> getWhateverCompositions(HashMap<Integer, ArrayList<Integer>> inNOfTasks, int inTargetInterval, HashMap<Integer, Integer> inProcessingNOfTasks)
-    {
-        ArrayList<ArrayList<Task>> resultCompositions = new ArrayList<ArrayList<Task>>();
-
-        if (inNOfTasks.isEmpty())
-        {
-            /* Compute the interval from current compositions. */
-//            int compositeInterval = 0;
-//            for (int thisTaskId : inProcessingNOfTasks.keySet())
+//    private ArrayList<ArrayList<Task>> getWhateverCompositions(HashMap<Integer, ArrayList<Integer>> inNOfTasks, int inTargetInterval, HashMap<Integer, Integer> inProcessingNOfTasks)
+//    {
+//        ArrayList<ArrayList<Task>> resultCompositions = new ArrayList<ArrayList<Task>>();
+//
+//        if (inNOfTasks.isEmpty())
+//        {
+//            /* Compute the interval from current compositions. */
+////            int compositeInterval = 0;
+////            for (int thisTaskId : inProcessingNOfTasks.keySet())
+////            {
+////                compositeInterval += taskContainer.getTaskById(thisTaskId).getComputationTimeNs() * inProcessingNOfTasks.get(thisTaskId);
+////            }
+////            System.out.format("End of recursive calls, %d\r\n", compositeInterval);
+//
+//            /* Check whether current composite interval equals target interval or not. */
+//            //if (compositeInterval == inTargetInterval)
+//            if (true)
 //            {
-//                compositeInterval += taskContainer.getTaskById(thisTaskId).getComputationTimeNs() * inProcessingNOfTasks.get(thisTaskId);
+////                System.out.println("Matched!!");
+////                System.out.println(inProcessingNOfTasks);
+//
+//                ArrayList thisResultComposition = new ArrayList<Task>();
+//                for (int thisTaskId : inProcessingNOfTasks.keySet())
+//                {
+//                    for (int loop=0; loop<inProcessingNOfTasks.get(thisTaskId); loop++)
+//                    {
+//                        thisResultComposition.add(taskContainer.getTaskById(thisTaskId));
+//                    }
+//                }
+//                resultCompositions.add(thisResultComposition);
+//                return resultCompositions;
 //            }
-//            System.out.format("End of recursive calls, %d\r\n", compositeInterval);
-
-            /* Check whether current composite interval equals target interval or not. */
-            //if (compositeInterval == inTargetInterval)
-            if (true)
-            {
-//                System.out.println("Matched!!");
-//                System.out.println(inProcessingNOfTasks);
-
-                ArrayList thisResultComposition = new ArrayList<Task>();
-                for (int thisTaskId : inProcessingNOfTasks.keySet())
-                {
-                    for (int loop=0; loop<inProcessingNOfTasks.get(thisTaskId); loop++)
-                    {
-                        thisResultComposition.add(taskContainer.getTaskById(thisTaskId));
-                    }
-                }
-                resultCompositions.add(thisResultComposition);
-                return resultCompositions;
-            }
-            else
-            {
-                /* Because addAll() doesn't accept null pointer, thus returning empty arrayList instead. */
-                //return null;
-                return resultCompositions;
-            }
-        }
-
-        /* Select an unsorted task to process and create a list which contains rest of n values of unsorted tasks. */
-        int thisTaskId = inNOfTasks.keySet().iterator().next();
-        ArrayList<Integer> nOfThisTask = inNOfTasks.get(thisTaskId);
-        HashMap<Integer, ArrayList<Integer>> restNOfTasks = new HashMap<Integer, ArrayList<Integer>>(inNOfTasks);
-        restNOfTasks.remove(thisTaskId);
-
-        if (inProcessingNOfTasks == null)
-        { // For the first time the program gets here, inProcessingNOfTasks has to be initialized.
-            inProcessingNOfTasks = new HashMap<Integer, Integer>();
-        }
-
-        // Iterate every possible n value of current task and pass the value down recursively.
-        for (Integer thisN: nOfThisTask)
-        {
-            inProcessingNOfTasks.put(thisTaskId, thisN);
-            resultCompositions.addAll(findMatchingCompositions(restNOfTasks, inTargetInterval, inProcessingNOfTasks));
-            inProcessingNOfTasks.remove(thisTaskId);
-        }
-        return resultCompositions;
-    }
+//            else
+//            {
+//                /* Because addAll() doesn't accept null pointer, thus returning empty arrayList instead. */
+//                //return null;
+//                return resultCompositions;
+//            }
+//        }
+//
+//        /* Select an unsorted task to process and create a list which contains rest of n values of unsorted tasks. */
+//        int thisTaskId = inNOfTasks.keySet().iterator().next();
+//        ArrayList<Integer> nOfThisTask = inNOfTasks.get(thisTaskId);
+//        HashMap<Integer, ArrayList<Integer>> restNOfTasks = new HashMap<Integer, ArrayList<Integer>>(inNOfTasks);
+//        restNOfTasks.remove(thisTaskId);
+//
+//        if (inProcessingNOfTasks == null)
+//        { // For the first time the program gets here, inProcessingNOfTasks has to be initialized.
+//            inProcessingNOfTasks = new HashMap<Integer, Integer>();
+//        }
+//
+//        // Iterate every possible n value of current task and pass the value down recursively.
+//        for (Integer thisN: nOfThisTask)
+//        {
+//            inProcessingNOfTasks.put(thisTaskId, thisN);
+//            resultCompositions.addAll(findMatchingCompositions(restNOfTasks, inTargetInterval, inProcessingNOfTasks));
+//            inProcessingNOfTasks.remove(thisTaskId);
+//        }
+//        return resultCompositions;
+//    }
 
     public Boolean areEqualWithinError(int inNum01, int inNum02, int inErrorRange)
     {
@@ -378,18 +438,17 @@ public class AmirDecomposition {
     public Boolean calculateArrivalTimeOfAllTasks() throws RuntimeException
     {
         for (Task thisTask : taskContainer.getAppTasksAsArray()){
-            Interval thisInterval = calculateArrivalTimeWindowOfTask(thisTask, taskArrivalTimeWindows.get(thisTask));
-            if (thisInterval == null) {
-                //return false;
+            ArrivalSegmentsContainer thisArrivalSegmentsContainer = new ArrivalSegmentsContainer(thisTask, new BusyIntervalContainer(busyIntervalContainer.findBusyIntervalsByTask(thisTask)));
+            if (thisArrivalSegmentsContainer.calculateFinalArrivalTimeWindow() == true) {
+                taskArrivalTimeWindows.put(thisTask, thisArrivalSegmentsContainer.getFinalArrivalTimeWindow());
             } else {
-                taskArrivalTimeWindows.put(thisTask, thisInterval);
-                //ProgMsg.debugPutline("%s, %d:%d ms", thisTask.getTitle(), (int)(thisInterval.getBegin()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER), (int)(thisInterval.getEnd()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER));
+                // Oh no... not good.
             }
         }
-
-        // TODO: Should return false if any arrival time window is null? No
         return true;
     }
+
+
 
     public Interval calculateArrivalTimeWindowOfTask(Task inTask, Interval inFirstWindow) throws RuntimeException
     {
@@ -541,7 +600,7 @@ public class AmirDecomposition {
     public Interval calculateArrivalTimeWindowOfTaskInABusyInterval(BusyInterval inBusyInterval, Task inTask)
     {
         // First, check whether this busy interval contains inTask or not.
-        if (inBusyInterval.containsComposition(inTask) == false)
+        if (inBusyInterval.containsTaskCheckedByNkValues(inTask) == false)
             return null;
 
         Boolean hasAmbiguousInferenceForThisTask = false;
@@ -792,7 +851,7 @@ public class AmirDecomposition {
                     }
 
                     // TODO: !!Bug!! if the arrival window is too big, then it's likely to infer incorrect number. ###FIXED!!!?
-                    if (numOfThisTaskByInference > numOfThisTaskByWindow) {
+                    if (numOfThisTaskByInference != numOfThisTaskByWindow) {
                         thisIsMismatchForSure = true;
                         break;
                     }
@@ -811,6 +870,9 @@ public class AmirDecomposition {
                 isSomethingChanged = true;
                 thisBusyInterval.getComposition().clear();
                 thisBusyInterval.getComposition().addAll(potentialInferences);
+
+                /* Update Nk values */
+                thisBusyInterval.updateNkValuesFromCompositions(taskContainer);
             } else {
                 //ProgMsg.debugPutline("No matched inference is found for bi " + String.valueOf((double)thisBusyInterval.getBeginTimeStampNs()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + "ms: %d", thisBusyInterval.getComposition().size());
             }
@@ -887,11 +949,12 @@ public class AmirDecomposition {
 
             /* Start constructing arrival time sequence of all tasks in this busy interval. */
             for ( Task thisTask : taskContainer.getAppTasksAsArray() ) {
-                if ( thisBusyInterval.containsComposition(thisTask) == false ) {
-                    continue;
-                }
+//                if ( thisBusyInterval.containsComposition(thisTask) == false ) {
+//                    continue;
+//                }
 
                 //int numOfThisTask = calculateNumOfGivenTaskInBusyIntervalByArrivalTimeWindow(thisBusyInterval, thisTask);
+                // TODO: Bug: if arrival time window is still empty for the task, it will throw an exception.
                 Interval thisArrivalWindow = findClosestArrivalTimeOfTask( thisBusyInterval.getBeginTimeStampNs(), thisTask );
 
                 while (thisArrivalWindow.getBegin() < thisBusyInterval.getEndTimeStampNs()) {

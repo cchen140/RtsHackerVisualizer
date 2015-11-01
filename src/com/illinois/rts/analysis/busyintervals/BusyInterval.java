@@ -2,9 +2,11 @@ package com.illinois.rts.analysis.busyintervals;
 
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.visualizer.Event;
+import com.illinois.rts.visualizer.TaskContainer;
 import com.illinois.rts.visualizer.TaskIntervalEvent;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 /**
@@ -24,6 +26,8 @@ public class BusyInterval {
     
     // There may have multiple inferences, so two-layer array is used here.
     private ArrayList<ArrayList<Task>> composition = new ArrayList<>();
+
+    private HashMap<Task, ArrayList<Integer>> NkValues = new HashMap<>();
 
     private HashMap<Task, Boolean> isArrivalTimeWindowParsedAndFixed = new HashMap<>();
 
@@ -71,6 +75,18 @@ public class BusyInterval {
         return endTimeStampNs;
     }
 
+    public HashMap<Task, ArrayList<Integer>> getNkValues() {
+        return NkValues;
+    }
+
+    public ArrayList<Integer> getNkValuesOfTask(Task inTask) {
+        return NkValues.get(inTask);
+    }
+
+    public void setNkValuesOfTask(Task inTask, ArrayList<Integer> nkValues) {
+        NkValues.put(inTask, nkValues);
+    }
+
     public Boolean contains(int inTimeStamp)
     {
         if ((beginTimeStampNs <= inTimeStamp)
@@ -84,16 +100,47 @@ public class BusyInterval {
         }
     }
 
-    public Boolean containsComposition(Task inTask)
-    {
-        // If any inferred compositions contain inTask, then return true.
-        for (ArrayList<Task> thisComposition : composition)
-        {
-            if (thisComposition.contains(inTask) == true)
-                return true;
+    public Boolean containsTaskCheckedByNkValues(Task inTask) {
+        if (getMaxNkValueOfTask(inTask) > 0) {
+            return true;
+        } else {
+            return false;
         }
-        return false;
+
     }
+
+    public int getMaxNkValueOfTask(Task inTask) {
+        int maxValue = 0;
+        for (int thisNk : getNkValues().get(inTask)) {
+            maxValue = thisNk > maxValue ? thisNk : maxValue;
+        }
+        return maxValue;
+    }
+
+    public int getMinNkValueOfTask(Task inTask) {
+        int minValue = 0;
+        Boolean firstLoop = true;
+        for (int thisNk : getNkValues().get(inTask)) {
+            if (firstLoop == true) {
+                minValue = thisNk;
+                firstLoop = false;
+                continue;
+            }
+            minValue = thisNk < minValue ? thisNk : minValue;
+        }
+        return minValue;
+    }
+
+//    public Boolean containsComposition(Task inTask)
+//    {
+//        // If any inferred compositions contain inTask, then return true.
+//        for (ArrayList<Task> thisComposition : composition)
+//        {
+//            if (thisComposition.contains(inTask) == true)
+//                return true;
+//        }
+//        return false;
+//    }
 
     /* Get the first element in the composition array.
      * This method is used when there is only one inference in each busy interval.
@@ -138,5 +185,32 @@ public class BusyInterval {
 
     public void setIsArrivalTimeWindowParsedAndFixed(Task inTask, Boolean isParsedAndFixed) {
         isArrivalTimeWindowParsedAndFixed.put(inTask, isParsedAndFixed);
+    }
+
+    public Boolean isNkValuesAmbiguous() {
+        for (ArrayList<Integer> thisNks : NkValues.values()) {
+            if (thisNks.size() > 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void updateNkValuesFromCompositions(TaskContainer inTaskContainer) {
+        NkValues.clear();
+        for (ArrayList<Task> thisComposition : composition) {
+            for (Task thisTask : inTaskContainer.getAppTasksAsArray()) {
+                int thisNkOfTask = Collections.frequency(thisComposition, thisTask);
+                ArrayList<Integer> existingNkOfTask = NkValues.get(thisTask);
+                if ( existingNkOfTask == null) {
+                    // First value
+                    existingNkOfTask = new ArrayList<>();
+                    existingNkOfTask.add(thisNkOfTask);
+                    NkValues.put(thisTask, existingNkOfTask);
+                } else if ( existingNkOfTask.contains(thisNkOfTask) == false ) {
+                    existingNkOfTask.add(thisNkOfTask);
+                }
+            }
+        }
     }
 }
