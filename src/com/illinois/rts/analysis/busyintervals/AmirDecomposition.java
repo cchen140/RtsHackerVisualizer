@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class AmirDecomposition {
     private TaskContainer taskContainer;
     private BusyIntervalContainer busyIntervalContainer;
-    private HashMap<Task, Interval> taskArrivalTimeWindows = new HashMap<Task, Interval>();
+    private HashMap<Task, ArrayList<Interval>> taskArrivalTimeWindows = new HashMap<Task, ArrayList<Interval>>();
 
     public AmirDecomposition(TaskContainer inTaskContainer, BusyIntervalContainer inBusyIntervalContainer)
     {
@@ -62,11 +62,25 @@ public class AmirDecomposition {
         ProgMsg.debugPutline("Removing ambiguous inference: %d pass.", passCount);
 
         /* Check whether there are multiple arrival time windows for a task. */
+        String exceptionString = "";
+        Boolean hasException = false;
         for (Task thisTask : taskContainer.getAppTasksAsArray()) {
             if (taskArrivalTimeWindows.get(thisTask) == null) {
-                throw new RuntimeException(String.format("%s arrival time window not yet fixed.", thisTask.getTitle()));
+                hasException = true;
+                exceptionString += thisTask.getTitle();
+            } else if (taskArrivalTimeWindows.get(thisTask).size() > 1) {
+                hasException = true;
+                exceptionString += thisTask.getTitle();
             }
         }
+        if (hasException) {
+            throw new RuntimeException(String.format("%s arrival time window not yet fixed.", exceptionString));
+        } else {
+            ProgMsg.debugPutline("All windows have been solved and fixed!!");
+        }
+
+
+
 
         return true;
     }
@@ -695,7 +709,7 @@ public class AmirDecomposition {
         return resultArrivalTimeWindow;
     }
 
-    public Trace buildTaskArrivalTimeWindowTrace(Task inTask)
+    public ArrayList<Trace> buildTaskArrivalTimeWindowTrace(Task inTask)
     {
         if (taskArrivalTimeWindows.get(inTask) == null)
         {
@@ -703,25 +717,29 @@ public class AmirDecomposition {
             return null;
         }
 
-        Interval taskArrivalTimeWindow = taskArrivalTimeWindows.get(inTask);
-        int windowLength = taskArrivalTimeWindow.getLength();
+        ArrayList<Trace> resultTraces = new ArrayList<>();
 
-        ArrayList<IntervalEvent> intervalEvents = new ArrayList<>();
-        int thisWindowBeginTime = taskArrivalTimeWindow.getBegin(); // Initialize window time with the first window.
-        int taskPeriod = inTask.getPeriodNs();
-        int endTime = busyIntervalContainer.getEndTime();
+        for (Interval taskArrivalTimeWindow : taskArrivalTimeWindows.get(inTask)) {
+            //Interval taskArrivalTimeWindow = taskArrivalTimeWindows.get(inTask);
+            int windowLength = taskArrivalTimeWindow.getLength();
 
-        while ((thisWindowBeginTime + windowLength) <= endTime)
-        {
-            IntervalEvent thisIntervalEvent = new IntervalEvent(thisWindowBeginTime, thisWindowBeginTime+windowLength);
-            thisIntervalEvent.setColor(inTask.getTaskColor());
-            thisIntervalEvent.enableTexture();
-            intervalEvents.add(thisIntervalEvent);
+            ArrayList<IntervalEvent> intervalEvents = new ArrayList<>();
+            int thisWindowBeginTime = taskArrivalTimeWindow.getBegin(); // Initialize window time with the first window.
+            int taskPeriod = inTask.getPeriodNs();
+            int endTime = busyIntervalContainer.getEndTime();
 
-            thisWindowBeginTime += taskPeriod;
+            while ((thisWindowBeginTime + windowLength) <= endTime) {
+                IntervalEvent thisIntervalEvent = new IntervalEvent(thisWindowBeginTime, thisWindowBeginTime + windowLength);
+                thisIntervalEvent.setColor(inTask.getTaskColor());
+                thisIntervalEvent.enableTexture();
+                intervalEvents.add(thisIntervalEvent);
+
+                thisWindowBeginTime += taskPeriod;
+            }
+            resultTraces.add(new Trace(inTask.getTitle() + " Arr. Window", inTask, intervalEvents, new TimeLine(), Trace.TRACE_TYPE_OTHER));
         }
 
-        return new Trace(inTask.getTitle() + " Arr. Window", inTask, intervalEvents, new TimeLine(), Trace.TRACE_TYPE_OTHER);
+        return resultTraces;
     }
 
     public ArrayList<Trace> buildTaskArrivalTimeWindowTracesForAllTasks()
@@ -729,7 +747,7 @@ public class AmirDecomposition {
         ArrayList<Trace> resultTraces = new ArrayList<Trace>();
         for (Task thisTask : taskContainer.getAppTasksAsArray())
         {
-            resultTraces.add(buildTaskArrivalTimeWindowTrace(thisTask));
+            resultTraces.addAll(buildTaskArrivalTimeWindowTrace(thisTask));
         }
         return resultTraces;
     }
@@ -828,41 +846,61 @@ public class AmirDecomposition {
                 continue;
 
             int orgNumOfInferences = thisBusyInterval.getComposition().size();
-
             ArrayList<ArrayList<Task>> potentialInferences = new ArrayList<>();
-            for (ArrayList<Task> thisInference : thisBusyInterval.getComposition())
-            {
-                /* Check if the number of thisTask is consistent with thisInference.
-                *  If not, then thisInference may not be true answer.
-                *  ### We are removing those who are not the answer for sure and leave ambiguous ones!! ###
-                */
+            potentialInferences.addAll(thisBusyInterval.getComposition());
 
-                // Iterate by tasks
-                Boolean thisIsMismatchForSure = false;
-                for (Task thisTask : taskContainer.getAppTasksAsArray())
-                {
-                    /* Calculate the number of thisTask contained in this inference. */
+            for (Task thisTask : taskContainer.getAppTasksAsArray()) {
+                int numOfThisTaskByWindow = calculateNumOfGivenTaskInBusyIntervalByArrivalTimeWindow(thisBusyInterval, thisTask);
+                if (numOfThisTaskByWindow == -1) {
+                    // Skip this one for now since arrival window for this task is not yet ready but is still possible to be the answer.
+                    continue;
+                }
+                ArrayList<ArrayList<Task>> compositionsToBeRemoved = new ArrayList<>();
+                for (ArrayList<Task> thisInference : thisBusyInterval.getComposition()) {
                     int numOfThisTaskByInference = Collections.frequency(thisInference, thisTask);
-                    int numOfThisTaskByWindow = calculateNumOfGivenTaskInBusyIntervalByArrivalTimeWindow(thisBusyInterval, thisTask);
-
-                    if (numOfThisTaskByWindow == -1) {
-                        // Skip this one for now since it's still possible to be the answer.
-                        continue;
-                    }
-
                     // TODO: !!Bug!! if the arrival window is too big, then it's likely to infer incorrect number. ###FIXED!!!?
                     if (numOfThisTaskByInference != numOfThisTaskByWindow) {
-                        thisIsMismatchForSure = true;
-                        break;
+                        compositionsToBeRemoved.add(thisInference);
                     }
                 }
-
-                if (thisIsMismatchForSure == false) {
-                    // This is not mismatch and still is likely to be an answer.
-                    potentialInferences.add(thisInference);
-                }
+                potentialInferences.removeAll(compositionsToBeRemoved);
 
             }
+
+//            ArrayList<ArrayList<Task>> potentialInferences = new ArrayList<>();
+//            for (ArrayList<Task> thisInference : thisBusyInterval.getComposition())
+//            {
+//                /* Check if the number of thisTask is consistent with thisInference.
+//                *  If not, then thisInference may not be true answer.
+//                *  ### We are removing those who are not the answer for sure and leave ambiguous ones!! ###
+//                */
+//
+//                // Iterate by tasks
+//                Boolean thisIsMismatchForSure = false;
+//                for (Task thisTask : taskContainer.getAppTasksAsArray())
+//                {
+//                    /* Calculate the number of thisTask contained in this inference. */
+//                    int numOfThisTaskByInference = Collections.frequency(thisInference, thisTask);
+//                    int numOfThisTaskByWindow = calculateNumOfGivenTaskInBusyIntervalByArrivalTimeWindow(thisBusyInterval, thisTask);
+//
+//                    if (numOfThisTaskByWindow == -1) {
+//                        // Skip this one for now since it's still possible to be the answer.
+//                        continue;
+//                    }
+//
+//                    // TODO: !!Bug!! if the arrival window is too big, then it's likely to infer incorrect number. ###FIXED!!!?
+//                    if (numOfThisTaskByInference != numOfThisTaskByWindow) {
+//                        thisIsMismatchForSure = true;
+//                        break;
+//                    }
+//                }
+//
+//                if (thisIsMismatchForSure == false) {
+//                    // This is not mismatch and still is likely to be an answer.
+//                    potentialInferences.add(thisInference);
+//                }
+//
+//            }
 
             if (potentialInferences.size()>0 && potentialInferences.size()!=orgNumOfInferences) {
                 // Note that we have skipped the busy intervals without ambiguity in the beginning of the for loop,
@@ -898,39 +936,49 @@ public class AmirDecomposition {
             return -1;
         }
 
-        Interval thisTaskArrivalWindow = new Interval(taskArrivalTimeWindows.get(inTask));
-        Interval intervalBusyInterval = new Interval(inBusyInterval.getBeginTimeStampNs(), inBusyInterval.getEndTimeStampNs());
+        int resultArrivalTimes = 0;
+        Boolean firstLoop = true;
+        for (Interval thisWindow : taskArrivalTimeWindows.get(inTask)) {
+            Interval thisTaskArrivalWindow = new Interval(thisWindow);
+            Interval intervalBusyInterval = new Interval(inBusyInterval.getBeginTimeStampNs(), inBusyInterval.getEndTimeStampNs());
 
-        Integer shiftValue = findSmallestPeriodShiftValueWithIntersection(intervalBusyInterval, thisTaskArrivalWindow, inTask.getPeriodNs());
-        if (shiftValue == null)
-            return 0;
+            Integer shiftValue = findSmallestPeriodShiftValueWithIntersection(intervalBusyInterval, thisTaskArrivalWindow, inTask.getPeriodNs());
+            if (shiftValue == null)
+                return 0;
 
-        thisTaskArrivalWindow.shift(shiftValue * inTask.getPeriodNs());
+            thisTaskArrivalWindow.shift(shiftValue * inTask.getPeriodNs());
 
-        // Check shifting direction
-        int shiftingPositiveNegativeFactor = 1;
-        if (shiftValue >= 0) {
-            shiftingPositiveNegativeFactor = 1;
-        }
-        else {
-            shiftingPositiveNegativeFactor = -1;
-        }
-
-        int countIntersectedTaskPeriod = 0;
-        while (true)
-        {
-            if (thisTaskArrivalWindow.intersect(intervalBusyInterval) != null)
-            {
-                thisTaskArrivalWindow.shift(shiftingPositiveNegativeFactor * inTask.getPeriodNs());
-                countIntersectedTaskPeriod++;
+            // Check shifting direction
+            int shiftingPositiveNegativeFactor = 1;
+            if (shiftValue >= 0) {
+                shiftingPositiveNegativeFactor = 1;
+            } else {
+                shiftingPositiveNegativeFactor = -1;
             }
-            else
-            {
-                break;
+
+            int countIntersectedTaskPeriod = 0;
+            while (true) {
+                if (thisTaskArrivalWindow.intersect(intervalBusyInterval) != null) {
+                    thisTaskArrivalWindow.shift(shiftingPositiveNegativeFactor * inTask.getPeriodNs());
+                    countIntersectedTaskPeriod++;
+                } else {
+                    break;
+                }
+            }
+            if (firstLoop == true) {
+                resultArrivalTimes = countIntersectedTaskPeriod;
+                firstLoop = false;
+            } else {
+                if (resultArrivalTimes != countIntersectedTaskPeriod) {
+                    // two windows lead to different result, thus return -1 as unsolvable.
+                    return -1;
+                } else {
+                    // resultArrivalTime = countIntersectedTaskPeriod;
+                }
             }
         }
 
-        return countIntersectedTaskPeriod;
+        return resultArrivalTimes;
     }
 
     public Boolean reconstructCompositionOfBusyIntervalByArrivalTimeWindows()
@@ -1009,7 +1057,8 @@ public class AmirDecomposition {
     public Interval findClosestArrivalTimeOfTask( int referenceTimePoint, Task inTask )
     {
         // Create a new Interval instance based on input value.
-        Interval taskWindow = new Interval( taskArrivalTimeWindows.get( inTask ) );
+        // TODO: we didn't consider multiple arrival time window condition here. Just get first one.
+        Interval taskWindow = new Interval( taskArrivalTimeWindows.get( inTask ).get(0) );
 
         int difference = referenceTimePoint - taskWindow.getBegin();
         int shiftFactor = difference / inTask.getPeriodNs();

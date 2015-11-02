@@ -138,10 +138,10 @@ public class QuickRmScheduling {
 
 
     public void runSim(int tickLimit) {
-        if (taskContainer.schedulabilityTest() == true)
-            ProgMsg.debugPutline("schedulable.");
-        else
-            ProgMsg.errPutline("not schedulable.");
+//        if (taskContainer.schedulabilityTest() == true)
+//            ProgMsg.debugPutline("schedulable.");
+//        else
+//            ProgMsg.errPutline("not schedulable.");
 
         // Pre-schedule, turn tasks into jobs
         QuickRmSimJobContainer simJobContainer = preSchedule(tickLimit);

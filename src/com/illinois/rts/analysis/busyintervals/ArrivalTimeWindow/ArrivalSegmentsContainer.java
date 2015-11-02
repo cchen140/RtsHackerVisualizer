@@ -24,7 +24,7 @@ public class ArrivalSegmentsContainer {
 //    private long periodBeginTimeStamp;
 //    private long period;
 
-    private Interval finalArrivalTimeWindow;
+    private ArrayList<Interval> finalArrivalTimeWindows;
 //    private ArrivalSegment baseArrivalSegment;
 
     public ArrivalSegmentsContainer(Task inTask, BusyIntervalContainer inBiContainer){
@@ -56,21 +56,22 @@ public class ArrivalSegmentsContainer {
         //updateArrivalIntersectionsByOneSegments();
         //updateArrivalIntersectionsByZeroOneSegments();
 
-        if (arrivalIntersections.size() == 1) {
-            // Move the window to around zero point.
-            finalArrivalTimeWindow = arrivalIntersections.get(0);
-            finalArrivalTimeWindow.shift(-(finalArrivalTimeWindow.getBegin() / task.getPeriodNs()) * task.getPeriodNs());
+        // Move the window to around zero point.
+        for (int i=0; i<arrivalIntersections.size(); i++) {
+            arrivalIntersections.get(i).shift(-(arrivalIntersections.get(i).getBegin() / task.getPeriodNs()) * task.getPeriodNs());
+        }
+        finalArrivalTimeWindows = arrivalIntersections;
 
+        if (arrivalIntersections.size() > 1) {
+            ProgMsg.errPutline("%s still has %d possible arrival windows after computation.", task.getTitle(), arrivalIntersections.size());
+            for (Interval thisWindow : arrivalIntersections) {
+                ProgMsg.errPutline("\t" + thisWindow.getBegin() + ":" + thisWindow.getEnd());
+            }
+        }
+
+        if (arrivalIntersections.size() > 0) {
             return true;
         } else {
-            ProgMsg.errPutline("%s still has %d possible arrival windows after computation.", task.getTitle(), arrivalIntersections.size());
-//            ProgMsg.errPutline("\t" + arrivalIntersections.get(0).getBegin() + ":" + arrivalIntersections.get(0).getEnd());
-//            ProgMsg.errPutline("\t" + arrivalIntersections.get(1).getBegin() + ":" + arrivalIntersections.get(1).getEnd());
-//
-//            finalArrivalTimeWindow = arrivalIntersections.get(1);
-//            finalArrivalTimeWindow.shift(-(finalArrivalTimeWindow.getBegin() / task.getPeriodNs()) * task.getPeriodNs());
-            //return true;
-
             return false;
         }
     }
@@ -239,6 +240,21 @@ public class ArrivalSegmentsContainer {
 
             arrivalIntersections = newArrivalIntersections;
         }
+
+        /* Combine arrival intersections if they are actually continuous. */
+        if (arrivalIntersections.size() == 2) {
+            ArrayList<Interval> resultIntersections;
+
+            Integer shiftValue = findSmallestPeriodShiftValueWithIntersection(arrivalIntersections.get(0), arrivalIntersections.get(1), taskP);
+            if (shiftValue != null) {
+                arrivalIntersections.get(0).shift(shiftValue * taskP);
+                resultIntersections = arrivalIntersections.get(0).union(arrivalIntersections.get(1));
+
+                if (resultIntersections.size() == 1) {
+                    arrivalIntersections = resultIntersections;
+                }
+            }
+        }
     }
 
     private int findEarliestArrivalSegmentBeginTime() {
@@ -273,7 +289,39 @@ public class ArrivalSegmentsContainer {
         return resultSegments;
     }
 
-    public Interval getFinalArrivalTimeWindow() {
-        return finalArrivalTimeWindow;
+    public ArrayList<Interval> getFinalArrivalTimeWindow() {
+        return finalArrivalTimeWindows;
+    }
+
+    // Integer type for the returned value is used because "null" will be returned if no intersection is found.
+    public Integer findSmallestPeriodShiftValueWithIntersection(Interval shiftingInterval, Interval fixedInterval, int inPeriod)
+    {
+        int periodShiftValue = (fixedInterval.getBegin()-shiftingInterval.getBegin()) / inPeriod;
+
+        Interval newInstanceShiftingInterval = new Interval(shiftingInterval);
+        newInstanceShiftingInterval.shift(periodShiftValue*inPeriod);
+
+        /* Check whether the intersection exists. */
+        if (fixedInterval.intersect(newInstanceShiftingInterval) != null)
+        {// Has intersection.
+            return periodShiftValue;
+        }
+
+
+        /* Shift one more to see if they have intersection. */
+        if (fixedInterval.getBegin() >= shiftingInterval.getBegin()) {
+            periodShiftValue++;
+            newInstanceShiftingInterval.shift(inPeriod);
+        } else {
+            periodShiftValue--;
+            newInstanceShiftingInterval.shift(-inPeriod);
+        }
+
+        if (fixedInterval.intersect(newInstanceShiftingInterval) != null) {
+            // Has intersection.
+            return periodShiftValue;
+        } else {
+            return null;
+        }
     }
 }

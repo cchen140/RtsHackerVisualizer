@@ -149,6 +149,12 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         /* Put task set info in logBuffer */
         TaskSetFileHandler taskSetFileHandler = new TaskSetFileHandler();
         logBuffer += taskSetFileHandler.generateProgConfigLines();
+        if (radioBtnCustomDuration.isSelected() == true) {
+            logBuffer += "#sim duration: " + inputSimDuration.getText() + " ms\r\n";
+        } else {
+            logBuffer += "#sim duration: " + inputHyperPeriodScale.getText() + "xHP\r\n";
+        }
+
         logBuffer += taskSetFileHandler.generateTaskParamsLines();
         logBuffer += taskSetFileHandler.generateTaskSetContainerLines(taskSetContainer);
         logBuffer += "@\r\n";
@@ -361,6 +367,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         final int numOfTaskSet = taskSetContainer.getTaskContainers().size();
         for (TaskContainer thisTaskContainer : taskSetContainer.getTaskContainers()) {
             System.out.println("");
+            ProgMsg.debugPutline("#%d", taskSetIndex);
 
             /* Start RM scheduling simulation */
             EventContainer thisEventContainer = null;
@@ -382,8 +389,10 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             } else {
                 // Duration is at least one hyper-period
                 // TODO: need to make sure the hyper-period doesn't exceed integer limit.
-                simDurationNs = (int) (simTaskContainer.calHyperPeriod()* Double.valueOf(inputHyperPeriodScale.getText()));
-                ProgMsg.debugPutline("scaled HP=" + String.valueOf(simDurationNs*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + " ms");
+                int hyperPeriod = (int) simTaskContainer.calHyperPeriod();
+                ProgMsg.debugPutline("HP = %d", hyperPeriod);
+                simDurationNs = (int) (hyperPeriod* Double.valueOf(inputHyperPeriodScale.getText()));
+                ProgMsg.debugPutline("scaled HP = " + String.valueOf(simDurationNs*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + " ms");
             }
 
 

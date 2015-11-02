@@ -34,10 +34,8 @@ public class ArrivalSegment extends Interval {
     }
 
 //    // Integer type for the returned value is used because "null" will be returned if no intersection is found.
-//    public Integer findSmallestPeriodShiftValueWithIntersection(Interval fixedInterval, int inPeriod)
+//    public static Integer findSmallestPeriodShiftValueWithIntersection(Interval shiftingInterval, Interval fixedInterval, int inPeriod)
 //    {
-//        Interval shiftingInterval = this;
-//
 //        int periodShiftValue = (fixedInterval.getBegin()-shiftingInterval.getBegin()) / inPeriod;
 //
 //        Interval newInstanceShiftingInterval = new Interval(shiftingInterval);
@@ -96,5 +94,7 @@ public class ArrivalSegment extends Interval {
 
         return resultIntersections;
     }
+
+
 
 }
