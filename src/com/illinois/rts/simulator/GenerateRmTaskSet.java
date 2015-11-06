@@ -140,6 +140,7 @@ public class GenerateRmTaskSet {
 //        maxUtil = Double.parseDouble(args[9]);
 
         int taskSeq = 0;
+        int failureCount = 0;
 
         TaskContainer taskContainer = new TaskContainer();
 //        ArrayList<Task> allTasks= new ArrayList<Task>();
@@ -154,7 +155,8 @@ public class GenerateRmTaskSet {
             //ProgMsg.debugPutline(hyperPeriodFactors.toString());
         }
 
-        ArrayList<Double> utilDistribution = getRandomUtilDistribution(numTasks, minUtil+(maxUtil-minUtil)/2);
+        double randomUtil = getRandom((int)(minUtil*100), (int)(maxUtil*100))/100.0;
+        ArrayList<Double> utilDistribution = getRandomUtilDistribution(numTasks, randomUtil);
 
         double total_util = 0;
         for (int i = 0; i < numTasks; i++)
@@ -203,9 +205,15 @@ public class GenerateRmTaskSet {
             tempComputationTime  = (int)(((double)tempComputationTime)*utilDistribution.get(i));
             //tempComputationTime = (int)(utilDistribution.get(i)*((double)task.getPeriodNs()));
             if (tempComputationTime<minExecTime || tempComputationTime>maxExecTime) {
-                return null;
-//                i--;
-//                continue;
+                failureCount++;
+                if (failureCount > 10) {
+                    return null;
+                } else {
+                    i--;
+                    continue;
+                }
+            } else {
+                failureCount = 0;
             }
 
 //            if (minExecTime>task.getPeriodNs()) {
@@ -459,7 +467,7 @@ public class GenerateRmTaskSet {
             indexB = getRandom(0, inMaxTaskNum-1);
 
             if (indexA==indexB || resultUtilArray.get(indexB)<0.001) {
-                i--;
+                //i--;
                 continue;
             } else {
                 resultUtilArray.set(indexA, resultUtilArray.get(indexA) + randUnit);
