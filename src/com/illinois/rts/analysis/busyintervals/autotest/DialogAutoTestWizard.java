@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Arc2D;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class DialogAutoTestWizard extends JDialog implements ActionListener {
@@ -37,13 +38,23 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
     private JRadioButton radioBtnCustomDuration;
     private JTextField inputHyperPeriodScale;
     private JButton btnConfigTaskSetGenerator;
+    private JCheckBox checkAutoLogEnable;
+    private JButton btnAutoLogFolderPath;
+    private JButton btnMassTestStart;
 
     private Boolean startBtnClicked = false;
     private TaskSetContainer taskSetContainer = new TaskSetContainer();
     private GenerateRmTaskSet taskSetGenerator = new GenerateRmTaskSet();
 
+    private int globalFailureCount = 0; // Caution!! This is a cross function variable.
+
 //    private DialogLogOutput dialogLogOutput = new DialogLogOutput();
     String logBuffer = "";
+    String logRawDataBuffer = "";
+    String autoLogFileName = "";
+    String autoLogFileNamePrefix = "";
+
+    String autoLogPath = "";
 
     private static DialogAutoTestWizard instance;
 
@@ -116,12 +127,20 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         btnExportTaskSets.addActionListener(this);
         btnGenerateTaskSets.addActionListener(this);
         btnConfigTaskSetGenerator.addActionListener(this);
+        btnAutoLogFolderPath.addActionListener(this);
+        btnMassTestStart.addActionListener(this);
         radioBtnCustomDuration.addActionListener(this);
         radioBtnHyperPeriod.addActionListener(this);
+        checkAutoLogEnable.addActionListener(this);
+
 
         // Select custom simulation duration by default.
         radioBtnCustomDuration.setSelected(true);
         inputHyperPeriodScale.setEnabled(false);
+
+        // Uncheck auto log
+        checkAutoLogEnable.setSelected(false);
+        btnAutoLogFolderPath.setEnabled(false);
 
         // Simulation duration and hyper-period scale.
         inputSimDuration.setText("1000");   // unit is ms
@@ -142,6 +161,32 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         // Clear the log buffer for a new test.
         logBuffer = "";
+        autoLogFileName = "";
+        autoLogFileNamePrefix = "";
+
+        /* Initialize file name prefix. */
+        autoLogFileName += "[" + (new DecimalFormat("##.##").format(taskSetGenerator.getMinUtil()));
+        autoLogFileName += "," + (new DecimalFormat("##.##").format(taskSetGenerator.getMaxUtil())) + "]_";
+        autoLogFileName += taskSetGenerator.getNumTaskPerSet() + "Tx";
+        autoLogFileName += taskSetGenerator.getNumTaskSet() + "_";
+        if (radioBtnCustomDuration.isSelected() == true) {
+            autoLogFileName += "custom" + inputSimDuration.getText() + "ms_";
+        } else {
+            autoLogFileName += "autoHPx" + inputHyperPeriodScale.getText() + "_";
+        }
+        if (taskSetGenerator.getGenerateFromHpDivisors() == true) {
+            autoLogFileName += taskSetGenerator.getMaxHyperPeriod()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + "msHPUpperBound_";
+        } else {
+            autoLogFileName += "[" + taskSetGenerator.getMinPeriod()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER;
+            autoLogFileName += "," + taskSetGenerator.getMaxPeriod()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + "]_";
+        }
+        if (taskSetGenerator.getMaxInitOffset() != 0) {
+            autoLogFileName += "hasOffset_";
+        }
+        if (taskSetGenerator.getNonHarmonicOnly() == true) {
+            autoLogFileName += "nonHarmonic_";
+        }
+
 
         /* Put note for the settings of task set generator. */
         logBuffer += taskSetGenerator.toCommentString();
@@ -163,6 +208,16 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         Boolean isNotCancel = startAutoTest();
 
         if (isNotCancel == true) {
+            if (checkAutoLogEnable.isSelected() == true) {
+                DataExporter autoLogExporter = new DataExporter();
+                try {
+                    autoLogExporter.exportStringToFilePath(autoLogPath+"raw_"+autoLogFileName+".txt", "test");
+                    autoLogExporter.exportStringToFilePath(autoLogPath+"log_"+autoLogFileName+".txt", logBuffer);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
             DialogLogOutput dialogLogOutput = new DialogLogOutput();
             dialogLogOutput.put(logBuffer);
             dialogLogOutput.showDialog(this);
@@ -260,6 +315,24 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             dialogTaskSetGeneratorSetter.showDialog(this);
         } else if (e.getSource() == btnStartAutoTest) {
             // The function is handled by onStart()
+        } else if (e.getSource() == checkAutoLogEnable) {
+            if (checkAutoLogEnable.isSelected() == true) {
+                btnAutoLogFolderPath.setEnabled(true);
+            } else {
+                btnAutoLogFolderPath.setEnabled(false);
+            }
+        } else if (e.getSource() == btnAutoLogFolderPath) {
+            DataExporter dataExporter = new DataExporter();
+            autoLogPath = dataExporter.getFolderPathFromDialog(autoLogPath) + "\\";
+            ProgMsg.debugPutline(autoLogPath);
+        } else if (e.getSource() == btnMassTestStart) {
+            if (checkAutoLogEnable.isSelected() == true) {
+                try {
+                    startMassTest();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 
@@ -361,6 +434,9 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             return false;
         }
 
+        String logFileName = "";
+
+
         int taskSetIndex = 1;
         int failureCount = 0;
         progressUpdater.setProgressPercent(0.0);
@@ -429,6 +505,12 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                     putLineLogBuffer("#%d TkSet: FAILED (H?-%s) SdGm=%s;", taskSetIndex, isHarmonic.toString(), Double.toString(precisionRatioGmSd));
                     failureCount++;
                 }
+
+                logRawDataBuffer += taskSetIndex;
+                logRawDataBuffer += "\t" + (new DecimalFormat("##.##").format(thisTaskContainer.getUtilization()));
+                logRawDataBuffer += "\t" + (new DecimalFormat("##.####").format(precisionRatioGmSd));
+                logRawDataBuffer += "\r\n";
+
             } catch (RuntimeException rex) {
                 //rex.printStackTrace();
                 putLineLogBuffer("#%d TkSet: TERMINATE - " + rex.getMessage(), taskSetIndex);
@@ -468,6 +550,9 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         }
 
         putLineLogBuffer("Summary: %d / %d failures.", failureCount, numOfTaskSet);
+        autoLogFileName = autoLogFileName + failureCount + "Failure";
+
+        globalFailureCount = failureCount;
 
         progressUpdater.setIsFinished(true);
         return true;
@@ -504,5 +589,124 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 //        }
 
 
+    }
+
+    void startMassTest() throws IOException{
+        String fullFailureCountFilePath = autoLogPath + "lowPrecisionCount.txt";
+        DataExporter failureCountLogFile = new DataExporter();
+
+        failureCountLogFile.exportStringToFilePath(fullFailureCountFilePath, "X\t10\t11\t12\t13\t14\t15\r\n");
+
+        for (double util=0.001; util<1 ; util+=0.1) {
+            taskSetGenerator.setMinUtil(util);
+            taskSetGenerator.setMaxUtil(util+0.1);
+
+
+            String rowTitle = "\"" + utilizationRangeString(util, util+0.1) + "\"";
+            failureCountLogFile.appendStringToFilePath(fullFailureCountFilePath, rowTitle);
+
+
+            //int failureCount = 0;
+            for (int taskPerSet=10; taskPerSet<=15; taskPerSet++) {
+                taskSetGenerator.setNumTaskPerSet(taskPerSet);
+
+                //GenerateRmTaskSet generateRmTaskSet = new GenerateRmTaskSet();
+                taskSetGenerator.setNumTaskSet(Integer.valueOf(inputNumOfTaskSets.getText()));
+                taskSetContainer = taskSetGenerator.generate();
+
+                if (taskSetContainer.size() > 0) {
+                    ProgMsg.debugPutline("Start mass test: %dT [%s,%s]", taskPerSet,
+                            (new DecimalFormat("##.##").format(taskSetGenerator.getMinUtil())),
+                            (new DecimalFormat("##.##").format(taskSetGenerator.getMaxUtil())));
+                    startUnitTest();
+                    //failureCount += globalFailureCount;
+                } else {
+                    ProgMsg.errPutline("No task set to be tested. Return to issue caution.");
+                    return;
+                }
+
+
+                failureCountLogFile.appendStringToFilePath(fullFailureCountFilePath, String.format("\t%d", globalFailureCount));
+                //failureCount = 0;
+
+            }
+
+
+            failureCountLogFile.appendStringToFilePath(fullFailureCountFilePath, "\r\n");
+
+
+        }
+
+    }
+
+    void startUnitTest() {
+        logBuffer = "";
+        logRawDataBuffer = "";
+        autoLogFileName = "";
+        autoLogFileNamePrefix = "";
+
+        /* Initialize file name prefix. */
+        autoLogFileName += "[" + (new DecimalFormat("##.##").format(taskSetGenerator.getMinUtil()));
+        autoLogFileName += "," + (new DecimalFormat("##.##").format(taskSetGenerator.getMaxUtil())) + "]_";
+        autoLogFileName += taskSetGenerator.getNumTaskPerSet() + "Tx";
+        autoLogFileName += taskSetGenerator.getNumTaskSet() + "_";
+        if (radioBtnCustomDuration.isSelected() == true) {
+            autoLogFileName += "custom" + inputSimDuration.getText() + "ms_";
+        } else {
+            autoLogFileName += "autoHPx" + inputHyperPeriodScale.getText() + "_";
+        }
+        if (taskSetGenerator.getGenerateFromHpDivisors() == true) {
+            autoLogFileName += taskSetGenerator.getMaxHyperPeriod() * ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + "msHPUpperBound_";
+        } else {
+            autoLogFileName += "[" + taskSetGenerator.getMinPeriod() * ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER;
+            autoLogFileName += "," + taskSetGenerator.getMaxPeriod() * ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER + "]_";
+        }
+        if (taskSetGenerator.getMaxInitOffset() != 0) {
+            autoLogFileName += "hasOffset_";
+        }
+        if (taskSetGenerator.getNonHarmonicOnly() == true) {
+            autoLogFileName += "nonHarmonic_";
+        }
+
+
+        /* Put note for the settings of task set generator. */
+        logBuffer += taskSetGenerator.toCommentString();
+
+        /* Put task set info in logBuffer */
+        TaskSetFileHandler taskSetFileHandler = new TaskSetFileHandler();
+        logBuffer += taskSetFileHandler.generateProgConfigLines();
+        if (radioBtnCustomDuration.isSelected() == true) {
+            logBuffer += "#sim duration: " + inputSimDuration.getText() + " ms\r\n";
+        } else {
+            logBuffer += "#sim duration: " + inputHyperPeriodScale.getText() + "xHP\r\n";
+        }
+
+        logBuffer += taskSetFileHandler.generateTaskParamsLines();
+        logBuffer += taskSetFileHandler.generateTaskSetContainerLines(taskSetContainer);
+        logBuffer += "@\r\n";
+
+        // Start test!!
+        Boolean isNotCancel = startAutoTest();
+
+        if (isNotCancel == true) {
+            if (checkAutoLogEnable.isSelected() == true) {
+                DataExporter autoLogExporter = new DataExporter();
+                try {
+                    autoLogExporter.exportStringToFilePath(autoLogPath + "raw_" + autoLogFileName + ".txt", logRawDataBuffer);
+                    autoLogExporter.exportStringToFilePath(autoLogPath + "log_" + autoLogFileName + ".txt", logBuffer);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        //dispose();
+    }
+
+    String utilizationRangeString(double inMin, double inMax) {
+        String resultString = "";
+        resultString += "[" + (new DecimalFormat("##.##").format(inMin));
+        resultString += "," + (new DecimalFormat("##.##").format(inMax)) + "]";
+        return resultString;
     }
 }

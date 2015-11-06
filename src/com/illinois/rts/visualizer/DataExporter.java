@@ -24,6 +24,29 @@ public class DataExporter extends DialogFileHandler{
         fileWriter.close();
     }
 
+    public void exportStringToFilePath(String inFilePath, String inString) throws IOException {
+        fileWriter = openToWriteFile(inFilePath);
+        if (fileWriter == null)
+            throw new IOException("IOException @ exportStringToFilePath(): File path is incorrect.");
+
+        fileWriter.write(inString);
+        fileWriter.close();
+    }
+
+    public void appendStringToFilePath(String inFilePath, String inString) throws IOException {
+        fileWriter = openToAppendFile(inFilePath);
+        if (fileWriter == null)
+            throw new IOException("IOException @ appendStringToFilePath(): File path is incorrect.");
+
+        fileWriter.append(inString);
+        fileWriter.close();
+    }
+
+    public String getFolderPathFromDialog(String defaultFolderPath) {
+        // It returns the path of the folder. null for cancel.
+        return openFileChooserDialog(SELECT_FOLDER, defaultFolderPath);
+    }
+
     // This method uses variable "fileWriter" from father's class.
     public void exportBusyIntervalsToFileDialog(BusyIntervalContainer inBusyIntervalContainer) throws IOException {
 

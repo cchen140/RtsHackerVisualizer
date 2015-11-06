@@ -14,6 +14,8 @@ import java.security.InvalidParameterException;
 public class DialogFileHandler {
     protected static final int OPEN_FILE = 0;
     protected static final int SAVE_FILE = 1;
+    protected static final int SELECT_FOLDER =2;
+
 
     protected String filePath = "";
     protected BufferedReader fileReader = null;
@@ -26,7 +28,7 @@ public class DialogFileHandler {
      */
     protected BufferedReader openFileFromDialog() throws IOException
     {
-        filePath = openFileChooserDialog(OPEN_FILE);
+        filePath = openFileChooserDialog(OPEN_FILE, "");
         if (filePath == null)
             return null;
 
@@ -44,7 +46,7 @@ public class DialogFileHandler {
      */
     protected BufferedWriter openWriteFileFromDialog() throws IOException
     {
-        filePath = openFileChooserDialog(SAVE_FILE);
+        filePath = openFileChooserDialog(SAVE_FILE, "");
         if (filePath == null)
             return null;
 
@@ -60,29 +62,33 @@ public class DialogFileHandler {
      * @param dialogType OPEN_FILE or SAVE_FILE.
      * @return The absolute path of the selected file from the dialog.
      */
-    private String openFileChooserDialog(int dialogType)
-    {
+    protected String openFileChooserDialog(int dialogType, String defaultPath) {
         JFileChooser fileChooser = new JFileChooser();
         //fileChooser.setFont(new Font("TimesRoman", Font.PLAIN, 32));//;setPreferredSize(new Dimension(800, 600));
         GuiUtility.changeChildrenFont(fileChooser, ProgConfig.DEFAULT_CONTENT_FONT);
         fileChooser.setPreferredSize(new Dimension(800, 600));
 
-        int dialogReturnValue = 0;
-        if (dialogType == OPEN_FILE)
-        {
-            dialogReturnValue = fileChooser.showOpenDialog(null);
+        // Set default path.
+        if (defaultPath == null) {
+            defaultPath = "";
         }
-        else if (dialogType == SAVE_FILE)
-        {
+        fileChooser.setCurrentDirectory(new File(defaultPath));
+
+        int dialogReturnValue = 0;
+        if (dialogType == OPEN_FILE) {
+            dialogReturnValue = fileChooser.showOpenDialog(null);
+        } else if (dialogType == SAVE_FILE) {
+            dialogReturnValue = fileChooser.showSaveDialog(null);
+        } else if (dialogType == SELECT_FOLDER) {
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             dialogReturnValue = fileChooser.showSaveDialog(null);
         }
 
-        if (dialogReturnValue == JFileChooser.APPROVE_OPTION)
-        {
+        if (dialogReturnValue == JFileChooser.APPROVE_OPTION) {
+
             return fileChooser.getSelectedFile().getAbsolutePath();
-        }
-        else
-        {
+
+        } else {
             // User cancels the dialog.
             return null;
         }
@@ -116,6 +122,25 @@ public class DialogFileHandler {
     {
         try {
             BufferedWriter fileWriter = new BufferedWriter(new FileWriter(filePath));
+            return fileWriter;
+        }
+        catch (IOException x)
+        {
+            System.err.format("IOException @ openWriteFile() while reading file: %s%n", x);
+            //throw new InvalidDataException("Can't load file.");
+            return null;
+        }
+    }
+
+    /**
+     * Load file as a BufferWriter (to write a file).
+     * @param filePath The path of a selected log file to be opened/created and written.
+     * @return a BufferedWriter of the opened file.
+     */
+    protected BufferedWriter openToAppendFile(String filePath)
+    {
+        try {
+            BufferedWriter fileWriter = new BufferedWriter(new FileWriter(filePath, true));
             return fileWriter;
         }
         catch (IOException x)

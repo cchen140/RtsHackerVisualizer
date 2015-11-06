@@ -457,4 +457,12 @@ public class TaskContainer {
         // No harmonic periods.
         return false;
     }
+
+    public double getUtilization() {
+        double resultUtil = 0;
+        for (Task thisTask : getAppTasksAsArray()) {
+            resultUtil += ((double)thisTask.getComputationTimeNs())/((double)thisTask.getPeriodNs());
+        }
+        return resultUtil;
+    }
 }
