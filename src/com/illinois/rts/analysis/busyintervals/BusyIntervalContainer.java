@@ -4,6 +4,7 @@ import com.illinois.rts.analysis.busyintervals.ArrivalTimeWindow.ArrivalSegment;
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.visualizer.*;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -200,5 +201,27 @@ public class BusyIntervalContainer {
             }
         }
         busyIntervals.remove(lastBi);
+    }
+
+    public ArrayList<AppEvent> getStartTimeEventsGTByTask(Task inTask) {
+        ArrayList resultEvents = new ArrayList();
+        for (BusyInterval bi : busyIntervals) {
+            bi.startTimesGroundTruth.sortTaskReleaseEventsByTime();
+            resultEvents.addAll(bi.startTimesGroundTruth.getEventsOfTask(inTask));
+        }
+        return resultEvents;
+    }
+
+    public ArrayList<AppEvent> getStartTimeEventsInfByTask(Task inTask) {
+        ArrayList resultEvents = new ArrayList();
+        for (BusyInterval bi : busyIntervals) {
+            bi.startTimesInference.sortTaskReleaseEventsByTime();
+            resultEvents.addAll(bi.startTimesInference.getEventsOfTask(inTask));
+        }
+        return resultEvents;
+    }
+
+    public int size() {
+        return busyIntervals.size();
     }
 }

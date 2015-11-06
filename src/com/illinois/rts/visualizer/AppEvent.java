@@ -12,6 +12,10 @@ public class AppEvent extends Event {
     private int recordData = 0;
     private String note = "";
 
+    /* This is for evaluation of deviation */
+    public int deviation;
+    public double precisionRatio;
+
     public AppEvent(int inTimeStamp, Task inTask, int inData, String inNote)
     {
         orgBeginTimestampNs = inTimeStamp;

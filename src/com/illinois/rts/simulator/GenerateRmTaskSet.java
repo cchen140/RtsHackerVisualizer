@@ -55,7 +55,7 @@ public class GenerateRmTaskSet {
 
     public GenerateRmTaskSet() {
 
-        maxHyperPeriod = (1000_000_000/ProgConfig.TIMESTAMP_UNIT_NS)*3; // 3 sec
+        maxHyperPeriod = (1001_000_000/ProgConfig.TIMESTAMP_UNIT_NS)*3; // 3 sec
 
         /* When maxHyperPeriod is specified, only minPeriod will be checked while the check for maxPeriod will be skipped. */
         maxPeriod = 100_000_000/ProgConfig.TIMESTAMP_UNIT_NS; // 100 ms
@@ -64,7 +64,7 @@ public class GenerateRmTaskSet {
         maxExecTime = 50_000_000/ProgConfig.TIMESTAMP_UNIT_NS; // 50 ms // org=3 ms
         minExecTime = 100_000/ProgConfig.TIMESTAMP_UNIT_NS; // 0.1 ms
 
-        maxInitOffset = 0; // 0ms //10_000_000; // 10 ms
+        maxInitOffset = maxHyperPeriod; // 0ms //10_000_000; // 10 ms
         minInitOffset = 0; // 0 ms
 
         maxUtil = 1;

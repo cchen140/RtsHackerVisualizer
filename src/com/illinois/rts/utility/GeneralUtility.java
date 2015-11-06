@@ -37,4 +37,12 @@ public class GeneralUtility {
         }
         return factors;
     }
+
+    public static double getGeometricMean(ArrayList<Double> values) {
+        double multiple = 1;
+        for (double val : values) {
+            multiple *= val;
+        }
+        return Math.pow(multiple, (double)(1/values.size()));
+    }
 }

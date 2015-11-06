@@ -103,4 +103,13 @@ public class StartTimeEventContainer {
         return startTimeEvents;
     }
 
+    public ArrayList<AppEvent> getEventsOfTask(Task inTask) {
+        ArrayList<AppEvent> resultEvents = new ArrayList<>();
+        for ( AppEvent thisEvent : startTimeEvents) {
+            if ( thisEvent.getTask() == inTask )
+                resultEvents.add(thisEvent);
+        }
+        return resultEvents;
+    }
+
 }

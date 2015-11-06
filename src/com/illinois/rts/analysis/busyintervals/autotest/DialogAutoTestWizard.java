@@ -125,7 +125,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         // Simulation duration and hyper-period scale.
         inputSimDuration.setText("1000");   // unit is ms
-        inputHyperPeriodScale.setText("3.2");
+        inputHyperPeriodScale.setText("4.5");
 
         inputNumOfTaskSets.setText("5");
 
@@ -417,22 +417,32 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             //decomposition.runAmirDecomposition(busyIntervalContainer);
             try {
                 amirDecomposition.runDecomposition();
+                double precisionRatioGmSd = amirDecomposition.computeInferencePrecisionRatioGeometricMeanByTaskStandardDeviation();
+                //double precisionRatioGm = amirDecomposition.computeInferencePrecisionRatioGeometricMean();
+                //putLineLogBuffer("#%d TkSet: SUCCESS (harmonic?%s)", taskSetIndex, isHarmonic.toString());
+
+                Boolean isHarmonic = simTaskContainer.hasHarmonicPeriods();
+                //if ( amirDecomposition.verifySchedulingInference() == true ) {
+                if (precisionRatioGmSd == 1.0) {
+                    putLineLogBuffer("#%d TkSet: SUCCESS (H?-%s) SdGm=%s;", taskSetIndex, isHarmonic.toString(), Double.toString(precisionRatioGmSd));
+                } else {
+                    putLineLogBuffer("#%d TkSet: FAILED (H?-%s) SdGm=%s;", taskSetIndex, isHarmonic.toString(), Double.toString(precisionRatioGmSd));
+                    failureCount++;
+                }
             } catch (RuntimeException rex) {
                 //rex.printStackTrace();
                 putLineLogBuffer("#%d TkSet: TERMINATE - " + rex.getMessage(), taskSetIndex);
                 ProgMsg.errPutline("#%d TkSet: TERMINATE - " + rex.getMessage(), taskSetIndex);
                 rex.printStackTrace();
                 failureCount++;
+                taskSetIndex++;
+                progressUpdater.setProgressPercent((double)taskSetIndex / (double)numOfTaskSet);
                 continue;
             }
 
-            Boolean isHarmonic = simTaskContainer.hasHarmonicPeriods();
-            if ( amirDecomposition.verifySchedulingInference() == true ) {
-                putLineLogBuffer("#%d TkSet: SUCCESS (harmonic?%s)", taskSetIndex, isHarmonic.toString());
-            } else {
-                putLineLogBuffer("#%d TkSet: FAILED (harmonic?%s)", taskSetIndex, isHarmonic.toString());
-                failureCount++;
-            }
+
+
+
 
             /* This block of code is for outputting the busy intervals. */
 //                DataExporter dataExporter = new DataExporter();
@@ -492,5 +502,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 //        {
 //            return simResult;
 //        }
+
+
     }
 }

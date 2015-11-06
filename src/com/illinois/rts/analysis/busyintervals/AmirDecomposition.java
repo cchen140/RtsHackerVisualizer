@@ -24,6 +24,8 @@ public class AmirDecomposition {
 
     public Boolean runDecompositionStep1()
     {
+        ProgMsg.debugPutline("Estimating N_k(tau_i) values for %d busy intervals.", busyIntervalContainer.size());
+
         // TODO: test for skipping the first few busy intervals
         busyIntervalContainer.removeBusyIntervalsBeforeTimeStamp(taskContainer.getLargestPeriod());
 
@@ -47,10 +49,10 @@ public class AmirDecomposition {
 
         int passCount = 1;
         while (true) {
-            //ProgMsg.debugPutline("Start calculating arrival time window: %d pass.", passCount);
+            ProgMsg.debugPutline("Start calculating arrival windows: %d-th pass.", passCount);
             calculateArrivalTimeOfAllTasks();
 
-            //ProgMsg.debugPutline("Removing ambiguous inference: %d pass.", passCount);
+            ProgMsg.debugPutline("Removing ambiguous inference: %d-th pass.", passCount);
             Boolean isSomethingChanged = removeAmbiguousInferenceByArrivalTimeWindow();
 
             if (isSomethingChanged == false) {
@@ -59,7 +61,7 @@ public class AmirDecomposition {
                 passCount++;
             }
         }
-        ProgMsg.debugPutline("Removing ambiguous inference: %d pass.", passCount);
+        ProgMsg.debugPutline("Total pass: %d pass.", passCount);
 
         /* Check whether there are multiple arrival time windows for a task. */
         String exceptionString = "";
@@ -71,12 +73,19 @@ public class AmirDecomposition {
             } else if (taskArrivalTimeWindows.get(thisTask).size() > 1) {
                 hasException = true;
                 exceptionString += thisTask.getTitle();
+//                ProgMsg.errPutline("%s chooses random window from %d.", thisTask.getTitle(), taskArrivalTimeWindows.get(thisTask).size() );
+                //Interval firstWindow = taskArrivalTimeWindows.get(thisTask).get(0);
+                //taskArrivalTimeWindows.get(thisTask).clear();
+                //taskArrivalTimeWindows.get(thisTask).add(firstWindow);
             }
         }
         if (hasException) {
+            //ProgMsg.errPutline("%s has no arrival window.", exceptionString);
+            ProgMsg.errPutline("%s arrival time window not yet fixed.", exceptionString);
             throw new RuntimeException(String.format("%s arrival time window not yet fixed.", exceptionString));
+
         } else {
-            ProgMsg.debugPutline("All windows have been solved and fixed!!");
+            //ProgMsg.debugPutline("All windows have been solved and fixed!!");
         }
 
 
@@ -457,6 +466,8 @@ public class AmirDecomposition {
                 taskArrivalTimeWindows.put(thisTask, thisArrivalSegmentsContainer.getFinalArrivalTimeWindow());
             } else {
                 // Oh no... not good.
+                // The program will never reach here since the previous function will throw the exception.
+                ProgMsg.debugErrPutline("Oh no. %s has 0 window", thisTask.getTitle());
             }
         }
         return true;
@@ -841,9 +852,13 @@ public class AmirDecomposition {
         Boolean isSomethingChanged = false;
         for (BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals())
         {
-            // If this busy interval has no ambiguous inference, then continue to next.
-            if (thisBusyInterval.getComposition().size() == 1)
+
+            if (thisBusyInterval.getComposition().size() == 1) {
+
+                // If this busy interval has no ambiguous inference, then it's best for removing ambiguity of the windows.
+                // TODO:
                 continue;
+            }
 
             int orgNumOfInferences = thisBusyInterval.getComposition().size();
             ArrayList<ArrayList<Task>> potentialInferences = new ArrayList<>();
@@ -855,13 +870,30 @@ public class AmirDecomposition {
                     // Skip this one for now since arrival window for this task is not yet ready but is still possible to be the answer.
                     continue;
                 }
+
+                Boolean prettySureOfNumOfThisTaskByWindow = false;
+                if (taskArrivalTimeWindows.get(thisTask).size() == 1) {
+                    prettySureOfNumOfThisTaskByWindow = true;
+                }
+
                 ArrayList<ArrayList<Task>> compositionsToBeRemoved = new ArrayList<>();
-                for (ArrayList<Task> thisInference : thisBusyInterval.getComposition()) {
+                for (ArrayList<Task> thisInference : potentialInferences) {
                     int numOfThisTaskByInference = Collections.frequency(thisInference, thisTask);
                     // TODO: !!Bug!! if the arrival window is too big, then it's likely to infer incorrect number. ###FIXED!!!?
-                    if (numOfThisTaskByInference != numOfThisTaskByWindow) {
-                        compositionsToBeRemoved.add(thisInference);
+
+
+
+                    // If a task has only one window, then when it checks a busy interval, if within this period it only overlaps this one, then we are sure about the Nki value.
+                    if (prettySureOfNumOfThisTaskByWindow == true) {
+                        if (numOfThisTaskByInference != numOfThisTaskByWindow) {
+                            compositionsToBeRemoved.add(thisInference);
+                        }
+                    } else {
+                        if (numOfThisTaskByInference > numOfThisTaskByWindow) {
+                            compositionsToBeRemoved.add(thisInference);
+                        }
                     }
+
                 }
                 potentialInferences.removeAll(compositionsToBeRemoved);
 
@@ -902,7 +934,7 @@ public class AmirDecomposition {
 //
 //            }
 
-            if (potentialInferences.size()>0 && potentialInferences.size()!=orgNumOfInferences) {
+            if ((potentialInferences.size()>0) && (potentialInferences.size()!=orgNumOfInferences)) {
                 // Note that we have skipped the busy intervals without ambiguity in the beginning of the for loop,
                 // thus anything reaches here means something has been removed.
                 isSomethingChanged = true;
@@ -936,8 +968,13 @@ public class AmirDecomposition {
             return -1;
         }
 
+        if (taskArrivalTimeWindows.get(inTask).size() != 1) {
+            return -1;
+        }
+
         int resultArrivalTimes = 0;
         Boolean firstLoop = true;
+        /* Caution: the program enters here only if the arrival window is certain. It returned -1 if there are multiple ones. */
         for (Interval thisWindow : taskArrivalTimeWindows.get(inTask)) {
             Interval thisTaskArrivalWindow = new Interval(thisWindow);
             Interval intervalBusyInterval = new Interval(inBusyInterval.getBeginTimeStampNs(), inBusyInterval.getEndTimeStampNs());
@@ -1076,6 +1113,70 @@ public class AmirDecomposition {
         return taskWindow;
     }
 
+
+
+//    private Boolean computeInferenceDeviationSingleBusyIntervalByTask(BusyInterval bi, Task task) {
+//        bi.getStartTimesInference().sortTaskReleaseEventsByTime();
+//        bi.getStartTimesGroundTruth().sortTaskReleaseEventsByTime();
+//
+//        ArrayList<AppEvent> taskStartEventsGT = bi.getStartTimesGroundTruth().getEventsOfTask(task);
+//        ArrayList<AppEvent> taskStartEventsIF = bi.getStartTimesInference().getEventsOfTask(task);
+//
+//        if (taskStartEventsGT.size() != taskStartEventsIF.size()) {
+//            return false;
+//        }
+//
+//        int countOfElements = taskStartEventsGT.size();
+//        for (int i = 0; i < countOfElements; i++) {
+//            AppEvent startGT = taskStartEventsGT.get(i);
+//            AppEvent startIF = taskStartEventsIF.get(i);
+//
+//            startIF.deviation = startGT.getOrgBeginTimestampNs() - startIF.getOrgBeginTimestampNs();
+//        }
+//        return true;
+//    }
+
+    private double recomputeInferencePrecisionRatioMultipleSingleBusyInterval(BusyInterval bi) {
+        double resultDeviationMultiple = 1;
+
+        bi.getStartTimesInference().sortTaskReleaseEventsByTime();
+        bi.getStartTimesGroundTruth().sortTaskReleaseEventsByTime();
+
+        for (Task thisTask : taskContainer.getAppTasksAsArray()) {
+            ArrayList<AppEvent> taskStartEventsGT = bi.getStartTimesGroundTruth().getEventsOfTask(thisTask);
+            ArrayList<AppEvent> taskStartEventsIF = bi.getStartTimesInference().getEventsOfTask(thisTask);
+            resultDeviationMultiple *= recomputeStartEventsPrecisionRatioMultiple(taskStartEventsGT, taskStartEventsIF);
+        }
+
+        return resultDeviationMultiple;
+    }
+
+    private double recomputeStartEventsPrecisionRatioMultiple(ArrayList<AppEvent> gt, ArrayList<AppEvent> inf) {
+
+        if (gt.size() != inf.size()) {
+            ProgMsg.debugErrPutline("Ground truth and inference have inconsistent number of starting events.");
+            return -1;
+        }
+
+        double resultDeviationMultiple = 1;
+
+        int countOfElements = gt.size();
+        for (int i = 0; i < countOfElements; i++) {
+            AppEvent startGT = gt.get(i);
+            AppEvent startIF = inf.get(i);
+            int taskP = startIF.getTask().getPeriodNs();
+
+            startIF.deviation = startGT.getOrgBeginTimestampNs() - startIF.getOrgBeginTimestampNs();
+            startIF.precisionRatio = 1.0 - ((double)Math.abs(startIF.deviation) / (double)taskP);
+            resultDeviationMultiple *= startIF.precisionRatio;
+
+            if (startIF.deviation != 0) {
+                ProgMsg.debugPutline("%s:" + Double.toString(startIF.precisionRatio), startIF.getTask().getTitle());
+            }
+        }
+        return resultDeviationMultiple;
+    }
+
     // TODO: The range of the deviation between ground truth and inference has to be specified further.
     private Boolean verifySchedulingInferenceSingleBusyInterval(BusyInterval bi) {
         if ((bi.getStartTimesGroundTruth() == null) || (bi.getStartTimesInference()==null))
@@ -1113,4 +1214,45 @@ public class AmirDecomposition {
         //ProgMsg.debugPutline("Overall verification done: " + overallResult.toString());
         return overallResult;
     }
+
+//    public double computeInferencePrecisionRatioGeometricMean()  throws RuntimeException {
+//        double overallPrecisionRatio = 1;
+//        double precisionRatioMultiple = 1;
+//        for (BusyInterval bi : busyIntervalContainer.getBusyIntervals()) {
+//            precisionRatioMultiple *= recomputeInferencePrecisionRatioMultipleSingleBusyInterval(bi);
+//        }
+//
+//        overallPrecisionRatio = Math.pow(precisionRatioMultiple, 1/(double)getAllStartEventsCount());
+//        //ProgMsg.debugPutline("Overall verification done: " + overallResult.toString());
+//
+//        return overallPrecisionRatio;
+//    }
+
+    public double computeInferencePrecisionRatioGeometricMeanByTaskStandardDeviation()  throws RuntimeException {
+        double sdRatioMultiple = 1.0;
+        for (Task thisTask : taskContainer.getAppTasksAsArray()) {
+            double sumOfSquare = 0;
+            ArrayList<AppEvent> taskStartEventsGT = busyIntervalContainer.getStartTimeEventsGTByTask(thisTask);
+            ArrayList<AppEvent> taskStartEventsIF = busyIntervalContainer.getStartTimeEventsInfByTask(thisTask);
+
+            if (taskStartEventsGT.size() != taskStartEventsIF.size()) {
+                ProgMsg.errPutline("%s Event counts are mismatched: %d : %d", thisTask.getTitle(), taskStartEventsGT.size(), taskStartEventsIF.size());
+                throw new RuntimeException(String.format("%s Event counts are mismatched: %d : %d", thisTask.getTitle(), taskStartEventsGT.size(), taskStartEventsIF.size()));
+            }
+
+            for (int i=0; i<taskStartEventsGT.size(); i++) {
+                taskStartEventsIF.get(i).deviation = taskStartEventsGT.get(i).getOrgBeginTimestampNs() - taskStartEventsIF.get(i).getOrgBeginTimestampNs();
+                sumOfSquare += Math.pow(taskStartEventsIF.get(i).deviation, 2);
+            }
+
+            double standardDeviation = Math.pow(sumOfSquare / (double) taskStartEventsGT.size(), 0.5);
+            double sdRatio = 1.0 - (standardDeviation/(double)(thisTask.getPeriodNs()));
+            //ProgMsg.debugPutline("%s SD, ratio = %s, %s", thisTask.getTitle(), Double.toString(standardDeviation), Double.toString(sdRatio));
+            sdRatioMultiple = sdRatioMultiple * sdRatio;
+        }
+
+        double geometricMean = Math.pow(sdRatioMultiple, 1.0/(double)(taskContainer.getAppTasksAsArray().size()));
+        return geometricMean;
+    }
+
 }

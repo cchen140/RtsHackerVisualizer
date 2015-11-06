@@ -32,47 +32,33 @@ public class ArrivalSegmentsContainer {
         task = inTask;
     }
 
-    public Boolean calculateFinalArrivalTimeWindow() {
+    public Boolean calculateFinalArrivalTimeWindow() throws RuntimeException {
 
         convertBusyIntervalsToArrivalSegments();
 
-//        ArrivalSegment baseArrivalSegment;// = new ArrivalSegment( getFirstOneArrivalSegment() );
-//        if (getFirstOneArrivalSegment() == null) {
-//            // If there is no one-segment, then just get one from anything you have.
-//            ProgMsg.errPutline("%s doesn't have 1-seg now.", task.getTitle());
-//            baseArrivalSegment = new ArrivalSegment( arrivalSegments.get(0) );
-//        } else {
-//            baseArrivalSegment = new ArrivalSegment( getFirstOneArrivalSegment() );
-//        }
-
-        //periodBeginTimeStamp = baseArrivalSegment.getBegin();
-
         arrivalIntersections.clear();
-        //arrivalIntersections.add(baseArrivalSegment);
+        createArrivalIntersectionsByPeriod();   // This generates task's arrival windows and puts into arrivalIntersections.
 
-        createArrivalIntersectionsByPeriod();
-
-        /* Compute intersections */
-        //updateArrivalIntersectionsByOneSegments();
-        //updateArrivalIntersectionsByZeroOneSegments();
-
-        // Move the window to around zero point.
+        /* Move the window to around zero point. */
         for (int i=0; i<arrivalIntersections.size(); i++) {
             arrivalIntersections.get(i).shift(-(arrivalIntersections.get(i).getBegin() / task.getPeriodNs()) * task.getPeriodNs());
         }
         finalArrivalTimeWindows = arrivalIntersections;
 
-        if (arrivalIntersections.size() > 1) {
-            ProgMsg.errPutline("%s still has %d possible arrival windows after computation.", task.getTitle(), arrivalIntersections.size());
-            for (Interval thisWindow : arrivalIntersections) {
-                ProgMsg.errPutline("\t" + thisWindow.getBegin() + ":" + thisWindow.getEnd());
-            }
-        }
+//        if (arrivalIntersections.size() > 1) {
+//            ProgMsg.errPutline("%s still has %d possible arrival windows after computation.", task.getTitle(), arrivalIntersections.size());
+//            for (Interval thisWindow : arrivalIntersections) {
+//                ProgMsg.errPutline("\t" + thisWindow.getBegin() + ":" + thisWindow.getEnd());
+//            }
+//        }
 
         if (arrivalIntersections.size() > 0) {
             return true;
         } else {
-            return false;
+            // The program will not reach here since createArrivalIntersectionsByPeriod() will throw the exception ]
+            // in the case when a task's arrival window becomes null.
+            throw new RuntimeException(String.format("%s has 0 arrival window. It shouldn't happen.", task.getTitle()));
+            //return false;
         }
     }
 
@@ -129,49 +115,6 @@ public class ArrivalSegmentsContainer {
         return null;
     }
 
-    /* The result is the intersections. */
-//    private ArrayList<Interval> intersectArrivalIntersections(ArrivalSegment inSegment) {
-//        ArrayList<Interval> newArrivalIntersections = new ArrayList<>();
-//
-//        for (Interval thisWindow : arrivalIntersections) {
-//            newArrivalIntersections.addAll( inSegment.getIntersectionWithPeriodShift(thisWindow, task.getPeriodNs()) );
-//        }
-//        return newArrivalIntersections;
-//    }
-//
-//    /* This is specific for 0-1-segment.
-//     * If no intersection happens, then nothing would be changed. */
-//    // TODO: potential bug if 0-1-segment is actually 0?
-//    private ArrayList<Interval> narrowExistingArrivalIntersections(ArrivalSegment inSegment) {
-//        ArrayList<Interval> newArrivalIntersections = new ArrayList<>();
-//
-//        for (Interval thisWindow : arrivalIntersections) {
-//            ArrayList<Interval> thisIntersections = inSegment.getIntersectionWithPeriodShift(thisWindow, task.getPeriodNs());
-//            if (thisIntersections.size() == 0) {
-//                newArrivalIntersections.add(thisWindow);
-//            } else {
-//                newArrivalIntersections.addAll(thisIntersections);
-//            }
-//        }
-//        return newArrivalIntersections;
-//    }
-
-//    private void updateArrivalIntersectionsByOneSegments() {
-//        for (ArrivalSegment thisSegment : arrivalSegments) {
-//            if (thisSegment.getSegmentType() == ArrivalSegment.ONE_ARRIVAL_SEGMENT) {
-//                arrivalIntersections = intersectArrivalIntersections(thisSegment);
-//            }
-//        }
-//    }
-
-//    private void updateArrivalIntersectionsByZeroOneSegments() {
-//        for (ArrivalSegment thisSegment : arrivalSegments) {
-//            if (thisSegment.getSegmentType() == ArrivalSegment.ZERO_ONE_ARRIVAL_SEGMENT) {
-//                arrivalIntersections = narrowExistingArrivalIntersections(thisSegment);
-//            }
-//        }
-//    }
-
     private void createArrivalIntersectionsByPeriod() {
         int beginTimeStamp = findEarliestArrivalSegmentBeginTime();
         int endTimeStamp = findLeastArrivalSegmentEndTime();
@@ -223,19 +166,9 @@ public class ArrivalSegmentsContainer {
 
             }
 
-//            for (Interval thisWindow : arrivalIntersections) {
-//                for (ArrivalSegment thisSegment : thisPeriodSegments) {
-//                    Interval result = thisSegment.intersect(thisWindow);
-//                    if (result != null) {
-//                        // Shift thisWindow to next period.
-//                        result.shift(taskP);
-//                        newArrivalIntersections.add(result);
-//                    }
-//                }
-//            }
-
             if (newArrivalIntersections.size() == 0) {
-                ProgMsg.errPutline("%s intersection becomes null. It should never happen!!", task.getTitle());
+                ProgMsg.errPutline("%s arrival window intersection becomes null. It should never happen!!", task.getTitle());
+                throw new RuntimeException(String.format("%s arrival window intersection becomes null. It should never happen!!", task.getTitle()));
             }
 
             arrivalIntersections = newArrivalIntersections;
