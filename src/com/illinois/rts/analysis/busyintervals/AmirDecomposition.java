@@ -173,7 +173,7 @@ public class AmirDecomposition {
             resultCompositions = findMatchingCompositions(nkOfTasks, duration, null);
             biDurationCompositionLookupTable.put(duration, resultCompositions);
         } else {
-            resultCompositions = biDurationCompositionLookupTable.get(duration);
+            resultCompositions = (ArrayList)biDurationCompositionLookupTable.get(duration).clone();
         }
 
         inBusyInterval.setComposition(resultCompositions);
