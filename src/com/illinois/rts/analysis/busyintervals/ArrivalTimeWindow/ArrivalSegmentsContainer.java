@@ -84,25 +84,32 @@ public class ArrivalSegmentsContainer {
         int taskP = task.getPeriodNs();
         int taskC = task.getComputationTimeNs();
 
-        /* Deal with the certain part first. */
-        for (int i=0; i<inBusyInterval.getMinNkValueOfTask(task); i++) {
-            /* Create the arrival segment for every period in this busy interval (except an extra one later). */
-            int resultBeginTime = inBusyInterval.getBeginTimeStampNs() + taskP*i;
-            int resultEndTime = Math.min(inBusyInterval.getEndTimeStampNs() - taskC,
-                    inBusyInterval.getBeginTimeStampNs() + taskP*(i+1) - taskC);
-            resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ONE_ARRIVAL_SEGMENT));
-        }
+        if (inBusyInterval.getNkValuesOfTask(task).size() == 1) {
+            int thisNkValue = inBusyInterval.getMinNkValueOfTask(task);
+            for (int i=0; i<thisNkValue; i++) {
+                /* Create the arrival segment for every period in this busy interval. */
+                int resultBeginTime = inBusyInterval.getBeginTimeStampNs() + taskP*i;
+                int resultEndTime = Math.min(inBusyInterval.getEndTimeStampNs() - taskP*(thisNkValue - (i+1)) - taskC,
+                        inBusyInterval.getBeginTimeStampNs() + taskP*(i+1) - taskC);
+                resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ONE_ARRIVAL_SEGMENT));
+            }
+        } else {
+            /* Deal with the certain part first. */
+            int thisNkValue = inBusyInterval.getMinNkValueOfTask(task);
+            for (int i=0; i<thisNkValue; i++) {
+                /* Create the arrival segment for every period in this busy interval. */
+                int resultBeginTime = inBusyInterval.getBeginTimeStampNs() + taskP*i;
+                int resultEndTime = inBusyInterval.getBeginTimeStampNs() + taskP*(i+1) - taskC;
+                resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ONE_ARRIVAL_SEGMENT));
+            }
 
-        if (inBusyInterval.getNkValuesOfTask(task).size() > 1) {
-            /* Create the arrival segment (0-1-segment) for this extra one. */
+            /* Create the arrival segment (0-1-segment) for the extra, uncertain one. */
             int nthPeriod = inBusyInterval.getMaxNkValueOfTask(task);
-
             int resultBeginTime = inBusyInterval.getBeginTimeStampNs() + taskP*(nthPeriod-1); // Note that nthPeriod is always >=1
-            int resultEndTime = Math.min(inBusyInterval.getEndTimeStampNs() - taskC,
-                    inBusyInterval.getBeginTimeStampNs() + taskP*(nthPeriod) - taskC);
+            int resultEndTime = inBusyInterval.getEndTimeStampNs() - taskC;
             resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ZERO_ONE_ARRIVAL_SEGMENT));
         }
-
+        
         return resultArrivalSegments;
     }
 
