@@ -157,7 +157,8 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
     }
 
     private void onStart() {
-// add your code here
+
+        long startTime = System.currentTimeMillis();
 
         // Clear the log buffer for a new test.
         logBuffer = "";
@@ -206,6 +207,10 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         // Start test!!
         Boolean isNotCancel = startAutoTest();
+
+        long stopTime = System.currentTimeMillis();
+        long elapsedTime = stopTime - startTime;
+        ProgMsg.sysPutLine("Exp Total Computation Time: " + elapsedTime/1000.0 + "s");
 
         if (isNotCancel == true) {
             if (checkAutoLogEnable.isSelected() == true) {

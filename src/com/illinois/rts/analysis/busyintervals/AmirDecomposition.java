@@ -16,6 +16,8 @@ public class AmirDecomposition {
     private BusyIntervalContainer busyIntervalContainer;
     private HashMap<Task, ArrayList<Interval>> taskArrivalTimeWindows = new HashMap<Task, ArrayList<Interval>>();
 
+    private HashMap<Integer, ArrayList<ArrayList<Task>>> biDurationCompositionLookupTable = new HashMap();
+
     public AmirDecomposition(TaskContainer inTaskContainer, BusyIntervalContainer inBusyIntervalContainer)
     {
         taskContainer = inTaskContainer;
@@ -136,41 +138,44 @@ public class AmirDecomposition {
     public void calculateAndSetNkValueOfBusyInterval(BusyInterval inBusyInterval) {
         int duration = inBusyInterval.getIntervalNs();
 
-        HashMap<Task, ArrayList<Integer>> nkOfTasks = new HashMap<Task, ArrayList<Integer>>();
+        ArrayList<ArrayList<Task>> resultCompositions;
+        if (biDurationCompositionLookupTable.get(duration) == null) {
 
-        /* Calculate Nk of each task. */
-        for (Object thisObject: taskContainer.getAppTasksAsArray())
-        {
-            Task thisTask = (Task) thisObject;
-            ArrayList<Integer> thisResult = new ArrayList<Integer>();
+            HashMap<Task, ArrayList<Integer>> nkOfTasks = new HashMap<Task, ArrayList<Integer>>();
 
-            int thisP = thisTask.getPeriodNs();
-            int thisC = thisTask.getComputationTimeNs();
+            /* Calculate Nk of each task. */
+            for (Object thisObject : taskContainer.getAppTasksAsArray()) {
+                Task thisTask = (Task) thisObject;
+                ArrayList<Integer> thisResult = new ArrayList<Integer>();
 
-            int numberOfCompletePeriods = (int) Math.floor(duration / thisP);
-            int subIntervalNs = duration - numberOfCompletePeriods*thisP;
+                int thisP = thisTask.getPeriodNs();
+                int thisC = thisTask.getComputationTimeNs();
 
-            if (subIntervalNs < thisC)
-            {// This task can only have occurred 0 time in this sub-interval.
-                thisResult.add(numberOfCompletePeriods + 0);
+                int numberOfCompletePeriods = (int) Math.floor(duration / thisP);
+                int subIntervalNs = duration - numberOfCompletePeriods * thisP;
+
+                if (subIntervalNs < thisC) {// This task can only have occurred 0 time in this sub-interval.
+                    thisResult.add(numberOfCompletePeriods + 0);
+                } else if (subIntervalNs < (thisP - thisC)) {// This task can have occurred 0 or 1 time in this sub-interval.
+                    thisResult.add(numberOfCompletePeriods + 0);
+                    thisResult.add(numberOfCompletePeriods + 1);
+                } else // if (subIntervalNs < thisP)
+                {// This task can only have occurred 1 times in this sub-interval.
+                    thisResult.add(numberOfCompletePeriods + 1);
+                }
+
+                nkOfTasks.put(thisTask, thisResult);
             }
-            else if (subIntervalNs < (thisP-thisC))
-            {// This task can have occurred 0 or 1 time in this sub-interval.
-                thisResult.add(numberOfCompletePeriods + 0);
-                thisResult.add(numberOfCompletePeriods + 1);
-            }
-            else // if (subIntervalNs < thisP)
-            {// This task can only have occurred 1 times in this sub-interval.
-                thisResult.add(numberOfCompletePeriods + 1);
-            }
 
-            nkOfTasks.put(thisTask, thisResult);
+            // Find Ns match this interval.
+            //ArrayList<ArrayList<Task>> resultCompositions;// = new ArrayList<HashMap<Integer, Integer>>();//HashMap<Integer, Integer>();
+
+            resultCompositions = findMatchingCompositions(nkOfTasks, duration, null);
+            biDurationCompositionLookupTable.put(duration, resultCompositions);
+        } else {
+            resultCompositions = biDurationCompositionLookupTable.get(duration);
         }
 
-        // Find Ns match this interval.
-        ArrayList<ArrayList<Task>> resultCompositions;// = new ArrayList<HashMap<Integer, Integer>>();//HashMap<Integer, Integer>();
-
-        resultCompositions = findMatchingCompositions(nkOfTasks, duration, null);
         inBusyInterval.setComposition(resultCompositions);
 
         /* Update Nk values. */
