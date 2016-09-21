@@ -8,12 +8,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+
 /**
  * Created by CY on 6/20/2015.
  */
 public class AmirDecomposition {
     private TaskContainer taskContainer;
-    private BusyIntervalContainer busyIntervalContainer;
+    private BusyIntervalContainer orgBusyIntervalContainer;
+    private BusyIntervalContainer processingBusyIntervalContainer;
     private HashMap<Task, ArrayList<Interval>> taskArrivalTimeWindows = new HashMap<Task, ArrayList<Interval>>();
 
     private HashMap<Integer, ArrayList<ArrayList<Task>>> biDurationCompositionLookupTable = new HashMap();
@@ -21,27 +23,39 @@ public class AmirDecomposition {
     public AmirDecomposition(TaskContainer inTaskContainer, BusyIntervalContainer inBusyIntervalContainer)
     {
         taskContainer = inTaskContainer;
-        busyIntervalContainer = inBusyIntervalContainer;
+        orgBusyIntervalContainer = inBusyIntervalContainer;
+        processingBusyIntervalContainer = new BusyIntervalContainer(orgBusyIntervalContainer.getBusyIntervals()); //inBusyIntervalContainer;
     }
 
     public Boolean runDecompositionStep1()
     {
-        ProgMsg.debugPutline("Estimating N_k(tau_i) values for %d busy intervals.", busyIntervalContainer.size());
+        ProgMsg.debugPutline("Estimating N_k(tau_i) values for %d busy intervals.", processingBusyIntervalContainer.size());
 
         // TODO: test for skipping the first few busy intervals
-        busyIntervalContainer.removeBusyIntervalsBeforeTimeStamp(taskContainer.getLargestPeriod());
+        processingBusyIntervalContainer.removeBusyIntervalsBeforeTimeStamp(taskContainer.getLargestPeriod());
+        orgBusyIntervalContainer.removeBusyIntervalsBeforeTimeStamp(taskContainer.getLargestPeriod());
 
         // Remove the last one since it may not be complete.
-        busyIntervalContainer.removeTheLastBusyInterval();
+        processingBusyIntervalContainer.removeTheLastBusyInterval();
+        orgBusyIntervalContainer.removeTheLastBusyInterval();
 
         // Step one: finding n values for every task in every busy interval.
-        for (BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals())
+        ArrayList<BusyInterval> biToBeRemoved = new ArrayList<>();
+        for (BusyInterval thisBusyInterval : processingBusyIntervalContainer.getBusyIntervals())
         {
             //thisBusyInterval.setComposition(calculateComposition(thisBusyInterval));
 
             // This is to calculate Nk values for each task in each busy interval.
-            calculateAndSetNkValueOfBusyInterval(thisBusyInterval);
+            if (calculateAndSetNkValueOfBusyInterval(thisBusyInterval) == false) {
+                // It returns false if no Nk inference has been reached.
+                biToBeRemoved.add(thisBusyInterval);
+            }
         }
+
+        /* Remove those busy intervals that have no inferences. */
+        ProgMsg.sysPutLine("%d busy intervals have been removed due to incapable of inferring their Nk values.", biToBeRemoved.size());
+        processingBusyIntervalContainer.busyIntervals.removeAll(biToBeRemoved);
+
         return true;
     }
 
@@ -121,7 +135,7 @@ public class AmirDecomposition {
     public Boolean runDecompositionWithErrors()
     {
         // Step one: finding n values for every task in every busy interval.
-        for (BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals())
+        for (BusyInterval thisBusyInterval : processingBusyIntervalContainer.getBusyIntervals())
         {
             thisBusyInterval.setComposition(calculateCompositionWithErrors(thisBusyInterval));
         }
@@ -135,7 +149,7 @@ public class AmirDecomposition {
         return true;
     }
 
-    public void calculateAndSetNkValueOfBusyInterval(BusyInterval inBusyInterval) {
+    public Boolean calculateAndSetNkValueOfBusyInterval(BusyInterval inBusyInterval) {
         int duration = inBusyInterval.getIntervalNs();
 
         ArrayList<ArrayList<Task>> resultCompositions;
@@ -150,13 +164,17 @@ public class AmirDecomposition {
 
                 int thisP = thisTask.getPeriodNs();
                 int thisC = thisTask.getComputationTimeNs();
+                int thisCLower = thisTask.getComputationTimeLowerBound();
+                //int thisCUpper = thisTask.getComputationTimeUpperBound();
 
                 int numberOfCompletePeriods = (int) Math.floor(duration / thisP);
                 int subIntervalNs = duration - numberOfCompletePeriods * thisP;
 
-                if (subIntervalNs < thisC) {// This task can only have occurred 0 time in this sub-interval.
+                //if (subIntervalNs < thisC) {// This task can only have occurred 0 time in this sub-interval.
+                if (subIntervalNs < thisCLower) {// This task can only have occurred 0 time in this sub-interval.
                     thisResult.add(numberOfCompletePeriods + 0);
-                } else if (subIntervalNs < (thisP - thisC)) {// This task can have occurred 0 or 1 time in this sub-interval.
+                //} else if (subIntervalNs < (thisP - thisC)) {// This task can have occurred 0 or 1 time in this sub-interval.
+                } else if (subIntervalNs < (thisP - thisCLower)) {// This task can have occurred 0 or 1 time in this sub-interval.
                     thisResult.add(numberOfCompletePeriods + 0);
                     thisResult.add(numberOfCompletePeriods + 1);
                 } else // if (subIntervalNs < thisP)
@@ -176,10 +194,18 @@ public class AmirDecomposition {
             resultCompositions = (ArrayList)biDurationCompositionLookupTable.get(duration).clone();
         }
 
-        inBusyInterval.setComposition(resultCompositions);
 
-        /* Update Nk values. */
-        inBusyInterval.updateNkValuesFromCompositions(taskContainer);
+        if (resultCompositions.size() != 0) {
+            inBusyInterval.setComposition(resultCompositions);
+
+            /* Update Nk values. */
+            inBusyInterval.updateNkValuesFromCompositions(taskContainer);
+
+            return true;
+        } else {
+            // We can't get any inference for this busy interval.
+            return false;
+        }
 
     }
 
@@ -281,15 +307,21 @@ public class AmirDecomposition {
         if (inNOfTasks.isEmpty())
         {
             /* Compute the interval from current compositions. */
-            int compositeInterval = 0;
+            //int compositeInterval = 0;
+            int compositeIntervalLowerBound = 0;
+            int compositeIntervalUpperBound = 0;
+
             for (Task thisTask : inProcessingNOfTasks.keySet())
             {
-                compositeInterval += thisTask.getComputationTimeNs() * inProcessingNOfTasks.get(thisTask);
+                //compositeInterval += thisTask.getComputationTimeNs() * inProcessingNOfTasks.get(thisTask);
+                compositeIntervalLowerBound += thisTask.getComputationTimeLowerBound() * inProcessingNOfTasks.get(thisTask);
+                compositeIntervalUpperBound += thisTask.getComputationTimeUpperBound() * inProcessingNOfTasks.get(thisTask);
             }
 //            System.out.format("End of recursive calls, %d\r\n", compositeInterval);
 
             /* Check whether current composite interval equals target interval or not. */
-            if (compositeInterval == inTargetInterval)
+            //if (compositeInterval == inTargetInterval)
+            if ((compositeIntervalLowerBound <= inTargetInterval) && (inTargetInterval <= compositeIntervalUpperBound)) // Including 20% error
             {
 //                System.out.println("Matched!!");
 //                System.out.println(inProcessingNOfTasks);
@@ -466,7 +498,7 @@ public class AmirDecomposition {
     public Boolean calculateArrivalTimeOfAllTasks() throws RuntimeException
     {
         for (Task thisTask : taskContainer.getAppTasksAsArray()){
-            ArrivalSegmentsContainer thisArrivalSegmentsContainer = new ArrivalSegmentsContainer(thisTask, new BusyIntervalContainer(busyIntervalContainer.findBusyIntervalsByTask(thisTask)));
+            ArrivalSegmentsContainer thisArrivalSegmentsContainer = new ArrivalSegmentsContainer(thisTask, new BusyIntervalContainer(processingBusyIntervalContainer.findBusyIntervalsByTask(thisTask)));
             if (thisArrivalSegmentsContainer.calculateFinalArrivalTimeWindow() == true) {
                 taskArrivalTimeWindows.put(thisTask, thisArrivalSegmentsContainer.getFinalArrivalTimeWindow());
             } else {
@@ -485,7 +517,7 @@ public class AmirDecomposition {
         ArrayList<BusyInterval> thisTaskBusyIntervals;
 
         /* Find the busy intervals that contain inTask. */
-        thisTaskBusyIntervals = busyIntervalContainer.findBusyIntervalsByTask(inTask);
+        thisTaskBusyIntervals = processingBusyIntervalContainer.findBusyIntervalsByTask(inTask);
 
         Interval firstWindow = null;
 
@@ -742,7 +774,7 @@ public class AmirDecomposition {
             ArrayList<IntervalEvent> intervalEvents = new ArrayList<>();
             int thisWindowBeginTime = taskArrivalTimeWindow.getBegin(); // Initialize window time with the first window.
             int taskPeriod = inTask.getPeriodNs();
-            int endTime = busyIntervalContainer.getEndTime();
+            int endTime = orgBusyIntervalContainer.getEndTime();
 
             while ((thisWindowBeginTime + windowLength) <= endTime) {
                 IntervalEvent thisIntervalEvent = new IntervalEvent(thisWindowBeginTime, thisWindowBeginTime + windowLength);
@@ -770,13 +802,13 @@ public class AmirDecomposition {
 
     public Trace buildCompositionTrace()
     {
-        return new Trace("Step2 Inf.", busyIntervalContainer.compositionInferencesToEvents(), new TimeLine());
+        return new Trace("Step2 Inf.", processingBusyIntervalContainer.compositionInferencesToEvents(), new TimeLine());
     }
 
     public Trace buildSchedulingInferenceTrace()
     {
         ArrayList resultEvents = new ArrayList();
-        for ( BusyInterval thisBI : busyIntervalContainer.getBusyIntervals() ) {
+        for ( BusyInterval thisBI : orgBusyIntervalContainer.getBusyIntervals() ) {
             resultEvents.addAll( thisBI.schedulingInference );
         }
         return new Trace("Inf. Schedule", resultEvents, new TimeLine());
@@ -855,7 +887,7 @@ public class AmirDecomposition {
     public Boolean removeAmbiguousInferenceByArrivalTimeWindow()
     {
         Boolean isSomethingChanged = false;
-        for (BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals())
+        for (BusyInterval thisBusyInterval : processingBusyIntervalContainer.getBusyIntervals())
         {
 
             if (thisBusyInterval.getComposition().size() == 1) {
@@ -1025,7 +1057,7 @@ public class AmirDecomposition {
 
     public Boolean reconstructCompositionOfBusyIntervalByArrivalTimeWindows()
     {
-        for ( BusyInterval thisBusyInterval : busyIntervalContainer.getBusyIntervals() ) {
+        for ( BusyInterval thisBusyInterval : orgBusyIntervalContainer.getBusyIntervals() ) {
 //            if (thisBusyInterval.getComposition().size() > 1) {
 //                // TODO: What we can do when there are multiple possible inferences while reconstructing the schedule for a busy interval?
 //                ProgMsg.debugErrPutline("Skipped!! Reconstruction Step: more than one inference in busy interval at " + String.valueOf((double)thisBusyInterval.getBeginTimeStampNs()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + " ms");
@@ -1207,7 +1239,7 @@ public class AmirDecomposition {
 
     public Boolean verifySchedulingInference() {
         Boolean overallResult = true;
-        for (BusyInterval bi : busyIntervalContainer.getBusyIntervals()) {
+        for (BusyInterval bi : orgBusyIntervalContainer.getBusyIntervals()) {
             Boolean verificationResult = verifySchedulingInferenceSingleBusyInterval(bi);
 
             if (verificationResult == false) {
@@ -1223,7 +1255,7 @@ public class AmirDecomposition {
 //    public double computeInferencePrecisionRatioGeometricMean()  throws RuntimeException {
 //        double overallPrecisionRatio = 1;
 //        double precisionRatioMultiple = 1;
-//        for (BusyInterval bi : busyIntervalContainer.getBusyIntervals()) {
+//        for (BusyInterval bi : processingBusyIntervalContainer.getBusyIntervals()) {
 //            precisionRatioMultiple *= recomputeInferencePrecisionRatioMultipleSingleBusyInterval(bi);
 //        }
 //
@@ -1237,17 +1269,18 @@ public class AmirDecomposition {
         double sdRatioMultiple = 1.0;
         for (Task thisTask : taskContainer.getAppTasksAsArray()) {
             double sumOfSquare = 0;
-            ArrayList<AppEvent> taskStartEventsGT = busyIntervalContainer.getStartTimeEventsGTByTask(thisTask);
-            ArrayList<AppEvent> taskStartEventsIF = busyIntervalContainer.getStartTimeEventsInfByTask(thisTask);
+            ArrayList<AppEvent> taskStartEventsGT = orgBusyIntervalContainer.getStartTimeEventsGTByTask(thisTask);
+            ArrayList<AppEvent> taskStartEventsIF = orgBusyIntervalContainer.getStartTimeEventsInfByTask(thisTask);
 
             if (taskStartEventsGT.size() != taskStartEventsIF.size()) {
                 ProgMsg.errPutline("%s Event counts are mismatched: %d : %d", thisTask.getTitle(), taskStartEventsGT.size(), taskStartEventsIF.size());
-                throw new RuntimeException(String.format("%s Event counts are mismatched: %d : %d", thisTask.getTitle(), taskStartEventsGT.size(), taskStartEventsIF.size()));
+                //throw new RuntimeException(String.format("%s Event counts are mismatched: %d : %d", thisTask.getTitle(), taskStartEventsGT.size(), taskStartEventsIF.size()));
             }
 
             for (int i=0; i<taskStartEventsGT.size(); i++) {
-                taskStartEventsIF.get(i).deviation = taskStartEventsGT.get(i).getOrgBeginTimestampNs() - taskStartEventsIF.get(i).getOrgBeginTimestampNs();
-                sumOfSquare += Math.pow(taskStartEventsIF.get(i).deviation, 2);
+                //taskStartEventsIF.get(i).deviation = taskStartEventsGT.get(i).getOrgBeginTimestampNs() - taskStartEventsIF.get(i).getOrgBeginTimestampNs();
+                //sumOfSquare += Math.pow(taskStartEventsIF.get(i).deviation, 2);
+                sumOfSquare += Math.pow(computeDeviationOfAnAppEvent(taskStartEventsGT.get(i), thisTask.getPeriodNs(), taskStartEventsIF), 2);
             }
 
             double standardDeviation = Math.pow(sumOfSquare / (double) taskStartEventsGT.size(), 0.5);
@@ -1258,6 +1291,34 @@ public class AmirDecomposition {
 
         double geometricMean = Math.pow(sdRatioMultiple, 1.0/(double)(taskContainer.getAppTasksAsArray().size()));
         return geometricMean;
+    }
+
+    private int computeDeviationOfAnAppEvent(AppEvent inSourceEvent, int inPeriod, ArrayList<AppEvent> inTargetEvents) {
+        int sourceEventTime = inSourceEvent.getOrgBeginTimestampNs();
+
+        /* Find the closest target event within +/- one period. */
+        int closestEventTime = -1;
+        Boolean hasMatched = false;
+        for (AppEvent thisEvent: inTargetEvents) {
+            int thisEventTime = thisEvent.getOrgBeginTimestampNs();
+            if ( (sourceEventTime-inPeriod <= thisEventTime) && (thisEventTime <= sourceEventTime+inPeriod) ) {
+                if (hasMatched == false) {
+                    closestEventTime = thisEventTime;
+                    hasMatched = true;
+                } else {
+                    if (Math.abs(thisEventTime - sourceEventTime) < Math.abs(closestEventTime - sourceEventTime)) {
+                        closestEventTime = thisEventTime;
+                    }
+                }
+            }
+        }
+
+        if (hasMatched == false) {
+            // No inference within +/- one period, thus the deviation is one period by definition.
+            return inPeriod;
+        } else {
+            return (closestEventTime - sourceEventTime);    // negative or positive doesn't matter.
+        }
     }
 
 }

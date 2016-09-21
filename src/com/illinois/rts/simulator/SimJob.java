@@ -13,6 +13,8 @@ public class SimJob {
     public long releaseTime;
     public long responseTime;
 
+    public boolean hasStarted;
+
     public SimJob(){}
 
     public SimJob( Task inTask, long inReleaseTime, long inRemainingExecTime )
@@ -20,5 +22,6 @@ public class SimJob {
         task = inTask;
         releaseTime = inReleaseTime;
         remainingExecTime = inRemainingExecTime;
+        hasStarted = false;
     }
 }

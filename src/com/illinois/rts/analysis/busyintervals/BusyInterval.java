@@ -2,6 +2,7 @@ package com.illinois.rts.analysis.busyintervals;
 
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.visualizer.Event;
+import com.illinois.rts.visualizer.ProgMsg;
 import com.illinois.rts.visualizer.TaskContainer;
 import com.illinois.rts.visualizer.TaskIntervalEvent;
 
@@ -211,6 +212,10 @@ public class BusyInterval {
                     existingNkOfTask.add(thisNkOfTask);
                 }
             }
+        }
+
+        if (NkValues.size() == 0) {
+            ProgMsg.errPutline("It should never happen.");
         }
     }
 }

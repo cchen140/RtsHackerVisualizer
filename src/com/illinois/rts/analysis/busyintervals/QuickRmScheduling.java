@@ -9,6 +9,7 @@ import com.illinois.rts.visualizer.*;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by CY on 8/18/2015.
@@ -17,6 +18,8 @@ public class QuickRmScheduling {
     private TaskContainer taskContainer;
     private EventContainer simEventContainer = new EventContainer();
     public ProgressUpdater progressUpdater = new ProgressUpdater();
+
+    static Random random = new Random();
 
     public QuickRmScheduling( TaskContainer inTaskContainer )
     {
@@ -151,6 +154,19 @@ public class QuickRmScheduling {
 
     }
 
+    long getDeviatedExecutionTime(Task task_i) {
+        // Case of Fixed
+        // return task_i.execTime;
+        // Case of Gaussian
+        //double stddev = 0.2;
+        double stddev = 0.2;    // added by CY
+        double gaussianFactor = random.nextGaussian();
+        long deviatedExecutionTime = (long) (gaussianFactor * (task_i.getComputationTimeNs() * stddev) + task_i.getComputationTimeNs());
+        //long deviatedExecutionTime = (long) ((gaussianFactor * stddev) + task_i.getComputationTimeNs());
+        return deviatedExecutionTime;//(long) (random.nextGaussian() * (task_i.getComputationTimeNs() * stddev) + task_i.getComputationTimeNs());
+        //return (long) ((random.nextGaussian() * stddev) + task_i.getComputationTimeNs());
+    }
+
     /**
      * Turn task set into jobs within designated end time.
      * @param tickLimit designated end time
@@ -165,7 +181,8 @@ public class QuickRmScheduling {
             int thisPeriod = thisTask.getPeriodNs();
             int thisOffset = thisTask.getInitialOffset();
             for (int tick=thisOffset; tick<tickLimit; tick+=thisPeriod) {
-                resultSimJobs.add( new SimJob(thisTask, tick, thisTask.getComputationTimeNs()) );
+                //resultSimJobs.add( new SimJob(thisTask, tick, thisTask.getComputationTimeNs()) );
+                resultSimJobs.add( new SimJob(thisTask, tick, getDeviatedExecutionTime(thisTask)) );
             }
         }
         return resultSimJobs;
@@ -222,7 +239,9 @@ public class QuickRmScheduling {
                     currentJob.releaseTime = (long)currentTimeStamp;
                 }
 
-                if ( (int)currentJob.remainingExecTime == currentRunTask.getComputationTimeNs() ) {
+                //if ( (int)currentJob.remainingExecTime == currentRunTask.getComputationTimeNs() ) {
+                if ( currentJob.hasStarted == false ) {
+                    currentJob.hasStarted = true;
                     AppEvent thisReleaseEvent = new AppEvent((int) currentJob.releaseTime, currentRunTask, 0, "BEGIN");
                     simEventContainer.addAppEvent(thisReleaseEvent);
                     //resultSchedulingEvents.add(thisReleaseEvent);
@@ -252,7 +271,9 @@ public class QuickRmScheduling {
                 currentTimeStamp = (int)currentJob.releaseTime;
 
                 // Check if it is the beginning of a new job.
-                if ( ((int)currentJob.remainingExecTime) == currentRunTask.getComputationTimeNs() ) {
+                //if ( ((int)currentJob.remainingExecTime) == currentRunTask.getComputationTimeNs() ) {
+                if ( currentJob.hasStarted == false ) {
+                    currentJob.hasStarted = true;
                     AppEvent thisReleaseEvent = new AppEvent((int) currentJob.releaseTime, currentRunTask, 0, "BEGIN");
                     simEventContainer.addAppEvent(thisReleaseEvent);
                     //resultSchedulingEvents.add(thisReleaseEvent);

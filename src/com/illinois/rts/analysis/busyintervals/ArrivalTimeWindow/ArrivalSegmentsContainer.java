@@ -83,7 +83,9 @@ public class ArrivalSegmentsContainer {
         ArrayList<ArrivalSegment> resultArrivalSegments = new ArrayList<>();
 
         int taskP = task.getPeriodNs();
-        int taskC = task.getComputationTimeNs();
+        //int taskC = task.getComputationTimeNs();
+        int thisCLower = task.getComputationTimeLowerBound();
+        //int thisCUpper = task.getComputationTimeUpperBound();
         int biDuration = inBusyInterval.getIntervalNs();
 
         if (inBusyInterval.getNkValuesOfTask(task).size() == 1) {
@@ -92,15 +94,31 @@ public class ArrivalSegmentsContainer {
                 for (int i=0; i<thisNkValue; i++) {
                     /* Create the arrival segment for every period in this busy interval. */
                     int resultBeginTime = inBusyInterval.getBeginTimeStampNs() + taskP*i;
-                    int resultEndTime = inBusyInterval.getEndTimeStampNs() - taskP*(thisNkValue - (i+1)) - taskC;
-                    resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ONE_ARRIVAL_SEGMENT));
+                    //int resultEndTime = inBusyInterval.getEndTimeStampNs() - taskP*(thisNkValue - (i+1)) - taskC;
+                    int resultEndTime = inBusyInterval.getEndTimeStampNs() - taskP*(thisNkValue - (i+1)) - thisCLower;
+
+                    /* If the end time is earlier than the begin time, then drop this segment.
+                     * This could happen due to too large negative deviation in this execution time. */
+                    if (resultBeginTime<=resultEndTime) {
+                        resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ONE_ARRIVAL_SEGMENT));
+                    } else {
+                        ProgMsg.errPutline("We have dropped a segment due to negative window length.");
+                    }
                 }
             } else {
                 for (int i=0; i<thisNkValue; i++) {
                     /* Create the arrival segment for every period in this busy interval. */
                     int resultBeginTime = inBusyInterval.getEndTimeStampNs() - taskP*(thisNkValue+1-(i+1));
-                    int resultEndTime = inBusyInterval.getBeginTimeStampNs() + taskP*(i+1) - taskC;
-                    resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ONE_ARRIVAL_SEGMENT));
+                    //int resultEndTime = inBusyInterval.getBeginTimeStampNs() + taskP*(i+1) - taskC;
+                    int resultEndTime = inBusyInterval.getBeginTimeStampNs() + taskP*(i+1) - thisCLower;
+
+                    /* If the end time is earlier than the begin time, then drop this segment.
+                     * This could happen due to too large negative deviation in this execution time. */
+                    if (resultBeginTime<=resultEndTime) {
+                        resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ONE_ARRIVAL_SEGMENT));
+                    } else {
+                        ProgMsg.errPutline("We have dropped a segment due to negative window length.");
+                    }
                 }
             }
         } else {
@@ -109,15 +127,31 @@ public class ArrivalSegmentsContainer {
             for (int i=0; i<thisNkValue; i++) {
                 /* Create the arrival segment for every period in this busy interval. */
                 int resultBeginTime = inBusyInterval.getBeginTimeStampNs() + taskP*i;
-                int resultEndTime = inBusyInterval.getBeginTimeStampNs() + taskP*(i+1) - taskC;
-                resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ONE_ARRIVAL_SEGMENT));
+                //int resultEndTime = inBusyInterval.getBeginTimeStampNs() + taskP*(i+1) - taskC;
+                int resultEndTime = inBusyInterval.getBeginTimeStampNs() + taskP*(i+1) - thisCLower;
+
+                /* If the end time is earlier than the begin time, then drop this segment.
+                 * This could happen due to too large negative deviation in this execution time. */
+                if (resultBeginTime<=resultEndTime) {
+                    resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ONE_ARRIVAL_SEGMENT));
+                } else {
+                    ProgMsg.errPutline("We have dropped a segment due to negative window length.");
+                }
             }
 
             /* Create the arrival segment (0-1-segment) for the extra, uncertain one. */
             int nthPeriod = inBusyInterval.getMaxNkValueOfTask(task);
             int resultBeginTime = inBusyInterval.getBeginTimeStampNs() + taskP*(nthPeriod-1); // Note that nthPeriod is always >=1
-            int resultEndTime = inBusyInterval.getEndTimeStampNs() - taskC;
-            resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ZERO_ONE_ARRIVAL_SEGMENT));
+            //int resultEndTime = inBusyInterval.getEndTimeStampNs() - taskC;
+            int resultEndTime = inBusyInterval.getEndTimeStampNs() - thisCLower;
+
+             /* If the end time is earlier than the begin time, then drop this segment.
+              * This could happen due to too large negative deviation in this execution time. */
+            if (resultBeginTime<=resultEndTime) {
+                resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ZERO_ONE_ARRIVAL_SEGMENT));
+            } else {
+                ProgMsg.errPutline("We have dropped a segment due to negative window length.");
+            }
         }
 
         return resultArrivalSegments;
@@ -212,6 +246,8 @@ public class ArrivalSegmentsContainer {
 
                         break;
                     }
+                } else {
+                    //ProgMsg.sysPutLine("An uncertain segment has been skipped.");
                 }
 
                 newArrivalIntersections.addAll(thisSegmentResult);
@@ -219,12 +255,17 @@ public class ArrivalSegmentsContainer {
 
             }
 
-            if (newArrivalIntersections.size() == 0) {
-                ProgMsg.errPutline("%s arrival window intersection becomes null. It should never happen!!", task.getTitle());
-                throw new RuntimeException(String.format("%s arrival window intersection becomes null. It should never happen!!", task.getTitle()));
+//            if (newArrivalIntersections.size() == 0) {
+//                ProgMsg.errPutline("%s arrival window intersection becomes null. It should never happen!!", task.getTitle());
+//                throw new RuntimeException(String.format("%s arrival window intersection becomes null. It should never happen!!", task.getTitle()));
+//            }
+
+            if (newArrivalIntersections.size() != 0) {
+                arrivalIntersections = newArrivalIntersections;
+            } else {
+                //ProgMsg.sysPutLine("This period has no intersections with the present window.");
             }
 
-            arrivalIntersections = newArrivalIntersections;
         }
 
         /* Combine arrival intersections if they are actually continuous. */

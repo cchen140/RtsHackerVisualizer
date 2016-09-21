@@ -26,6 +26,8 @@ public class Task {
     protected int periodNs = 0;
 
     protected int computationTimeNs = 0;
+    protected int computationTimeLowerBound = 0;    // Lower bound error
+    protected int computationTimeUpperBound = 0;    // Upper bound error
     protected int computationTimeErrorNs = 500000;  // The error should be positive.
 
     protected int priority = 0;
@@ -56,7 +58,8 @@ public class Task {
         this(inTaskId, inTitle, inColor);
         taskType = inType;
         periodNs = inPeriod;
-        computationTimeNs = inComputationTime;
+        //computationTimeNs = inComputationTime;
+        setComputationTimeNs(inComputationTime);
         priority = inPriority;
     }
 
@@ -73,8 +76,21 @@ public class Task {
         return computationTimeNs;
     }
 
+    public int getComputationTimeLowerBound() {
+        return computationTimeLowerBound;
+    }
+
+    public int getComputationTimeUpperBound() {
+        return computationTimeUpperBound;
+    }
+
     public void setComputationTimeNs(int computationTimeNs) {
         this.computationTimeNs = computationTimeNs;
+
+        /* Deviation */
+        //TODO: This has to be formulated.
+        computationTimeLowerBound = (int) (computationTimeNs*0.8);
+        computationTimeUpperBound = (int) (computationTimeNs*1.2);
     }
 
     public void setSymbol(String inSymbol)
@@ -207,6 +223,8 @@ public class Task {
         taskType = inTask.taskType;
         periodNs = inTask.periodNs;
         computationTimeNs = inTask.computationTimeNs;
+        computationTimeLowerBound = inTask.computationTimeLowerBound;
+        computationTimeUpperBound = inTask.computationTimeUpperBound;
         computationTimeErrorNs = inTask.computationTimeErrorNs;
         priority = inTask.priority;
         deadlineNs = inTask.deadlineNs;
