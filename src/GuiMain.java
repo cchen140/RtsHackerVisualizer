@@ -322,11 +322,17 @@ public class GuiMain implements ActionListener, MouseListener {
                 /* Build a trace to show result of busy interval analysis. */
                 TraceGroup decompositionTraceGroup = new TraceGroup();
                 decompositionTraceGroup.setTitle("Decomposition");
-                  //Trace decompositionInferenceTrace = decomposition.BuildInferenceTrace(busyIntervalContainer);
-                  decompositionTraceGroup.addTrace(decomposition.buildAmirDecompositionStep1ResultTrace());
-                decomposition.runAmirDecompositionStep2();
+                    //Trace decompositionInferenceTrace = decomposition.BuildInferenceTrace(busyIntervalContainer);
+                    decompositionTraceGroup.addTrace(decomposition.buildAmirDecompositionStep1ResultTrace());
+
+                //decomposition.runAmirDecompositionStep2();
+                decompositionTraceGroup.addTraces(decomposition.amirDecomposition.runDecompositionStep2());
+                decompositionTraceGroup.addTrace(decomposition.buildAmirDecompositionStep1ResultTrace());
+                //decompositionTraceGroup.addTraces(decomposition.buildAmirDecompositionArrivalWindows());
+
                 decomposition.runAmirDecompositionStep3();
-                decompositionTraceGroup.addTraces(decomposition.buildAmirDecompositionResultTraces());
+                    decompositionTraceGroup.addTraces(decomposition.buildAmirDecompositionResultTraces());
+
                 zPanel.getTraceGroupContainer().addTraceGroup(decompositionTraceGroup);
                 applyNewSettingsAndRePaint();
 
@@ -335,6 +341,9 @@ public class GuiMain implements ActionListener, MouseListener {
                 } else {
                     ProgMsg.errPutline("Inference of the schedules is incorrect.");
                 }
+
+                double precisionRatioGmSd = decomposition.amirDecomposition.computeInferencePrecisionRatioGeometricMeanByTaskStandardDeviation();
+                ProgMsg.debugPutline("SdGm=%s;", Double.toString(precisionRatioGmSd));
 
             }
             else

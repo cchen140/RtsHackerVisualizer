@@ -5,6 +5,7 @@ import com.illinois.rts.analysis.busyintervals.BusyIntervalContainer;
 import com.illinois.rts.analysis.busyintervals.Interval;
 import com.illinois.rts.framework.Task;
 import com.illinois.rts.visualizer.ProgMsg;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -215,55 +216,60 @@ public class ArrivalSegmentsContainer {
             ArrayList<Interval> newArrivalIntersections = new ArrayList<>();
             ArrayList<ArrivalSegment> thisPeriodSegments = findArrivalSegmentsBetweenTimes(beginTimeStamp+taskP*i, beginTimeStamp+taskP*(i+1)-1);
 
+            // Iterate every segment in this period.
             for (ArrivalSegment thisSegment : thisPeriodSegments) {
-                ArrayList<Interval> thisSegmentResult = new ArrayList<>();
 
-                for (Interval thisWindow : arrivalIntersections) {
-                    Interval result = thisSegment.intersect(thisWindow);
-                    if (result != null) {
-                        // Shift thisWindow to next period.
-                        result.shift(taskP);
-                        thisSegmentResult.add(result);
-                    }
+                // Skip if it is not a one-segment.
+                if (thisSegment.getSegmentType() != ArrivalSegment.ONE_ARRIVAL_SEGMENT) {
+                    continue;
                 }
 
                 /* Check whether this ONE-segment is completely within this period. */
-                if (thisSegment.getSegmentType() == ArrivalSegment.ONE_ARRIVAL_SEGMENT) {
-                    if (thisSegment.within(new Interval(beginTimeStamp + taskP * i, beginTimeStamp + taskP * (i + 1) - 1))) {
-                        // This is the KEY segment which is completely within this period. Do this one is enough.
-                        newArrivalIntersections = thisSegmentResult;
+                if (thisSegment.within(new Interval(beginTimeStamp + taskP * i, beginTimeStamp + taskP * (i + 1) - 1))) {
 
-                        for (ArrivalSegment secLoopSegment : thisPeriodSegments) {
-                            if (secLoopSegment == thisSegment)
-                                continue;
+                    ArrayList<Interval> thisSegmentResult = new ArrayList<>();
 
-                            if (secLoopSegment.getSegmentType() == ArrivalSegment.ONE_ARRIVAL_SEGMENT) {
-                                if (secLoopSegment.getBegin() > thisSegment.getBegin()) {
-                                    secLoopSegment.setBegin(beginTimeStamp+taskP*(i+1));
-                                }
+                    // Take this segment to intersect with every arrival window interval.
+                    for (Interval thisWindow : arrivalIntersections) {
+                        Interval result = thisSegment.intersect(thisWindow);
+                        if (result != null) {
+                            thisSegmentResult.add(result);
+                        }
+                    }
+
+                    // This is the KEY segment which is completely within this period. Do this one is enough.
+                    newArrivalIntersections = thisSegmentResult;
+
+                    for (ArrivalSegment secLoopSegment : thisPeriodSegments) {
+                        if (secLoopSegment == thisSegment)
+                            continue;
+
+                        if (secLoopSegment.getSegmentType() == ArrivalSegment.ONE_ARRIVAL_SEGMENT) {
+                            if (secLoopSegment.getBegin() > thisSegment.getBegin()) {
+                            //if (secLoopSegment.getEnd() > (beginTimeStamp + taskP * (i + 1) - 1)) {
+                                secLoopSegment.setBegin(beginTimeStamp+taskP*(i+1));
                             }
                         }
-
-                        break;
                     }
+
+                    break;
                 } else {
-                    //ProgMsg.sysPutLine("An uncertain segment has been skipped.");
+                    ProgMsg.sysPutLine("An intermittent 1-segment has been skipped.");
                 }
 
-                newArrivalIntersections.addAll(thisSegmentResult);
                 continue;
 
             }
 
-//            if (newArrivalIntersections.size() == 0) {
-//                ProgMsg.errPutline("%s arrival window intersection becomes null. It should never happen!!", task.getTitle());
-//                throw new RuntimeException(String.format("%s arrival window intersection becomes null. It should never happen!!", task.getTitle()));
-//            }
-
             if (newArrivalIntersections.size() != 0) {
                 arrivalIntersections = newArrivalIntersections;
             } else {
-                //ProgMsg.sysPutLine("This period has no intersections with the present window.");
+                ProgMsg.sysPutLine("This period has no intersections with the present window.");
+            }
+
+            for (Interval thisWindow : arrivalIntersections) {
+                // Shift thisWindow to next period.
+                thisWindow.shift(taskP);
             }
 
         }

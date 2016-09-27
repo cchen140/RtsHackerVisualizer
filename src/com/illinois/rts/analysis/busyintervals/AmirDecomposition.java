@@ -59,17 +59,24 @@ public class AmirDecomposition {
         return true;
     }
 
-    public Boolean runDecompositionStep2() throws RuntimeException
+    public ArrayList<Trace> runDecompositionStep2() throws RuntimeException
+    //public Boolean runDecompositionStep2() throws RuntimeException
     {
         // Step two: creating arrival time window for each task by processing the result from step one.
+
+        ArrayList<Trace> debugTraces = new ArrayList<>();
 
         int passCount = 1;
         while (true) {
             ProgMsg.debugPutline("Start calculating arrival windows: %d-th pass.", passCount);
             calculateArrivalTimeOfAllTasks();
 
+            debugTraces.addAll(buildTaskArrivalTimeWindowTracesForAllTasks());
+
             ProgMsg.debugPutline("Removing ambiguous inference: %d-th pass.", passCount);
             Boolean isSomethingChanged = removeAmbiguousInferenceByArrivalTimeWindow();
+
+            debugTraces.add(buildCompositionTrace());
 
             if (isSomethingChanged == false) {
                 break;
@@ -107,7 +114,8 @@ public class AmirDecomposition {
 
 
 
-        return true;
+        //return true;
+        return debugTraces;
     }
 
     public Boolean runDecompositionStep3()
@@ -521,6 +529,8 @@ public class AmirDecomposition {
 
         Interval firstWindow = null;
 
+        /* Use previous window if given, otherwise compute and use the window from the shortest busy interval that
+         * contains this task. */
         if (inFirstWindow != null) {
             firstWindow = inFirstWindow;
         }
@@ -539,73 +549,70 @@ public class AmirDecomposition {
         firstWindow.shift(-(firstWindow.getEnd() / inTask.getPeriodNs()) * inTask.getPeriodNs());
         //ProgMsg.debugPutline("first window of %s, %d:%d ms", inTask.getTitle(), (int)(firstWindow.getBegin()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER), (int)(firstWindow.getEnd()*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER));
 
-
-
         Boolean anyoneHasTwoIntersectionsInTheEnd = false;
         Interval lastWindow = new Interval(firstWindow);
+        lastWindow.setBegin(firstWindow.getBegin());
+        lastWindow.setEnd(firstWindow.getEnd());
 
-            anyoneHasTwoIntersectionsInTheEnd = false;
-            lastWindow.setBegin(firstWindow.getBegin());
-            lastWindow.setEnd(firstWindow.getEnd());
+        /* Go through every busy interval that has this task to update the arrival window. */
+        for (BusyInterval thisBusyInterval : thisTaskBusyIntervals) {
 
-            for (BusyInterval thisBusyInterval : thisTaskBusyIntervals) {
-
-                // Check whether this busy interval has been solved for inTask.
-                if (thisBusyInterval.getIsArrivalTimeWindowParsedAndFixed(inTask) != null) {
-                    if (thisBusyInterval.getIsArrivalTimeWindowParsedAndFixed(inTask) == true) {
-                        // This busy interval has been parsed and the window can not contribute more, thus skip.
-                        continue;
-                    }
+            // Check whether this busy interval has been solved for inTask.
+            if (thisBusyInterval.getIsArrivalTimeWindowParsedAndFixed(inTask) != null) {
+                if (thisBusyInterval.getIsArrivalTimeWindowParsedAndFixed(inTask) == true) {
+                    // This busy interval has been parsed and the window can not contribute more, thus skip.
+                    continue;
                 }
+            }
 
 
-                /* Get current arrival window and check whether the window is valid or not. */
-                Interval thisWindow = calculateArrivalTimeWindowOfTaskInABusyInterval(thisBusyInterval, inTask);
-                if (thisWindow == null) {
-                    /* This could happen if it contains 0 or 1 arrival. */
+            /* Get current arrival window and check whether the window is valid or not. */
+            Interval thisWindow = calculateArrivalTimeWindowOfTaskInABusyInterval(thisBusyInterval, inTask);
+            if (thisWindow == null) {
+                /* This could happen if it contains 0 or 1 arrival. */
+                continue;
+            }
+
+            Integer smallestShiftPeriodValue = findSmallestPeriodShiftValueWithIntersection(firstWindow, thisWindow, inTask.getPeriodNs());
+
+            if (smallestShiftPeriodValue == null) {// No intersection.
+                ProgMsg.errPutline("No intersection! Should not ever happen!!");
+                ProgMsg.errPutline("\t- %d:%d ms", (int) (thisWindow.getBegin() * ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER), (int) (thisWindow.getEnd() * ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER));
+                continue;
+            } else {// Has intersection.
+                Interval shiftedThisWindow = new Interval(thisWindow);
+                shiftedThisWindow.shift(smallestShiftPeriodValue * inTask.getPeriodNs());
+
+                // Shift one more -period to see if there is another intersection
+                shiftedThisWindow.shift(-inTask.getPeriodNs());
+                if (firstWindow.intersect(shiftedThisWindow) != null) {// Has two intersections, thus skip intersecting this window.
+                    //ProgMsg.debugPutline("Two windows have multiple intersections!! Skip intersecting this window for now.");
+                    anyoneHasTwoIntersectionsInTheEnd = true;
+
+                    // Mark this busy interval as not solved.
+                    thisBusyInterval.setIsArrivalTimeWindowParsedAndFixed(inTask, false);
+                    continue;
+                }
+                // No intersection with moving -1 period.
+
+                // Now testing the intersection with moving +1 period.
+                // Shift one more +period to see if there is another intersection
+                shiftedThisWindow.shift(2 * inTask.getPeriodNs());
+                if (firstWindow.intersect(shiftedThisWindow) != null) {// Has two intersections, thus skip intersecting this window.
+                    //ProgMsg.debugPutline("Two windows have multiple intersections!! Skip intersecting this window for now.");
+                    anyoneHasTwoIntersectionsInTheEnd = true;
+
+                    // Mark this busy interval as not solved.
+                    thisBusyInterval.setIsArrivalTimeWindowParsedAndFixed(inTask, false);
                     continue;
                 }
 
-                Integer smallestShiftPeriodValue = findSmallestPeriodShiftValueWithIntersection(firstWindow, thisWindow, inTask.getPeriodNs());
+                // In the end, it has only one intersection, so apply the intersection to firstWindow.
+                thisWindow.shift(smallestShiftPeriodValue * inTask.getPeriodNs());
+                firstWindow = firstWindow.intersect(thisWindow);
+            }
 
-                if (smallestShiftPeriodValue == null) {// No intersection.
-                    ProgMsg.errPutline("No intersection! Should not ever happen!!");
-                    ProgMsg.errPutline("\t- %d:%d ms", (int) (thisWindow.getBegin() * ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER), (int) (thisWindow.getEnd() * ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER));
-                    continue;
-                } else {// Has intersection.
-                    Interval shiftedThisWindow = new Interval(thisWindow);
-                    shiftedThisWindow.shift(smallestShiftPeriodValue * inTask.getPeriodNs());
-
-                    // Shift one more -period to see if there is another intersection
-                    shiftedThisWindow.shift(-inTask.getPeriodNs());
-                    if (firstWindow.intersect(shiftedThisWindow) != null) {// Has two intersections, thus skip intersecting this window.
-                        //ProgMsg.debugPutline("Two windows have multiple intersections!! Skip intersecting this window for now.");
-                        anyoneHasTwoIntersectionsInTheEnd = true;
-
-                        // Mark this busy interval as not solved.
-                        thisBusyInterval.setIsArrivalTimeWindowParsedAndFixed(inTask, false);
-                        continue;
-                    }
-                    // No intersection with moving -1 period.
-
-                    // Now testing the intersection with moving +1 period.
-                    // Shift one more +period to see if there is another intersection
-                    shiftedThisWindow.shift(2 * inTask.getPeriodNs());
-                    if (firstWindow.intersect(shiftedThisWindow) != null) {// Has two intersections, thus skip intersecting this window.
-                        //ProgMsg.debugPutline("Two windows have multiple intersections!! Skip intersecting this window for now.");
-                        anyoneHasTwoIntersectionsInTheEnd = true;
-
-                        // Mark this busy interval as not solved.
-                        thisBusyInterval.setIsArrivalTimeWindowParsedAndFixed(inTask, false);
-                        continue;
-                    }
-
-                    // In the end, it has only one intersection, so apply the intersection to firstWindow.
-                    thisWindow.shift(smallestShiftPeriodValue * inTask.getPeriodNs());
-                    firstWindow = firstWindow.intersect(thisWindow);
-                }
-
-            } // End of for loop.
+        } // End of for loop.
 
         // TODO: Check this variable to see whether we have two intersections for a pair of window in the end.
         if (anyoneHasTwoIntersectionsInTheEnd == true) {
@@ -1033,6 +1040,12 @@ public class AmirDecomposition {
             int countIntersectedTaskPeriod = 0;
             while (true) {
                 if (thisTaskArrivalWindow.intersect(intervalBusyInterval) != null) {
+
+                    // Check whether the arrival window is completely within this busy interval.
+                    if (!thisTaskArrivalWindow.within(intervalBusyInterval)) {
+                        return -1;
+                    }
+
                     thisTaskArrivalWindow.shift(shiftingPositiveNegativeFactor * inTask.getPeriodNs());
                     countIntersectedTaskPeriod++;
                 } else {
@@ -1243,7 +1256,7 @@ public class AmirDecomposition {
             Boolean verificationResult = verifySchedulingInferenceSingleBusyInterval(bi);
 
             if (verificationResult == false) {
-                ProgMsg.debugPutline("Busy interval verification failed in busy interval at " + String.valueOf((double)bi.getBeginTimeStampNs() * (double)ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + " ms");
+                //ProgMsg.debugPutline("Busy interval verification failed in busy interval at " + String.valueOf((double)bi.getBeginTimeStampNs() * (double)ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + " ms");
                 overallResult = false;
             }
         }
@@ -1285,7 +1298,7 @@ public class AmirDecomposition {
 
             double standardDeviation = Math.pow(sumOfSquare / (double) taskStartEventsGT.size(), 0.5);
             double sdRatio = 1.0 - (standardDeviation/(double)(thisTask.getPeriodNs()));
-            //ProgMsg.debugPutline("%s SD, ratio = %s, %s", thisTask.getTitle(), Double.toString(standardDeviation), Double.toString(sdRatio));
+            ProgMsg.debugPutline("%s SD, ratio = %s, %s", thisTask.getTitle(), Double.toString(standardDeviation), Double.toString(sdRatio));
             sdRatioMultiple = sdRatioMultiple * sdRatio;
         }
 

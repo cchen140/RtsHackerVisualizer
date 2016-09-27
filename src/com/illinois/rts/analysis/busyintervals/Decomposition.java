@@ -32,10 +32,10 @@ public class Decomposition {
         return amirDecomposition.runDecompositionStep1();
     }
 
-    public Boolean runAmirDecompositionStep2()
-    {
-        return amirDecomposition.runDecompositionStep2();
-    }
+//    public Boolean runAmirDecompositionStep2()
+//    {
+//        return amirDecomposition.runDecompositionStep2();
+//    }
 
     public Boolean runAmirDecompositionStep3() { return amirDecomposition.runDecompositionStep3(); }
 
@@ -67,6 +67,10 @@ public class Decomposition {
     public ArrayList<Trace> buildAmirDecompositionResultTraces()
     {
         return amirDecomposition.buildResultTraces();
+    }
+
+    public ArrayList<Trace> buildAmirDecompositionArrivalWindows() {
+        return amirDecomposition.buildTaskArrivalTimeWindowTracesForAllTasks();
     }
 
 //    public ArrayList<Trace> buildArri
