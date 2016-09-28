@@ -19,13 +19,7 @@ public class ArrivalSegmentsContainer {
     private Task task;
 
     private ArrayList<ArrivalSegment> arrivalSegments = new ArrayList<>();
-    private ArrayList<Interval> arrivalIntersections = new ArrayList<>();
-
-//    private long periodBeginTimeStamp;
-//    private long period;
-
     private ArrayList<Interval> finalArrivalTimeWindows;
-//    private ArrivalSegment baseArrivalSegment;
 
     public ArrivalSegmentsContainer(Task inTask, BusyIntervalContainer inBiContainer){
         biContainer = inBiContainer;
@@ -36,23 +30,15 @@ public class ArrivalSegmentsContainer {
 
         convertBusyIntervalsToArrivalSegments();
 
-        arrivalIntersections.clear();
-        createArrivalIntersectionsByPeriod();   // This generates task's arrival windows and puts into arrivalIntersections.
+        ArrayList<Interval> arrivalWindows = computeArrivalWindowsFromArrivalSegmentsByWeight();   // This generates task's arrival windows and puts into arrivalIntersections.
 
         /* Move the window to around zero point. */
-        for (int i=0; i<arrivalIntersections.size(); i++) {
-            arrivalIntersections.get(i).shift(-(arrivalIntersections.get(i).getBegin() / task.getPeriodNs()) * task.getPeriodNs());
+        for (int i=0; i<arrivalWindows.size(); i++) {
+            arrivalWindows.get(i).shift(-(arrivalWindows.get(i).getBegin() / task.getPeriodNs()) * task.getPeriodNs());
         }
-        finalArrivalTimeWindows = arrivalIntersections;
+        finalArrivalTimeWindows = arrivalWindows;
 
-//        if (arrivalIntersections.size() > 1) {
-//            ProgMsg.errPutline("%s still has %d possible arrival windows after computation.", task.getTitle(), arrivalIntersections.size());
-//            for (Interval thisWindow : arrivalIntersections) {
-//                ProgMsg.errPutline("\t" + thisWindow.getBegin() + ":" + thisWindow.getEnd());
-//            }
-//        }
-
-        if (arrivalIntersections.size() > 0) {
+        if (finalArrivalTimeWindows.size() > 0) {
             return true;
         } else {
             // The program will not reach here since createArrivalIntersectionsByPeriod() will throw the exception ]
@@ -157,42 +143,6 @@ public class ArrivalSegmentsContainer {
         return resultArrivalSegments;
     }
 
-    private ArrayList<ArrivalSegment> getArrivalSegmentsInBusyIntervalForTask(BusyInterval inBusyInterval)
-    {
-        ArrayList<ArrivalSegment> resultArrivalSegments = new ArrayList<>();
-
-        int taskP = task.getPeriodNs();
-        int taskC = task.getComputationTimeNs();
-
-        if (inBusyInterval.getNkValuesOfTask(task).size() == 1) {
-            int thisNkValue = inBusyInterval.getMinNkValueOfTask(task);
-            for (int i=0; i<thisNkValue; i++) {
-                /* Create the arrival segment for every period in this busy interval. */
-                int resultBeginTime = inBusyInterval.getBeginTimeStampNs() + taskP*i;
-                int resultEndTime = Math.min(inBusyInterval.getEndTimeStampNs() - taskP*(thisNkValue - (i+1)) - taskC,
-                        inBusyInterval.getBeginTimeStampNs() + taskP*(i+1) - taskC);
-                resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ONE_ARRIVAL_SEGMENT));
-            }
-        } else {
-            /* Deal with the certain part first. */
-            int thisNkValue = inBusyInterval.getMinNkValueOfTask(task);
-            for (int i=0; i<thisNkValue; i++) {
-                /* Create the arrival segment for every period in this busy interval. */
-                int resultBeginTime = inBusyInterval.getBeginTimeStampNs() + taskP*i;
-                int resultEndTime = inBusyInterval.getBeginTimeStampNs() + taskP*(i+1) - taskC;
-                resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ONE_ARRIVAL_SEGMENT));
-            }
-
-            /* Create the arrival segment (0-1-segment) for the extra, uncertain one. */
-            int nthPeriod = inBusyInterval.getMaxNkValueOfTask(task);
-            int resultBeginTime = inBusyInterval.getBeginTimeStampNs() + taskP*(nthPeriod-1); // Note that nthPeriod is always >=1
-            int resultEndTime = inBusyInterval.getEndTimeStampNs() - taskC;
-            resultArrivalSegments.add(new ArrivalSegment(resultBeginTime, resultEndTime, ArrivalSegment.ZERO_ONE_ARRIVAL_SEGMENT));
-        }
-
-        return resultArrivalSegments;
-    }
-
     private ArrivalSegment getFirstOneArrivalSegment() {
         for (ArrivalSegment thisArrivalSegment : arrivalSegments) {
             if (thisArrivalSegment.getSegmentType() == ArrivalSegment.ONE_ARRIVAL_SEGMENT) {
@@ -202,86 +152,77 @@ public class ArrivalSegmentsContainer {
         return null;
     }
 
-    private void createArrivalIntersectionsByPeriod() {
+    private ArrayList<Interval> computeArrivalWindowsFromArrivalSegmentsByWeight() {
         int beginTimeStamp = findEarliestArrivalSegmentBeginTime();
         int endTimeStamp = findLeastArrivalSegmentEndTime();
 
         int taskP = task.getPeriodNs();
 
-        // Make initial window as whole period.
-        arrivalIntersections.add(new Interval(beginTimeStamp, beginTimeStamp+taskP));
+        // Make base interval as whole period.
+        WeightedInterval baseWeightedInterval = new WeightedInterval(beginTimeStamp, beginTimeStamp+taskP);
 
         for (int i=0; (beginTimeStamp+taskP*(i+1)) < endTimeStamp; i++) {// i+1 is to skip the last period since it may not be complete
-            ArrayList<Interval> newArrivalIntersections = new ArrayList<>();
-            ArrayList<ArrivalSegment> thisPeriodSegments = findArrivalSegmentsBetweenTimes(beginTimeStamp+taskP*i, beginTimeStamp+taskP*(i+1)-1);
+            ArrayList<ArrivalSegment> thisPeriodSegments = findArrivalSegmentsBetweenTimes(beginTimeStamp + taskP * i, beginTimeStamp + taskP * (i + 1) - 1);
 
             for (ArrivalSegment thisSegment : thisPeriodSegments) {
-                ArrayList<Interval> thisSegmentResult = new ArrayList<>();
 
-                for (Interval thisWindow : arrivalIntersections) {
-                    Interval result = thisSegment.intersect(thisWindow);
-                    if (result != null) {
-                        // Shift thisWindow to next period.
-                        result.shift(taskP);
-                        thisSegmentResult.add(result);
-                    }
-                }
-
-                /* Check whether this ONE-segment is completely within this period. */
-                if (thisSegment.getSegmentType() == ArrivalSegment.ONE_ARRIVAL_SEGMENT) {
-                    if (thisSegment.within(new Interval(beginTimeStamp + taskP * i, beginTimeStamp + taskP * (i + 1) - 1))) {
-                        // This is the KEY segment which is completely within this period. Do this one is enough.
-                        newArrivalIntersections = thisSegmentResult;
-
-                        for (ArrivalSegment secLoopSegment : thisPeriodSegments) {
-                            if (secLoopSegment == thisSegment)
-                                continue;
-
-                            if (secLoopSegment.getSegmentType() == ArrivalSegment.ONE_ARRIVAL_SEGMENT) {
-                                if (secLoopSegment.getBegin() > thisSegment.getBegin()) {
-                                    secLoopSegment.setBegin(beginTimeStamp+taskP*(i+1));
-                                }
-                            }
-                        }
-
-                        break;
-                    }
-                } else {
-                    //ProgMsg.sysPutLine("An uncertain segment has been skipped.");
-                }
-
-                newArrivalIntersections.addAll(thisSegmentResult);
-                continue;
-
+                Interval clonedSegment = new Interval(thisSegment);
+                clonedSegment.shift(-(taskP * i));
+                baseWeightedInterval.applyWeight(clonedSegment);
             }
-
-//            if (newArrivalIntersections.size() == 0) {
-//                ProgMsg.errPutline("%s arrival window intersection becomes null. It should never happen!!", task.getTitle());
-//                throw new RuntimeException(String.format("%s arrival window intersection becomes null. It should never happen!!", task.getTitle()));
-//            }
-
-            if (newArrivalIntersections.size() != 0) {
-                arrivalIntersections = newArrivalIntersections;
-            } else {
-                //ProgMsg.sysPutLine("This period has no intersections with the present window.");
-            }
-
         }
+
+        ArrayList<Interval> rawResultWindows = baseWeightedInterval.getMostWeightedIntervals();
+        ArrayList<Interval> mergedResultWindows = new ArrayList<>();
 
         /* Combine arrival intersections if they are actually continuous. */
-        if (arrivalIntersections.size() == 2) {
-            ArrayList<Interval> resultIntersections;
+        if (rawResultWindows.size() >= 2) {
 
-            Integer shiftValue = findSmallestPeriodShiftValueWithIntersection(arrivalIntersections.get(0), arrivalIntersections.get(1), taskP);
-            if (shiftValue != null) {
-                arrivalIntersections.get(0).shift(shiftValue * taskP);
-                resultIntersections = arrivalIntersections.get(0).union(arrivalIntersections.get(1));
+            ArrayList<Interval> mergedRawResultWindows = new ArrayList<>();
+            for (Interval firstLoopWindow : rawResultWindows) {
 
-                if (resultIntersections.size() == 1) {
-                    arrivalIntersections = resultIntersections;
+                if (mergedRawResultWindows.contains(firstLoopWindow)) {
+                    // If this window has been merged in previous loops, then skip.
+                    continue;
+                }
+
+                Boolean shouldStartComputing = false;
+                Interval mergedInterval = null;
+                for (Interval secondLoopWindow : rawResultWindows) {
+                    if (firstLoopWindow == secondLoopWindow) {
+                        shouldStartComputing = true;
+                        continue;
+                    }
+
+                    if (shouldStartComputing == false) {
+                        continue;
+                    }
+
+                    Integer shiftValue = findSmallestPeriodShiftValueWithIntersection(firstLoopWindow, secondLoopWindow, taskP);
+                    if (shiftValue != null) {
+                        Interval tempFirstLoopWindow = new Interval(firstLoopWindow);
+                        tempFirstLoopWindow.shift(shiftValue * taskP);
+                        ArrayList<Interval> thisIntersections = tempFirstLoopWindow.union(secondLoopWindow);
+
+                        if (thisIntersections.size() == 1) {
+                            mergedInterval = thisIntersections.get(0);
+                            mergedRawResultWindows.add(firstLoopWindow);
+                            mergedRawResultWindows.add(secondLoopWindow);   // this is to avoid duplicate handles.
+                            break;
+                        }
+                    }
+                }
+                if (mergedInterval != null) {
+                    mergedResultWindows.add(mergedInterval);
+                } else {
+                    mergedResultWindows.add(firstLoopWindow);
                 }
             }
+        } else {
+            mergedResultWindows.addAll(rawResultWindows);
         }
+
+        return mergedResultWindows;
     }
 
     private int findEarliestArrivalSegmentBeginTime() {
