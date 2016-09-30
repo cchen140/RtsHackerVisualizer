@@ -166,7 +166,7 @@ public class ArrivalSegmentsContainer {
 
             for (ArrivalSegment thisSegment : thisPeriodSegments) {
 
-                Interval clonedSegment = new Interval(thisSegment);
+                ArrivalSegment clonedSegment = new ArrivalSegment(thisSegment);
                 clonedSegment.shift(-(taskP * i));
                 baseWeightedInterval.applyWeight(clonedSegment);
             }

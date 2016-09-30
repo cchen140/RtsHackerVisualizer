@@ -324,7 +324,10 @@ public class GuiMain implements ActionListener, MouseListener {
                 decompositionTraceGroup.setTitle("Decomposition");
                   //Trace decompositionInferenceTrace = decomposition.BuildInferenceTrace(busyIntervalContainer);
                   decompositionTraceGroup.addTrace(decomposition.buildAmirDecompositionStep1ResultTrace());
-                decomposition.runAmirDecompositionStep2();
+
+                //decomposition.runAmirDecompositionStep2();
+                decompositionTraceGroup.addTraces(decomposition.amirDecomposition.runDecompositionStep2());
+
                 decomposition.runAmirDecompositionStep3();
                 decompositionTraceGroup.addTraces(decomposition.buildAmirDecompositionResultTraces());
                 zPanel.getTraceGroupContainer().addTraceGroup(decompositionTraceGroup);

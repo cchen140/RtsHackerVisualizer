@@ -26,15 +26,17 @@ public class WeightedInterval extends Interval {
         weightMap.clear();
     }
 
-    public void applyWeight(Interval inInterval) {
-        Interval intersection = this.intersect(inInterval);
+    public void applyWeight(ArrivalSegment inArrivalSegment) {
+        Interval intersection = this.intersect(inArrivalSegment);
 
         if (intersection == null) {
             return;
         }
 
         for (int i=intersection.getBegin(); i<=intersection.getEnd(); i++) {
-            int increasedWeight = weightMap.get(i)==null ? 1 : weightMap.get(i)+1;
+            int increasedWeight = (weightMap.get(i)==null) ? 1 : weightMap.get(i)+1;
+            //int increasedWeight = ((weightMap.get(i)==null) ? 0 : weightMap.get(i))
+            //                    + ((inArrivalSegment.getSegmentType()==ArrivalSegment.ONE_ARRIVAL_SEGMENT) ? 2 : 1);
             weightMap.put(i, increasedWeight);
         }
     }
