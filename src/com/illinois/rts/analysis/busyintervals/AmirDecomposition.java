@@ -29,15 +29,17 @@ public class AmirDecomposition {
 
     public Boolean runDecompositionStep1()
     {
-        ProgMsg.debugPutline("Estimating N_k(tau_i) values for %d busy intervals.", processingBusyIntervalContainer.size());
+        ProgMsg.debugPutline("Initial busy interval count: %d", processingBusyIntervalContainer.size());
 
-        // TODO: test for skipping the first few busy intervals
-        processingBusyIntervalContainer.removeBusyIntervalsBeforeTimeStamp(taskContainer.getLargestPeriod());
-        orgBusyIntervalContainer.removeBusyIntervalsBeforeTimeStamp(taskContainer.getLargestPeriod());
+        // TODO: test for skipping the first hyper period.
+        processingBusyIntervalContainer.removeBusyIntervalsBeforeTimeStamp((int)taskContainer.calHyperPeriod());
+        orgBusyIntervalContainer.removeBusyIntervalsBeforeTimeStamp((int)taskContainer.calHyperPeriod());
 
         // Remove the last one since it may not be complete.
         processingBusyIntervalContainer.removeTheLastBusyInterval();
         orgBusyIntervalContainer.removeTheLastBusyInterval();
+
+        ProgMsg.debugPutline("Estimating N_k(tau_i) values for %d busy intervals.", processingBusyIntervalContainer.size());
 
         // Step one: finding n values for every task in every busy interval.
         ArrayList<BusyInterval> biToBeRemoved = new ArrayList<>();
@@ -66,8 +68,10 @@ public class AmirDecomposition {
 
         ArrayList<Trace> debugTraces = new ArrayList<>();
 
-        int passCount = 1;
+        int passCount = 0;
         while (true) {
+            passCount++;
+
             ProgMsg.debugPutline("Start calculating arrival windows: %d-th pass.", passCount);
             calculateArrivalTimeOfAllTasks();
 
@@ -80,31 +84,31 @@ public class AmirDecomposition {
 
             if (isSomethingChanged == false) {
 
+                /* We comment the following block out because it may remove correct arrival window with a wrong
+                 * composition inference caused by variations. */
                 /* Check if any task has unsolved arrival windows. */
-                Boolean needsToSolveAmbiguousArrivalWindows = false;
-                for (Task thisTask : taskContainer.getAppTasksAsArray()) {
-                    if (taskArrivalTimeWindows.get(thisTask).size() >= 2) {
-                        needsToSolveAmbiguousArrivalWindows = true;
-                        break;
-                    }
-                }
-                if (needsToSolveAmbiguousArrivalWindows == true) {
-                    ProgMsg.debugPutline("Try to solve ambiguous arrival windows.");
-                    if (removeAmbiguousArrivalWindowsByInferredCompositions()) {
-                        if (removeAmbiguousInferenceByArrivalTimeWindow()) {
-                            passCount+=2;
-                            ProgMsg.debugPutline("Some ambiguous arrival windows have been invalidated.");
-                            continue;
-                        }
-                    } else {
-                        ProgMsg.debugErrPutline("Unable to solve ambiguous arrival windows. Use the random selection measure.");
-
-                    }
-                }
+//                Boolean needsToSolveAmbiguousArrivalWindows = false;
+//                for (Task thisTask : taskContainer.getAppTasksAsArray()) {
+//                    if (taskArrivalTimeWindows.get(thisTask).size() >= 2) {
+//                        needsToSolveAmbiguousArrivalWindows = true;
+//                        break;
+//                    }
+//                }
+//                if (needsToSolveAmbiguousArrivalWindows == true) {
+//                    ProgMsg.debugPutline("Try to solve ambiguous arrival windows.");
+//                    if (removeAmbiguousArrivalWindowsByInferredCompositions()) {
+//                        if (removeAmbiguousInferenceByArrivalTimeWindow()) {
+//                            passCount+=1;
+//                            ProgMsg.debugPutline("Some ambiguous arrival windows have been invalidated.");
+//                            continue;
+//                        }
+//                    } else {
+//                        ProgMsg.debugErrPutline("Unable to solve ambiguous arrival windows. Use the random selection measure.");
+//
+//                    }
+//                }
 
                 break;
-            } else {
-                passCount++;
             }
         }
         ProgMsg.debugPutline("Total pass: %d pass.", passCount);
@@ -1298,15 +1302,24 @@ public class AmirDecomposition {
 //    }
 
     public double computeInferencePrecisionRatioGeometricMeanByTaskStandardDeviation()  throws RuntimeException {
-        double sdRatioMultiple = 1.0;
+        //double sdRatioMultiple = 1.0;
+        double sdRatioSum = 0.0;
+        int numOfLegitimateTask = 0;
         for (Task thisTask : taskContainer.getAppTasksAsArray()) {
             double sumOfSquare = 0;
             ArrayList<AppEvent> taskStartEventsGT = orgBusyIntervalContainer.getStartTimeEventsGTByTask(thisTask);
             ArrayList<AppEvent> taskStartEventsIF = orgBusyIntervalContainer.getStartTimeEventsInfByTask(thisTask);
 
-            if (taskStartEventsGT.size() != taskStartEventsIF.size()) {
-                ProgMsg.errPutline("%s Event counts are mismatched: %d : %d", thisTask.getTitle(), taskStartEventsGT.size(), taskStartEventsIF.size());
+            //if (taskStartEventsGT.size() != taskStartEventsIF.size()) {
+            //    ProgMsg.errPutline("%s Event counts are mismatched: %d : %d", thisTask.getTitle(), taskStartEventsGT.size(), taskStartEventsIF.size());
                 //throw new RuntimeException(String.format("%s Event counts are mismatched: %d : %d", thisTask.getTitle(), taskStartEventsGT.size(), taskStartEventsIF.size()));
+            //}
+
+            if (taskStartEventsGT.size() > 0) {
+                numOfLegitimateTask++;
+            } else {
+                ProgMsg.debugPutline("%s has no GT event. (IF:%d)", thisTask.getTitle(), taskStartEventsIF.size());
+                continue;
             }
 
             for (int i=0; i<taskStartEventsGT.size(); i++) {
@@ -1318,13 +1331,21 @@ public class AmirDecomposition {
             double standardDeviation = Math.pow(sumOfSquare / (double) taskStartEventsGT.size(), 0.5);
             double sdRatio = 1.0 - (standardDeviation/(double)(thisTask.getPeriodNs()));
             ProgMsg.debugPutline("%s SD, ratio = %s, %s", thisTask.getTitle(), Double.toString(standardDeviation), Double.toString(sdRatio));
-            sdRatioMultiple = sdRatioMultiple * sdRatio;
+            //sdRatioMultiple = sdRatioMultiple * sdRatio;
+            sdRatioSum += sdRatio;
         }
 
-        double geometricMean = Math.pow(sdRatioMultiple, 1.0/(double)(taskContainer.getAppTasksAsArray().size()));
-        ProgMsg.debugPutline("Overall ratio = %s", Double.toString(geometricMean));
+        double arithmeticMean = 0;
+        if (numOfLegitimateTask == 0) {
+            arithmeticMean = -0.01;
+        } else {
+            //double geometricMean = Math.pow(sdRatioMultiple, 1.0/(double)(taskContainer.getAppTasksAsArray().size()));
+            arithmeticMean = sdRatioSum / (double) (numOfLegitimateTask);
+            ProgMsg.debugPutline("Overall ratio = %s", Double.toString(arithmeticMean));
+        }
 
-        return geometricMean;
+        //return geometricMean;
+        return arithmeticMean;
     }
 
     private int computeDeviationOfAnAppEvent(AppEvent inSourceEvent, int inPeriod, ArrayList<AppEvent> inTargetEvents) {

@@ -16,14 +16,18 @@ public class WeightedInterval extends Interval {
 
     public WeightedInterval(int inBegin, int inEnd) {
         super(inBegin, inEnd);
+        resetWeightMap();
     }
 
-    public WeightedInterval(Interval inInterval) {
-        super(inInterval);
-    }
+    //public WeightedInterval(Interval inInterval) {
+    //    super(inInterval);
+    //}
 
     public void resetWeightMap() {
         weightMap.clear();
+        for (int i=getBegin(); i<=getEnd(); i++) {
+            weightMap.put(i, 0);
+        }
     }
 
     public void applyWeight(ArrivalSegment inArrivalSegment) {
@@ -43,6 +47,7 @@ public class WeightedInterval extends Interval {
 
     public ArrayList<Interval> getMostWeightedIntervals() {
         ArrayList<Interval> resultIntervals = new ArrayList<>();
+
         int highestWeight = Collections.max(weightMap.values());;
         Boolean isBuildingAInterval = false;
         int currentIntervalBegin = 0;
@@ -63,6 +68,13 @@ public class WeightedInterval extends Interval {
                     isBuildingAInterval = false;
                 }
             }
+        }
+
+        // Check if the last arrival interval has not yet closed.
+        if (isBuildingAInterval) {
+            Interval newInterval = new Interval(currentIntervalBegin, getEnd());
+            resultIntervals.add(newInterval);
+            //isBuildingAInterval = false;
         }
 
         if (resultIntervals.size() == 0) {
