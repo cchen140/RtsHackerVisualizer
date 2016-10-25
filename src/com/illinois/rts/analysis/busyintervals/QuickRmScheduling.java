@@ -11,6 +11,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.apache.commons.math3.distribution.GumbelDistribution;    // for Gumbel distribution
+
 /**
  * Created by CY on 8/18/2015.
  */
@@ -19,6 +21,7 @@ public class QuickRmScheduling {
     private EventContainer simEventContainer = new EventContainer();
     public ProgressUpdater progressUpdater = new ProgressUpdater();
 
+    static GumbelDistribution gumbel = new GumbelDistribution(-0.5772, 1);    // 0.5772 is a Euler–Mascheroni constant, it will make the mean value to be zero.
     static Random random = new Random();
 
     public QuickRmScheduling( TaskContainer inTaskContainer )
@@ -155,16 +158,22 @@ public class QuickRmScheduling {
     }
 
     long getDeviatedExecutionTime(Task task_i) {
-        // Case of Fixed
-        // return task_i.execTime;
-        // Case of Gaussian
-        //double stddev = 0.2;
-        double stddev = 0.2;    // added by CY
-        double gaussianFactor = random.nextGaussian();
-        long deviatedExecutionTime = (long) (gaussianFactor * (task_i.getComputationTimeNs() * stddev) + task_i.getComputationTimeNs());
-        //long deviatedExecutionTime = (long) ((gaussianFactor * stddev) + task_i.getComputationTimeNs());
-        return deviatedExecutionTime;//(long) (random.nextGaussian() * (task_i.getComputationTimeNs() * stddev) + task_i.getComputationTimeNs());
-        //return (long) ((random.nextGaussian() * stddev) + task_i.getComputationTimeNs());
+        double deviation = 1; // +/-100 us // 10 means 1ms
+        double deviationFactor = gumbel.sample();
+
+        long deviatedExecutionTime = (long) (deviationFactor*deviation + task_i.getComputationTimeNs());
+        return deviatedExecutionTime;
+
+//        // Case of Fixed
+//        // return task_i.execTime;
+//        // Case of Gaussian
+//        double stddev = 0.2;
+//        //double stddev = 0;    // added by CY
+//        double gaussianFactor = random.nextGaussian();
+//        long deviatedExecutionTime = (long) (gaussianFactor * (task_i.getComputationTimeNs() * stddev) + task_i.getComputationTimeNs());
+//        //long deviatedExecutionTime = (long) ((gaussianFactor * stddev) + task_i.getComputationTimeNs());
+//        return deviatedExecutionTime;//(long) (random.nextGaussian() * (task_i.getComputationTimeNs() * stddev) + task_i.getComputationTimeNs());
+//        //return (long) ((random.nextGaussian() * stddev) + task_i.getComputationTimeNs());
     }
 
     /**

@@ -12,10 +12,12 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.Arc2D;
+import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+
+import static com.illinois.rts.utility.Sys.createFolder;
 
 public class DialogAutoTestWizard extends JDialog implements ActionListener {
     private static int TEXTFIELD_COLUMN_SIZE = 5;
@@ -47,6 +49,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
     private GenerateRmTaskSet taskSetGenerator = new GenerateRmTaskSet();
 
     private int globalFailureCount = 0; // Caution!! This is a cross function variable.
+    private double globalPrecisionRatioAverage = 0.0; // Caution!! This is a cross function variable.
 
 //    private DialogLogOutput dialogLogOutput = new DialogLogOutput();
     String logBuffer = "";
@@ -54,7 +57,8 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
     String autoLogFileName = "";
     String autoLogFileNamePrefix = "";
 
-    String autoLogPath = "";
+    String rootAutoLogPath = "";
+    String currentAutoLogPath = "";
 
     private static DialogAutoTestWizard instance;
 
@@ -216,8 +220,8 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             if (checkAutoLogEnable.isSelected() == true) {
                 DataExporter autoLogExporter = new DataExporter();
                 try {
-                    autoLogExporter.exportStringToFilePath(autoLogPath+"raw_"+autoLogFileName+".txt", "test");
-                    autoLogExporter.exportStringToFilePath(autoLogPath+"log_"+autoLogFileName+".txt", logBuffer);
+                    autoLogExporter.exportStringToFilePath(currentAutoLogPath +"raw_"+autoLogFileName+".txt", "test");
+                    autoLogExporter.exportStringToFilePath(currentAutoLogPath +"log_"+autoLogFileName+".txt", logBuffer);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -328,8 +332,8 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             }
         } else if (e.getSource() == btnAutoLogFolderPath) {
             DataExporter dataExporter = new DataExporter();
-            autoLogPath = dataExporter.getFolderPathFromDialog(autoLogPath) + "\\";
-            ProgMsg.debugPutline(autoLogPath);
+            rootAutoLogPath = dataExporter.getFolderPathFromDialog(rootAutoLogPath) + "\\";
+            ProgMsg.debugPutline(rootAutoLogPath);
         } else if (e.getSource() == btnMassTestStart) {
             if (checkAutoLogEnable.isSelected() == true) {
                 try {
@@ -444,6 +448,8 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         int taskSetIndex = 1;
         int failureCount = 0;
+        double sumOfPrecisionRatio = 0.0;
+        int sumOfPrecisionRatioCount = 0;
         progressUpdater.setProgressPercent(0.0);
         final int numOfTaskSet = taskSetContainer.getTaskContainers().size();
         for (TaskContainer thisTaskContainer : taskSetContainer.getTaskContainers()) {
@@ -511,6 +517,11 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                     failureCount++;
                 }
 
+                if (precisionRatioGmSd >= 0) {
+                    sumOfPrecisionRatio += precisionRatioGmSd;
+                    sumOfPrecisionRatioCount++;
+                }
+
                 logRawDataBuffer += taskSetIndex;
                 logRawDataBuffer += "\t" + (new DecimalFormat("##.##").format(thisTaskContainer.getUtilization()));
                 logRawDataBuffer += "\t" + (new DecimalFormat("##.####").format(precisionRatioGmSd));
@@ -559,6 +570,13 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         globalFailureCount = failureCount;
 
+        if (sumOfPrecisionRatioCount == 0) {
+            globalPrecisionRatioAverage = -0.1;
+            ProgMsg.errPutline("This should not happen (but may happen...)");
+        } else {
+            globalPrecisionRatioAverage = sumOfPrecisionRatio / (double) sumOfPrecisionRatioCount;
+        }
+
         progressUpdater.setIsFinished(true);
         return true;
     }
@@ -597,49 +615,88 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
     }
 
     void startMassTest() throws IOException{
-        String fullFailureCountFilePath = autoLogPath + "lowPrecisionCount.txt";
-        DataExporter failureCountLogFile = new DataExporter();
 
-        failureCountLogFile.exportStringToFilePath(fullFailureCountFilePath, "X\t10\t11\t12\t13\t14\t15\r\n");
+        String fullPrOverHpFilePath = rootAutoLogPath + "PrOverHp.txt";
+        DataExporter prOverHpLogFile = new DataExporter();
+        prOverHpLogFile.exportStringToFilePath(fullPrOverHpFilePath,
+                "X" +
+                "\t\"[0.0,0.1]\"" +
+                "\t\"[0.1,0.2]\"" +
+                "\t\"[0.2,0.3]\"" +
+                "\t\"[0.3,0.4]\"" +
+                "\t\"[0.4,0.5]\"" +
+                "\t\"[0.5,0.6]\"" +
+                "\t\"[0.6,0.7]\"" +
+                "\t\"[0.7,0.8]\"" +
+                "\t\"[0.8,0.9]\"" +
+                "\t\"[0.9,1.0]\"" +
+                "\r\n");
 
-        for (double util=0.001; util<1 ; util+=0.1) {
-            taskSetGenerator.setMinUtil(util);
-            taskSetGenerator.setMaxUtil(util+0.1);
+        // Hyper period loop
+        for (double hp=1.1; hp<=1.3; hp+=0.1) {
+
+            // Set current hyper-period.
+            inputHyperPeriodScale.setText(String.valueOf(hp));
+
+            /* Create a dedicated folder. */
+            createFolder(rootAutoLogPath + (new DecimalFormat("##.#").format(hp)));
+            currentAutoLogPath = rootAutoLogPath + (new DecimalFormat("##.#").format(hp)) + File.separator;
+
+            String fullFailureCountFilePath = currentAutoLogPath + "lowPrecisionCount.txt";
+            DataExporter failureCountLogFile = new DataExporter();
+            failureCountLogFile.exportStringToFilePath(fullFailureCountFilePath, "X\t10\t11\t12\t13\t14\t15\r\n");
+
+            String fullPrecisionRatioFilePath = currentAutoLogPath + "precisionRatio.txt";
+            DataExporter precisionRatioLogFile = new DataExporter();
+            precisionRatioLogFile.exportStringToFilePath(fullPrecisionRatioFilePath, "X\t10\t11\t12\t13\t14\t15\r\n");
+
+            // row title
+            prOverHpLogFile.appendStringToFilePath(fullPrOverHpFilePath, (new DecimalFormat("##.#").format(hp)));
+
+            // utilization loop
+            for (double util = 0.001; util < 1; util += 0.1) {
+                taskSetGenerator.setMinUtil(util);
+                taskSetGenerator.setMaxUtil(util + 0.1);
+
+                // row title
+                String rowTitle = "\"" + utilizationRangeString(util, util + 0.1) + "\"";
+                failureCountLogFile.appendStringToFilePath(fullFailureCountFilePath, rowTitle);
+                precisionRatioLogFile.appendStringToFilePath(fullPrecisionRatioFilePath, rowTitle);
 
 
-            String rowTitle = "\"" + utilizationRangeString(util, util+0.1) + "\"";
-            failureCountLogFile.appendStringToFilePath(fullFailureCountFilePath, rowTitle);
+                double sumOfPrThisUtil = 0.0;
+                for (int taskPerSet = 10; taskPerSet <= 15; taskPerSet++) {
+                    taskSetGenerator.setNumTaskPerSet(taskPerSet);
 
+                    //GenerateRmTaskSet generateRmTaskSet = new GenerateRmTaskSet();
+                    taskSetGenerator.setNumTaskSet(Integer.valueOf(inputNumOfTaskSets.getText()));
+                    taskSetContainer = taskSetGenerator.generate();
 
-            //int failureCount = 0;
-            for (int taskPerSet=10; taskPerSet<=15; taskPerSet++) {
-                taskSetGenerator.setNumTaskPerSet(taskPerSet);
+                    if (taskSetContainer.size() > 0) {
+                        ProgMsg.debugPutline("Start mass test: %dT [%s,%s]", taskPerSet,
+                                (new DecimalFormat("##.##").format(taskSetGenerator.getMinUtil())),
+                                (new DecimalFormat("##.##").format(taskSetGenerator.getMaxUtil())));
+                        startUnitTest();
+                        //failureCount += globalFailureCount;
+                    } else {
+                        ProgMsg.errPutline("No task set to be tested. Return to issue caution.");
+                        return;
+                    }
 
-                //GenerateRmTaskSet generateRmTaskSet = new GenerateRmTaskSet();
-                taskSetGenerator.setNumTaskSet(Integer.valueOf(inputNumOfTaskSets.getText()));
-                taskSetContainer = taskSetGenerator.generate();
+                    failureCountLogFile.appendStringToFilePath(fullFailureCountFilePath, String.format("\t%d", globalFailureCount));
+                    precisionRatioLogFile.appendStringToFilePath(fullPrecisionRatioFilePath, String.format("\t%s", (new DecimalFormat("##.###").format(globalPrecisionRatioAverage))));
 
-                if (taskSetContainer.size() > 0) {
-                    ProgMsg.debugPutline("Start mass test: %dT [%s,%s]", taskPerSet,
-                            (new DecimalFormat("##.##").format(taskSetGenerator.getMinUtil())),
-                            (new DecimalFormat("##.##").format(taskSetGenerator.getMaxUtil())));
-                    startUnitTest();
-                    //failureCount += globalFailureCount;
-                } else {
-                    ProgMsg.errPutline("No task set to be tested. Return to issue caution.");
-                    return;
+                    sumOfPrThisUtil += globalPrecisionRatioAverage;
                 }
 
+                failureCountLogFile.appendStringToFilePath(fullFailureCountFilePath, "\r\n");
+                precisionRatioLogFile.appendStringToFilePath(fullPrecisionRatioFilePath, "\r\n");
 
-                failureCountLogFile.appendStringToFilePath(fullFailureCountFilePath, String.format("\t%d", globalFailureCount));
-                //failureCount = 0;
+                prOverHpLogFile.appendStringToFilePath(fullPrOverHpFilePath, String.format("\t%s", (new DecimalFormat("##.###").format(sumOfPrThisUtil/6.0))));
 
             }
 
-
-            failureCountLogFile.appendStringToFilePath(fullFailureCountFilePath, "\r\n");
-
-
+            prOverHpLogFile.appendStringToFilePath(fullPrOverHpFilePath, "\r\n");
         }
 
     }
@@ -697,8 +754,8 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             if (checkAutoLogEnable.isSelected() == true) {
                 DataExporter autoLogExporter = new DataExporter();
                 try {
-                    autoLogExporter.exportStringToFilePath(autoLogPath + "raw_" + autoLogFileName + ".txt", logRawDataBuffer);
-                    autoLogExporter.exportStringToFilePath(autoLogPath + "log_" + autoLogFileName + ".txt", logBuffer);
+                    autoLogExporter.exportStringToFilePath(currentAutoLogPath + "raw_" + autoLogFileName + ".txt", logRawDataBuffer);
+                    autoLogExporter.exportStringToFilePath(currentAutoLogPath + "log_" + autoLogFileName + ".txt", logBuffer);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
