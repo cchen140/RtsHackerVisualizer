@@ -633,7 +633,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                 "\r\n");
 
         // Hyper period loop
-        for (double hp=1.1; hp<=1.3; hp+=0.1) {
+        for (double hp=1.1; hp<=2.6; hp+=0.1) {
 
             // Set current hyper-period.
             inputHyperPeriodScale.setText(String.valueOf(hp));
@@ -671,6 +671,14 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                     //GenerateRmTaskSet generateRmTaskSet = new GenerateRmTaskSet();
                     taskSetGenerator.setNumTaskSet(Integer.valueOf(inputNumOfTaskSets.getText()));
                     taskSetContainer = taskSetGenerator.generate();
+
+                    /* Make computation time as 80% of current WCET. */
+                    for (TaskContainer thisTaskSet : taskSetContainer.getTaskContainers()) {
+                        for (Task thisTask : thisTaskSet.getAppTasksAsArray()) {
+                            int oldComputationTime = thisTask.getComputationTimeNs();
+                            thisTask.setComputationTimeNs((int)(oldComputationTime*0.8));
+                        }
+                    }
 
                     if (taskSetContainer.size() > 0) {
                         ProgMsg.debugPutline("Start mass test: %dT [%s,%s]", taskPerSet,
