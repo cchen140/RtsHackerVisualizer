@@ -62,7 +62,7 @@ public class GenerateRmTaskSet {
         minPeriod = 10_000_000/ProgConfig.TIMESTAMP_UNIT_NS;   // 10 ms // org = 5ms
 
         maxExecTime = 50_000_000/ProgConfig.TIMESTAMP_UNIT_NS; // 50 ms // org=3 ms
-        minExecTime = 100_000/ProgConfig.TIMESTAMP_UNIT_NS; // 0.1 ms
+        minExecTime = 1000_000/ProgConfig.TIMESTAMP_UNIT_NS; // 1 ms
 
         maxInitOffset = maxHyperPeriod; // 0ms //10_000_000; // 10 ms
         minInitOffset = 0; // 0 ms

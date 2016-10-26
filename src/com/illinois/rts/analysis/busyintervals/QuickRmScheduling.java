@@ -158,7 +158,8 @@ public class QuickRmScheduling {
     }
 
     long getDeviatedExecutionTime(Task task_i) {
-        double deviation = 1; // +/-100 us // 10 means 1ms
+        //double deviation = 1; // +/-100 us // 10 means 1ms
+        double deviation = task_i.getComputationTimeNs() * 0.05; // +/-100 us // 10 means 1ms
         double deviationFactor = gumbel.sample();
 
         long deviatedExecutionTime = (long) (deviationFactor*deviation + task_i.getComputationTimeNs());
