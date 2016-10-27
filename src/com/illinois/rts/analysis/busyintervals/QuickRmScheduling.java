@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import org.apache.commons.math3.distribution.GumbelDistribution;    // for Gumbel distribution
+import org.apache.commons.math3.distribution.NormalDistribution;
 
 /**
  * Created by CY on 8/18/2015.
@@ -22,6 +23,7 @@ public class QuickRmScheduling {
     public ProgressUpdater progressUpdater = new ProgressUpdater();
 
     static GumbelDistribution gumbel = new GumbelDistribution(-0.5772, 1);    // 0.5772 is a Euler–Mascheroni constant, it will make the mean value to be zero.
+    static NormalDistribution normalDis = new NormalDistribution(0, 0.5377);
     static Random random = new Random();
 
     public QuickRmScheduling( TaskContainer inTaskContainer )
@@ -158,9 +160,12 @@ public class QuickRmScheduling {
     }
 
     long getDeviatedExecutionTime(Task task_i) {
+        double deviation = task_i.getWcet()*0.1; // it corresponds to (wcet - c)/2 where c is wcet*0.8
+        double deviationFactor = normalDis.sample();
+
         //double deviation = 1; // +/-100 us // 10 means 1ms
-        double deviation = task_i.getComputationTimeNs() * 0.05; // +/-100 us // 10 means 1ms
-        double deviationFactor = gumbel.sample();
+        //double deviation = task_i.getComputationTimeNs() * 0; // +/-100 us // 10 means 1ms
+        //double deviationFactor = gumbel.sample();
 
         long deviatedExecutionTime = (long) (deviationFactor*deviation + task_i.getComputationTimeNs());
         return deviatedExecutionTime;

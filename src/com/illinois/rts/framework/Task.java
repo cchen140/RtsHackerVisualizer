@@ -25,6 +25,8 @@ public class Task {
 
     protected int periodNs = 0;
 
+    protected int wcet = 0;
+
     protected int computationTimeNs = 0;
     protected int computationTimeLowerBound = 0;    // Lower bound error
     protected int computationTimeUpperBound = 0;    // Upper bound error
@@ -91,6 +93,14 @@ public class Task {
         //TODO: This has to be formulated.
         computationTimeLowerBound = (int) (computationTimeNs*0.8);
         computationTimeUpperBound = (int) (computationTimeNs*1.2);
+    }
+
+    public int getWcet() {
+        return wcet;
+    }
+
+    public void setWcet(int wcet) {
+        this.wcet = wcet;
     }
 
     public void setSymbol(String inSymbol)

@@ -634,6 +634,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         // Hyper period loop
         for (double hp=1.1; hp<=2.6; hp+=0.1) {
+        //for (double hp=3.5; hp<=3.5; hp+=0.1) {
 
             // Set current hyper-period.
             inputHyperPeriodScale.setText(String.valueOf(hp));
@@ -676,6 +677,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                     for (TaskContainer thisTaskSet : taskSetContainer.getTaskContainers()) {
                         for (Task thisTask : thisTaskSet.getAppTasksAsArray()) {
                             int oldComputationTime = thisTask.getComputationTimeNs();
+                            thisTask.setWcet(oldComputationTime);
                             thisTask.setComputationTimeNs((int)(oldComputationTime*0.8));
                         }
                     }
