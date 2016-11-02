@@ -23,7 +23,8 @@ public class QuickRmScheduling {
     public ProgressUpdater progressUpdater = new ProgressUpdater();
 
     static GumbelDistribution gumbel = new GumbelDistribution(-0.5772, 1);    // 0.5772 is a Euler–Mascheroni constant, it will make the mean value to be zero.
-    static NormalDistribution normalDis = new NormalDistribution(0, 0.5377);
+    static NormalDistribution normalDis = new NormalDistribution(0, 0.05377);   // this is for c_i=80% wcet_i
+    //static NormalDistribution normalDis = new NormalDistribution(0, 0.16133);
     static Random random = new Random();
 
     public QuickRmScheduling( TaskContainer inTaskContainer )
@@ -160,7 +161,9 @@ public class QuickRmScheduling {
     }
 
     long getDeviatedExecutionTime(Task task_i) {
-        double deviation = task_i.getWcet()*0.1; // it corresponds to (wcet - c)/2 where c is wcet*0.8
+        //double deviation = 0;
+        //double deviation = task_i.getWcet()*0.1; // it corresponds to (wcet - c)/2 where c is wcet*0.8
+        double deviation = task_i.getWcet();
         double deviationFactor = normalDis.sample();
 
         //double deviation = 1; // +/-100 us // 10 means 1ms
@@ -168,6 +171,13 @@ public class QuickRmScheduling {
         //double deviationFactor = gumbel.sample();
 
         long deviatedExecutionTime = (long) (deviationFactor*deviation + task_i.getComputationTimeNs());
+        //long deviatedExecutionTime = (long) (Math.random() * task_i.getWcet());
+        if (deviatedExecutionTime > task_i.getWcet()) {
+            deviatedExecutionTime = task_i.getWcet();
+        } else if (deviatedExecutionTime <= 0) {
+            ProgMsg.debugErrPutline("Deviated execution time is negative. It shouldn't happen.");
+            deviatedExecutionTime = task_i.getWcet();
+        }
         return deviatedExecutionTime;
 
 //        // Case of Fixed
