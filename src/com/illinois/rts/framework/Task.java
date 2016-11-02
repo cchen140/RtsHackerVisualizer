@@ -93,6 +93,8 @@ public class Task {
         //TODO: This has to be formulated.
         computationTimeLowerBound = (int) (computationTimeNs*0.8);
         computationTimeUpperBound = (int) (computationTimeNs*1.2);
+        //computationTimeLowerBound = (int) (computationTimeNs*1);
+        //computationTimeUpperBound = (int) (computationTimeNs*1);
     }
 
     public int getWcet() {

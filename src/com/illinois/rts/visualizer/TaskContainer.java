@@ -461,7 +461,8 @@ public class TaskContainer {
     public double getUtilization() {
         double resultUtil = 0;
         for (Task thisTask : getAppTasksAsArray()) {
-            resultUtil += ((double)thisTask.getComputationTimeNs())/((double)thisTask.getPeriodNs());
+            //resultUtil += ((double)thisTask.getComputationTimeNs())/((double)thisTask.getPeriodNs());
+            resultUtil += ((double)thisTask.getWcet())/((double)thisTask.getPeriodNs());
         }
         return resultUtil;
     }
