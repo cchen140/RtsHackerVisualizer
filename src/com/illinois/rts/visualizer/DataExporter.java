@@ -14,9 +14,32 @@ import java.util.ArrayList;
  */
 public class DataExporter extends DialogFileHandler{
     private EventContainer eventContainer = null;
+    String exportFilePath = null;
 
     // Constructor
     public DataExporter() {}
+
+    public DataExporter(String inExportFilePath) throws IOException {
+        exportFilePath = inExportFilePath;
+        fileWriter = openToWriteFile(exportFilePath);
+        if (fileWriter == null)
+            throw new IOException("IOException @ exportStringToFilePath(): File path is incorrect.");
+
+        fileWriter.close();
+    }
+
+    public void appendString(String inString) throws IOException {
+        if (exportFilePath == null) {
+            return;
+        }
+
+        fileWriter = openToAppendFile(exportFilePath);
+        if (fileWriter == null)
+            throw new IOException("IOException @ appendStringToFilePath(): File path is incorrect.");
+
+        fileWriter.append(inString);
+        fileWriter.close();
+    }
 
     public void exportStringToFileDialog(String inString) throws IOException {
         openWriteFileFromDialog();  // set up fileWriter.
