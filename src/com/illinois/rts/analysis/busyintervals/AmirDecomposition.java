@@ -143,9 +143,50 @@ public class AmirDecomposition {
         //return true;
     }
 
+    public void setZeroInitialOffsetArrivalWindows() {
+        taskArrivalTimeWindows.clear();
+        for ( Task thisTask : taskContainer.getAppTasksAsArray() ) {
+            ArrayList<Interval> thisTaskArrivalWindow = new ArrayList<>();
+            thisTaskArrivalWindow.add(new Interval(0,0));
+            taskArrivalTimeWindows.put(thisTask, thisTaskArrivalWindow);
+        }
+    }
+
+    public void setRandomInitialOffsetArrivalWindows() {
+        taskArrivalTimeWindows.clear();
+        for ( Task thisTask : taskContainer.getAppTasksAsArray() ) {
+            int randomInitialOffset = (int) (Math.random() * thisTask.getWcet());
+            ArrayList<Interval> thisTaskArrivalWindow = new ArrayList<>();
+            thisTaskArrivalWindow.add(new Interval(randomInitialOffset, randomInitialOffset));
+            taskArrivalTimeWindows.put(thisTask, thisTaskArrivalWindow);
+        }
+    }
+
     public Boolean runDecompositionStep3()
     {
         reconstructCompositionOfBusyIntervalByArrivalTimeWindows();
+
+        return true;
+    }
+
+    public Boolean runZeroDecomposition() throws RuntimeException
+    {
+
+       setZeroInitialOffsetArrivalWindows();
+
+        // Step three: arrival time to scheduling.
+        runDecompositionStep3();
+
+        return true;
+    }
+
+    public Boolean runRandomDecomposition() throws RuntimeException
+    {
+
+       setRandomInitialOffsetArrivalWindows();
+
+        // Step three: arrival time to scheduling.
+        runDecompositionStep3();
 
         return true;
     }
