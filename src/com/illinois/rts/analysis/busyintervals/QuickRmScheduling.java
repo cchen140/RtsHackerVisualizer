@@ -176,7 +176,7 @@ public class QuickRmScheduling {
             deviatedExecutionTime = task_i.getWcet();
         } else if (deviatedExecutionTime <= 0) {
             ProgMsg.debugErrPutline("Deviated execution time is negative. It shouldn't happen.");
-            deviatedExecutionTime = task_i.getWcet();
+            deviatedExecutionTime = (long) (0.1 * task_i.getWcet());
         }
         return deviatedExecutionTime;
 
