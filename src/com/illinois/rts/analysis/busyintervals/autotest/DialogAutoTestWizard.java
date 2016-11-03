@@ -492,7 +492,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             quickRmScheduling.runSim(simDurationNs);
             thisEventContainer = quickRmScheduling.getSimEventContainer();
 
-            fullSimDurationNs = (int) (hyperPeriod * 3.5);
+            fullSimDurationNs = (int) (hyperPeriod * 2);
             quickRmScheduling = new QuickRmScheduling(simTaskContainer);
             quickRmScheduling.runSim(fullSimDurationNs);
             thisFullEventContainer = quickRmScheduling.getSimEventContainer();
