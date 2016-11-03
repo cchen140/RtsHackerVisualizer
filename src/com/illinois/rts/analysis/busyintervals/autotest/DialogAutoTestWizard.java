@@ -51,6 +51,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
     private int globalFailureCount = 0; // Caution!! This is a cross function variable.
     private double globalPrecisionRatioAverage = 0.0; // Caution!! This is a cross function variable.
     private ArrayList<Double> globalPrecisionRatioRecords = new ArrayList<>();
+    private ArrayList<Double> globalPrecisionRatioFullHpRecords = new ArrayList<>();
 
 //    private DialogLogOutput dialogLogOutput = new DialogLogOutput();
     String logBuffer = "";
@@ -459,6 +460,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
             /* Start RM scheduling simulation */
             EventContainer thisEventContainer = null;
+            EventContainer thisFullEventContainer = null;
 
             // Get task container from the panel with latest configurations.
             TaskContainer simTaskContainer = thisTaskContainer;
@@ -472,12 +474,14 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
             /* Determine simulation duration. */
             int simDurationNs;
+            int fullSimDurationNs;
+            int hyperPeriod = 0;
             if (radioBtnCustomDuration.isSelected() == true) {
                 simDurationNs = (int) (Double.valueOf(inputSimDuration.getText()) * ProgConfig.TIMESTAMP_MS_TO_UNIT_MULTIPLIER);
             } else {
                 // Duration is at least one hyper-period
                 // TODO: need to make sure the hyper-period doesn't exceed integer limit.
-                int hyperPeriod = (int) simTaskContainer.calHyperPeriod();
+                hyperPeriod = (int) simTaskContainer.calHyperPeriod();
                 ProgMsg.debugPutline("HP = %d", hyperPeriod);
                 simDurationNs = (int) (hyperPeriod* Double.valueOf(inputHyperPeriodScale.getText()));
                 ProgMsg.debugPutline("scaled HP = " + String.valueOf(simDurationNs*ProgConfig.TIMESTAMP_UNIT_TO_MS_MULTIPLIER) + " ms");
@@ -488,16 +492,24 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             quickRmScheduling.runSim(simDurationNs);
             thisEventContainer = quickRmScheduling.getSimEventContainer();
 
+            fullSimDurationNs = (int) (hyperPeriod * 3.5);
+            quickRmScheduling = new QuickRmScheduling(simTaskContainer);
+            quickRmScheduling.runSim(fullSimDurationNs);
+            thisFullEventContainer = quickRmScheduling.getSimEventContainer();
+
+
             if (thisEventContainer == null) {
                 ProgMsg.errPutline("Got empty result from RM scheduling simulation.");
                 continue;
             }
 
             // Build busy intervals
-
-            // Analyze
             BusyIntervalContainer busyIntervalContainer = new BusyIntervalContainer();
             busyIntervalContainer.createBusyIntervalsFromEvents(thisEventContainer);
+
+            // For computing precision ratio over full HP (3.5 HP)
+            BusyIntervalContainer fullHpBusyIntervalContainer = new BusyIntervalContainer();
+            fullHpBusyIntervalContainer.createBusyIntervalsFromEvents(thisFullEventContainer);
 
             /* Analyze busy intervals. The result will be written back to busy intervals. */
             AmirDecomposition amirDecomposition = new AmirDecomposition(thisEventContainer.getTaskContainer(), busyIntervalContainer);
@@ -510,6 +522,9 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                 double precisionRatioGmSd = amirDecomposition.computeInferencePrecisionRatioGeometricMeanByTaskStandardDeviation();
                 //double precisionRatioGm = amirDecomposition.computeInferencePrecisionRatioGeometricMean();
                 //putLineLogBuffer("#%d TkSet: SUCCESS (harmonic?%s)", taskSetIndex, isHarmonic.toString());
+
+                double meanPrFullHp = amirDecomposition.computeMeanPrecisionRatioFromEventContainer(fullHpBusyIntervalContainer);
+                globalPrecisionRatioFullHpRecords.add(meanPrFullHp);
 
                 globalPrecisionRatioRecords.add(precisionRatioGmSd);
 
@@ -642,9 +657,16 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         DataExporter prSdOverHpLogFile = new DataExporter();
         prSdOverHpLogFile.exportStringToFilePath(fullPrSdOverHpFilePath, columnTitle);
 
+        DataExporter prOverHpFullHpLogFile = new DataExporter(rootAutoLogPath + "PrOverHpFullHp.txt");
+        prOverHpFullHpLogFile.appendString(columnTitle);
+
+        DataExporter prSdOverHpFullHpLogFile = new DataExporter(rootAutoLogPath + "PrSdOverHpFullHp.txt");
+        prSdOverHpFullHpLogFile.appendString(columnTitle);
+
         // Hyper period loop
-        for (double hp=1.1; hp<=2.6; hp+=0.1) {
         //for (double hp=3.5; hp<=3.5; hp+=0.1) {
+        for (double hp=1.1; hp<=3.1; hp+=0.1) {
+        //for (double hp=2.6; hp<=2.6; hp+=0.1) {
 
             // Set current hyper-period.
             inputHyperPeriodScale.setText(String.valueOf(hp));
@@ -665,6 +687,9 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             prOverHpLogFile.appendStringToFilePath(fullPrOverHpFilePath, (new DecimalFormat("##.#").format(hp)));
             prSdOverHpLogFile.appendStringToFilePath(fullPrSdOverHpFilePath, (new DecimalFormat("##.#").format(hp)));
 
+            prOverHpFullHpLogFile.appendString(new DecimalFormat("##.#").format(hp));
+            prSdOverHpFullHpLogFile.appendString(new DecimalFormat("##.#").format(hp));
+
             // utilization loop
             for (double util = 0.001; util < 1; util += 0.1) {
                 taskSetGenerator.setMinUtil(util);
@@ -675,6 +700,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                 failureCountLogFile.appendStringToFilePath(fullFailureCountFilePath, rowTitle);
                 precisionRatioLogFile.appendStringToFilePath(fullPrecisionRatioFilePath, rowTitle);
 
+                globalPrecisionRatioFullHpRecords.clear();
                 globalPrecisionRatioRecords.clear();
 
                 double sumOfPrThisUtil = 0.0;
@@ -720,10 +746,17 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
                 prOverHpLogFile.appendStringToFilePath(fullPrOverHpFilePath, String.format("\t%s", (new DecimalFormat("##.###").format(sumOfPrThisUtil/6.0))));
 
+                double meanHullHp = computeMeanFromDoubleArrayList(globalPrecisionRatioFullHpRecords);
+                double sdFullHp = computeStandardDeviationFromDoubleArrayList(globalPrecisionRatioFullHpRecords);
+                prOverHpFullHpLogFile.appendString(String.format("\t%s", (new DecimalFormat("##.###").format(meanHullHp))));
+                prSdOverHpFullHpLogFile.appendString(String.format("\t%s", (new DecimalFormat("##.###").format(sdFullHp))));
             }
 
             prOverHpLogFile.appendStringToFilePath(fullPrOverHpFilePath, "\r\n");
             prSdOverHpLogFile.appendStringToFilePath(fullPrSdOverHpFilePath, "\r\n");
+
+            prOverHpFullHpLogFile.appendString("\r\n");
+            prSdOverHpFullHpLogFile.appendString("\r\n");
         }
 
     }

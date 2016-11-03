@@ -1417,4 +1417,15 @@ public class AmirDecomposition {
         }
     }
 
+    public double computeMeanPrecisionRatioFromEventContainer(BusyIntervalContainer inBiContainer) {
+        orgBusyIntervalContainer = inBiContainer;
+        orgBusyIntervalContainer.removeBusyIntervalsBeforeTimeStamp((int)taskContainer.calHyperPeriod());
+
+        // Remove the last one since it may not be complete.
+        orgBusyIntervalContainer.removeTheLastBusyInterval();
+
+        runDecompositionStep3();
+        return computeInferencePrecisionRatioGeometricMeanByTaskStandardDeviation();
+    }
+
 }
