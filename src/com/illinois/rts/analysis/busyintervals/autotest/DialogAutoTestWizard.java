@@ -50,6 +50,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
     private int globalFailureCount = 0; // Caution!! This is a cross function variable.
     private double globalPrecisionRatioAverage = 0.0; // Caution!! This is a cross function variable.
+    private ArrayList<Double> globalPrecisionRatioRecords = new ArrayList<>();
 
 //    private DialogLogOutput dialogLogOutput = new DialogLogOutput();
     String logBuffer = "";
@@ -504,9 +505,13 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             //decomposition.runAmirDecomposition(busyIntervalContainer);
             try {
                 amirDecomposition.runDecomposition();
+                //amirDecomposition.runZeroDecomposition();
+                //amirDecomposition.runRandomDecomposition();
                 double precisionRatioGmSd = amirDecomposition.computeInferencePrecisionRatioGeometricMeanByTaskStandardDeviation();
                 //double precisionRatioGm = amirDecomposition.computeInferencePrecisionRatioGeometricMean();
                 //putLineLogBuffer("#%d TkSet: SUCCESS (harmonic?%s)", taskSetIndex, isHarmonic.toString());
+
+                globalPrecisionRatioRecords.add(precisionRatioGmSd);
 
                 Boolean isHarmonic = simTaskContainer.hasHarmonicPeriods();
                 //if ( amirDecomposition.verifySchedulingInference() == true ) {
@@ -616,10 +621,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
     void startMassTest() throws IOException{
 
-        String fullPrOverHpFilePath = rootAutoLogPath + "PrOverHp.txt";
-        DataExporter prOverHpLogFile = new DataExporter();
-        prOverHpLogFile.exportStringToFilePath(fullPrOverHpFilePath,
-                "X" +
+        String columnTitle = "X" +
                 "\t\"[0.0,0.1]\"" +
                 "\t\"[0.1,0.2]\"" +
                 "\t\"[0.2,0.3]\"" +
@@ -630,7 +632,15 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                 "\t\"[0.7,0.8]\"" +
                 "\t\"[0.8,0.9]\"" +
                 "\t\"[0.9,1.0]\"" +
-                "\r\n");
+                "\r\n";
+
+        String fullPrOverHpFilePath = rootAutoLogPath + "PrOverHp.txt";
+        DataExporter prOverHpLogFile = new DataExporter();
+        prOverHpLogFile.exportStringToFilePath(fullPrOverHpFilePath, columnTitle);
+
+        String fullPrSdOverHpFilePath = rootAutoLogPath + "PrSdOverHp.txt";
+        DataExporter prSdOverHpLogFile = new DataExporter();
+        prSdOverHpLogFile.exportStringToFilePath(fullPrSdOverHpFilePath, columnTitle);
 
         // Hyper period loop
         for (double hp=1.1; hp<=2.6; hp+=0.1) {
@@ -653,6 +663,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
             // row title
             prOverHpLogFile.appendStringToFilePath(fullPrOverHpFilePath, (new DecimalFormat("##.#").format(hp)));
+            prSdOverHpLogFile.appendStringToFilePath(fullPrSdOverHpFilePath, (new DecimalFormat("##.#").format(hp)));
 
             // utilization loop
             for (double util = 0.001; util < 1; util += 0.1) {
@@ -664,9 +675,11 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                 failureCountLogFile.appendStringToFilePath(fullFailureCountFilePath, rowTitle);
                 precisionRatioLogFile.appendStringToFilePath(fullPrecisionRatioFilePath, rowTitle);
 
+                globalPrecisionRatioRecords.clear();
 
                 double sumOfPrThisUtil = 0.0;
                 for (int taskPerSet = 10; taskPerSet <= 15; taskPerSet++) {
+                //for (int taskPerSet = 1; taskPerSet <= 9; taskPerSet++) {
                     taskSetGenerator.setNumTaskPerSet(taskPerSet);
 
                     //GenerateRmTaskSet generateRmTaskSet = new GenerateRmTaskSet();
@@ -699,6 +712,9 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                     sumOfPrThisUtil += globalPrecisionRatioAverage;
                 }
 
+                double sd = computeStandardDeviationFromDoubleArrayList(globalPrecisionRatioRecords);
+                prSdOverHpLogFile.appendStringToFilePath(fullPrSdOverHpFilePath, String.format("\t%s", (new DecimalFormat("##.###").format(sd))));
+
                 failureCountLogFile.appendStringToFilePath(fullFailureCountFilePath, "\r\n");
                 precisionRatioLogFile.appendStringToFilePath(fullPrecisionRatioFilePath, "\r\n");
 
@@ -707,6 +723,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             }
 
             prOverHpLogFile.appendStringToFilePath(fullPrOverHpFilePath, "\r\n");
+            prSdOverHpLogFile.appendStringToFilePath(fullPrSdOverHpFilePath, "\r\n");
         }
 
     }
@@ -780,5 +797,22 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
         resultString += "[" + (new DecimalFormat("##.##").format(inMin));
         resultString += "," + (new DecimalFormat("##.##").format(inMax)) + "]";
         return resultString;
+    }
+
+    double computeMeanFromDoubleArrayList(ArrayList<Double> inList) {
+        double sum = 0;
+        for (Double thisVal : inList) {
+            sum += thisVal;
+        }
+        return sum/inList.size();
+    }
+
+    double computeStandardDeviationFromDoubleArrayList(ArrayList<Double> inList) {
+        double mean = computeMeanFromDoubleArrayList(inList);
+        double sumOfSquare = 0;
+        for (Double thisVal : inList) {
+             sumOfSquare += Math.pow(mean-thisVal, 2);
+        }
+        return Math.pow(sumOfSquare/inList.size(), 0.5);
     }
 }
