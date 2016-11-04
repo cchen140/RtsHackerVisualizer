@@ -499,7 +499,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             quickRmScheduling.runSim(simDurationNs);
             thisEventContainer = quickRmScheduling.getSimEventContainer();
 
-            fullSimDurationNs = (int) (hyperPeriod * 2);
+            fullSimDurationNs = (int) (hyperPeriod * 3.0);
             quickRmScheduling = new QuickRmScheduling(simTaskContainer);
             quickRmScheduling.runSim(fullSimDurationNs);
             thisFullEventContainer = quickRmScheduling.getSimEventContainer();
@@ -514,7 +514,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             BusyIntervalContainer busyIntervalContainer = new BusyIntervalContainer();
             busyIntervalContainer.createBusyIntervalsFromEvents(thisEventContainer);
 
-            // For computing precision ratio over full HP (3.5 HP)
+            // For computing precision ratio over full HP (3.0 HP)
             BusyIntervalContainer fullHpBusyIntervalContainer = new BusyIntervalContainer();
             fullHpBusyIntervalContainer.createBusyIntervalsFromEvents(thisFullEventContainer);
 
@@ -672,7 +672,7 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
 
         // Hyper period loop
         //for (double hp=3.5; hp<=3.5; hp+=0.1) {
-        for (double hp=1.1; hp<=3.1; hp+=0.1) {
+        for (double hp=2.1; hp<=4.1; hp+=0.1) {
         //for (double hp=2.6; hp<=2.6; hp+=0.1) {
 
             // Set current hyper-period.
