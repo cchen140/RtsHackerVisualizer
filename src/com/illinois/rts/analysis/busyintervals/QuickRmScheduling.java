@@ -248,7 +248,10 @@ public class QuickRmScheduling {
                 currentJob = jobContainer.popNextHighestPriorityJobByTime(currentTimeStamp);
 
                 if ( (currentJob == null) && (jobContainer.size() == 0) ) {
-                        break;
+                    // Close the last busy interval.
+                    TaskIntervalEvent currentIdleEvent = new TaskIntervalEvent(currentTimeStamp, currentTimeStamp+1, idleTask, "");
+                    simEventContainer.addCompleteSchedulerEvent(currentIdleEvent);
+                    break;
                 } else if (currentJob == null) {
                     currentJob = jobContainer.popNextEarliestHighestPriorityJob();
 //                        simEventContainer.add(EventContainer.SCHEDULER_EVENT, (int) tick, 0, Task.IDLE_TASK_ID, "IDLE");

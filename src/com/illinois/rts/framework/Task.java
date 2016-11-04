@@ -89,6 +89,10 @@ public class Task {
     public void setComputationTimeNs(int computationTimeNs) {
         this.computationTimeNs = computationTimeNs;
 
+        if (wcet == 0) {
+            wcet = computationTimeNs;
+        }
+
         /* Deviation */
         //TODO: This has to be formulated.
         computationTimeLowerBound = (int) (computationTimeNs*0.8);

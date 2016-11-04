@@ -191,6 +191,17 @@ public class BusyIntervalContainer {
         }
     }
 
+    public void removeBusyIntervalsBeforeButExcludeTimeStamp(int inTimeStamp) {
+        ArrayList<BusyInterval> biBeforeTimeStamp;
+        biBeforeTimeStamp = findBusyIntervalsBeforeTimeStamp(inTimeStamp);
+        for (BusyInterval thisBi : biBeforeTimeStamp) {
+            if (thisBi.contains(inTimeStamp)) {
+                continue;
+            }
+            busyIntervals.remove(thisBi);
+        }
+    }
+
     public void removeTheLastBusyInterval() {
         int lastBeginTime = 0;
         BusyInterval lastBi = null;
