@@ -465,6 +465,13 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
             // Get task container from the panel with latest configurations.
             TaskContainer simTaskContainer = thisTaskContainer;
 
+            /* Make computation time as 80% of current WCET. */
+            for (Task thisTask : simTaskContainer.getAppTasksAsArray()) {
+                //int oldComputationTime = thisTask.getComputationTimeNs();
+                //thisTask.setWcet(oldComputationTime);
+                thisTask.setComputationTimeNs((int)(thisTask.getWcet()*0.8));
+            }
+
             // Remove everything except app tasks.
             simTaskContainer.removeNoneAppTasks();
 
@@ -711,15 +718,6 @@ public class DialogAutoTestWizard extends JDialog implements ActionListener {
                     //GenerateRmTaskSet generateRmTaskSet = new GenerateRmTaskSet();
                     taskSetGenerator.setNumTaskSet(Integer.valueOf(inputNumOfTaskSets.getText()));
                     taskSetContainer = taskSetGenerator.generate();
-
-                    /* Make computation time as 80% of current WCET. */
-                    for (TaskContainer thisTaskSet : taskSetContainer.getTaskContainers()) {
-                        for (Task thisTask : thisTaskSet.getAppTasksAsArray()) {
-                            int oldComputationTime = thisTask.getComputationTimeNs();
-                            thisTask.setWcet(oldComputationTime);
-                            thisTask.setComputationTimeNs((int)(oldComputationTime*0.8));
-                        }
-                    }
 
                     if (taskSetContainer.size() > 0) {
                         ProgMsg.debugPutline("Start mass test: %dT [%s,%s]", taskPerSet,

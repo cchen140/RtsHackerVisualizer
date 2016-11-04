@@ -32,12 +32,15 @@ public class AmirDecomposition {
         ProgMsg.debugPutline("Initial busy interval count: %d", processingBusyIntervalContainer.size());
 
         // TODO: test for skipping the first hyper period.
-        processingBusyIntervalContainer.removeBusyIntervalsBeforeTimeStamp((int)taskContainer.calHyperPeriod());
-        orgBusyIntervalContainer.removeBusyIntervalsBeforeTimeStamp((int)taskContainer.calHyperPeriod());
+        //processingBusyIntervalContainer.removeBusyIntervalsBeforeTimeStamp((int)taskContainer.calHyperPeriod()*2);
+        //orgBusyIntervalContainer.removeBusyIntervalsBeforeTimeStamp((int)taskContainer.calHyperPeriod()*2);
+
+        processingBusyIntervalContainer.removeBusyIntervalsBeforeButExcludeTimeStamp((int)taskContainer.calHyperPeriod()*2);
+        orgBusyIntervalContainer.removeBusyIntervalsBeforeButExcludeTimeStamp((int)taskContainer.calHyperPeriod()*2);
 
         // Remove the last one since it may not be complete.
-        processingBusyIntervalContainer.removeTheLastBusyInterval();
-        orgBusyIntervalContainer.removeTheLastBusyInterval();
+        //processingBusyIntervalContainer.removeTheLastBusyInterval();
+        //orgBusyIntervalContainer.removeTheLastBusyInterval();
 
         ProgMsg.debugPutline("Estimating N_k(tau_i) values for %d busy intervals.", processingBusyIntervalContainer.size());
 

@@ -38,9 +38,9 @@ public class WeightedInterval extends Interval {
         }
 
         for (int i=intersection.getBegin(); i<=intersection.getEnd(); i++) {
-            int increasedWeight = (weightMap.get(i)==null) ? 1 : weightMap.get(i)+1;
-            //int increasedWeight = ((weightMap.get(i)==null) ? 0 : weightMap.get(i))
-            //                    + ((inArrivalSegment.getSegmentType()==ArrivalSegment.ONE_ARRIVAL_SEGMENT) ? 2 : 1);
+            //int increasedWeight = (weightMap.get(i)==null) ? 1 : weightMap.get(i)+1;
+            int increasedWeight = ((weightMap.get(i)==null) ? 0 : weightMap.get(i))
+                                + ((inArrivalSegment.getSegmentType()==ArrivalSegment.ONE_ARRIVAL_SEGMENT) ? 2 : 1);
             weightMap.put(i, increasedWeight);
         }
     }

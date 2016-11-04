@@ -225,6 +225,7 @@ public class GenerateRmTaskSet {
             // Round to 0.1ms (100us).
             //task.setComputationTimeNs(tempComputationTime - tempComputationTime % 100_000);
             task.setComputationTimeNs(tempComputationTime);
+            task.setWcet(tempComputationTime);
 
             total_util += ( task.getComputationTimeNs() / (double)(task.getPeriodNs()));
 
